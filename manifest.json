@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Adapta PE",
+  "version": "10.0",
+  "description": "Sistema Operativo de Accesibilidad Universal Hands-Free.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "AdaptaPE.png"
+  },
+  "icons": {
+    "16": "AdaptaPE.png",
+    "48": "AdaptaPE.png",
+    "128": "AdaptaPE.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["activeTab", "storage", "tts", "tabs"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content_script.js"]
+    }
+  ]
+}

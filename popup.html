@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@500;800;900&display=swap');
+    :root { --rojo: #E30613; --bg: #e4e8ec; --card: #ffffff; --text: #2d3436; }
+    body { width: 340px; padding: 15px; font-family: 'Nunito', sans-serif; background: var(--bg); margin: 0; color: var(--text); }
+    .container { background: var(--card); border-radius: 30px; padding: 25px; box-shadow: 0 12px 35px rgba(0,0,0,0.1); }
+    .header { display: flex; align-items: center; justify-content: center; flex-direction: column; border-bottom: 2px dashed #f1f2f6; padding-bottom: 18px; margin-bottom: 20px; }
+    .header img { width: 70px; height: 70px; border-radius: 22px; box-shadow: 0 8px 15px rgba(227, 6, 19, 0.25); object-fit: cover; margin-bottom: 12px; }
+    .header h3 { margin: 0; color: var(--rojo); font-size: 28px; font-weight: 900; letter-spacing: -1px; }
+    .header p { margin: 0; font-size: 12px; color: #b2bec3; font-weight: 800; letter-spacing: 2px; }
+    .opcion { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #f8f9fa; flex-wrap: wrap; }
+    .opcion-info { display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 800; color: #2d3436; }
+    .switch { position: relative; display: inline-block; width: 54px; height: 30px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #dfe6e9; transition: .4s; border-radius: 30px; }
+    .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+    input:checked + .slider { background-color: var(--rojo); }
+    input:checked + .slider:before { transform: translateX(24px); }
+    .select-box { margin-top: 10px; padding-bottom: 15px; border-bottom: 1px solid #f8f9fa; }
+    select { width: 100%; padding: 14px; border-radius: 18px; border: 2px solid #f1f2f6; font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 800; color: var(--text); background: var(--bg); cursor: pointer; outline: none; transition: 0.3s; }
+    select:focus { border-color: var(--rojo); background: white; }
+    .hint-box { display: none; width: 100%; background: #fff0f1; border-left: 4px solid var(--rojo); padding: 10px 12px; margin-top: 12px; border-radius: 0 10px 10px 0; font-size: 13px; color: #d63031; box-sizing: border-box; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="AdaptaPE.png" alt="Adapta PE Logo" onerror="this.src='https://via.placeholder.com/70/d32f2f/fff?text=PE'">
+      <h3>Adapta PE</h3>
+      <p>OS V10.0 (HANDS-FREE)</p>
+    </div>
+
+    <div class="opcion">
+      <div class="opcion-info">🗣️ TalkBack</div>
+      <label class="switch"><input type="checkbox" id="checkTalkBack"><span class="slider"></span></label>
+    </div>
+
+    <div class="opcion" style="flex-direction: column; align-items: flex-start;">
+      <div style="display:flex; justify-content:space-between; width:100%;">
+        <div class="opcion-info">🤖 Asistente Always-On</div>
+        <label class="switch"><input type="checkbox" id="checkVoz"><span class="slider"></span></label>
+      </div>
+      <div class="hint-box" id="hintVoz" style="margin-top: 8px;">
+        <strong>Comandos:</strong> "Buscar [texto]", "Bajar/Subir", "Nueva pestaña", "Cerrar pestaña".
+      </div>
+    </div>
+
+    <div class="select-box">
+      <div class="opcion-info" style="margin-bottom: 12px;">👁️ Visión (Daltonismo)</div>
+      <select id="selectDaltonismo">
+        <option value="ninguno">Normal (Sin Filtros)</option>
+        <option value="protanopia">Protanopia (Sin Rojos)</option>
+        <option value="deuteranopia">Deuteranopia (Sin Verdes)</option>
+        <option value="tritanopia">Tritanopia (Sin Azules)</option>
+      </select>
+    </div>
+
+    <div class="opcion" style="border:none; padding-bottom: 0;">
+      <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+        <div class="opcion-info">🎯 Mouse Cinético</div>
+        <label class="switch"><input type="checkbox" id="checkOjos"><span class="slider"></span></label>
+      </div>
+      <div class="hint-box" id="hintGestos">
+        <strong>Puntero Fluido:</strong> Sigue tu movimiento general (cabeza/manos). Quédate quieto 2 seg. para hacer Clic.
+      </div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
