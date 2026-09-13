@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="AdaptaPE.png" alt="Logo de Adapta PE" width="250">
+</p>
+
 # 🇵🇪 Adapta PE — Sistema Operativo de Accesibilidad Universal Hands-Free
 
 > **Versión:** 10.0 (Manifest V3)  
