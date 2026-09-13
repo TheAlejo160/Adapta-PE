@@ -27,6 +27,7 @@
 8. [Filtros de Daltonismo (Matrices SVG)](#-filtros-de-daltonismo-matrices-svg)
 9. [Seguridad y Privacidad](#-seguridad-y-privacidad)
 10. [Roadmap y Futuras Mejoras](#-roadmap-y-futuras-mejoras)
+11. [Licencia y Créditos](#-licencia-y-créditos)
 
 ---
 
@@ -405,6 +406,9 @@ Adapta PE no aplica simples capas de opacidad, sino **matrices de transformació
 
 ---
 
-### 👨‍💻 Créditos y Licencia
-Desarrollado con dedicación para promover la inclusión digital y la accesibilidad universal en el Perú y el mundo.  
-Distribuido bajo la Licencia Abierta MIT. ¡Contribuciones y mejoras son bienvenidas!
+### 📄 Licencia y Créditos
+
+<a href="https://example.com">Adapta PE</a> © 2026 by <a href="https://thealejo-dev.cc">Rodrigo Alejandro Apcho Aliaga</a> is licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
+
+Desarrollado con dedicación para promover la inclusión digital y la accesibilidad universal en el Perú y el mundo.
+
