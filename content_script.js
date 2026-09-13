@@ -4,7 +4,7 @@ let vozActiva = false;
 let elementoActual = null;
 let temporizadorTalkBack = null;
 
-// --- 1. ASISTENTE DE VOZ "ALWAYS-ON" Y GLOBAL ---
+// --- 1. ASISTENTE DE VOZ "ALWAYS-ON" ---
 let reconocimientoVoz = null;
 let microfonoIniciado = false;
 
@@ -13,7 +13,7 @@ function gestionarMicrofono() {
     if (!microfonoIniciado) iniciarAsistenteVoz();
   } else {
     if (reconocimientoVoz) {
-        reconocimientoVoz.onend = null; // Quitamos el reinicio automático
+        reconocimientoVoz.onend = null;
         reconocimientoVoz.stop();
     }
     microfonoIniciado = false;
@@ -23,15 +23,13 @@ function gestionarMicrofono() {
 }
 
 function iniciarAsistenteVoz() {
-  if (!('webkitSpeechRecognition' in window)) { console.warn("Navegador no soporta voz."); return; }
-
+  if (!('webkitSpeechRecognition' in window)) return;
   microfonoIniciado = true;
   reconocimientoVoz = new webkitSpeechRecognition();
   reconocimientoVoz.lang = "es-PE";
-  reconocimientoVoz.continuous = true; // ESCUCHA CONTINUA MIENTRAS ESTÉ PRENDIDO
+  reconocimientoVoz.continuous = true;
   reconocimientoVoz.interimResults = false;
 
-  // UI Visual de Estado
   let ui = document.getElementById("adapta-pe-mic-status");
   if(!ui){
       ui = document.createElement("div");
@@ -47,47 +45,36 @@ function iniciarAsistenteVoz() {
   reconocimientoVoz.onresult = (event) => {
     let last = event.results.length - 1;
     let comando = event.results[last][0].transcript.toLowerCase().trim();
-    console.log("🗣️ [Adapta PE] Comando detectado:", comando);
+    console.log("🗣️ [Adapta PE] Comando:", comando);
 
-    // LÓGICA DE NAVEGACIÓN GLOBAL (CONTROL DEL NAVEGADOR)
-
-    // 1. Pestañas
     if (comando.includes("nueva pestaña") || comando.includes("abrir pestaña")) {
         chrome.runtime.sendMessage({ accion: "hablar", texto: "Abriendo nueva pestaña" });
         chrome.runtime.sendMessage({ accion: "abrir_pestana", url: "https://www.google.com" });
     }
-    else if (comando.includes("cerrar pestaña") || comando.includes("cierra la pestaña")) {
-        chrome.runtime.sendMessage({ accion: "hablar", texto: "Cerrando pestaña" });
+    else if (comando.includes("cerrar pestaña")) {
         chrome.runtime.sendMessage({ accion: "cerrar_pestana" });
     }
-    // 2. Scroll
-    else if (comando === "bajar" || comando === "baja" || comando.includes("hacia abajo")) {
+    else if (comando === "bajar" || comando.includes("hacia abajo")) {
         window.scrollBy({ top: window.innerHeight * 0.7, behavior: 'smooth' });
     }
-    else if (comando === "subir" || comando === "sube" || comando.includes("hacia arriba")) {
+    else if (comando === "subir" || comando.includes("hacia arriba")) {
         window.scrollBy({ top: -(window.innerHeight * 0.7), behavior: 'smooth' });
     }
-    // 3. Buscar en Google directamente
-    else if (comando.startsWith("buscar ") || comando.startsWith("busca ")) {
-        let busqueda = comando.replace("buscar ", "").replace("busca ", "").trim();
-        chrome.runtime.sendMessage({ accion: "hablar", texto: "Buscando " + busqueda });
+    else if (comando.startsWith("buscar ")) {
+        let busqueda = comando.replace("buscar ", "").trim();
         chrome.runtime.sendMessage({ accion: "buscar_google", query: busqueda });
     }
-    // 4. Dictado en cajas de texto activas
-    else if (comando.startsWith("escribir ") || comando.startsWith("escribe ")) {
-        let dictado = comando.replace("escribir ", "").replace("escribe ", "").trim();
+    else if (comando.startsWith("escribir ")) {
+        let dictado = comando.replace("escribir ", "").trim();
         let campo = document.activeElement;
         if (campo && (campo.tagName === 'INPUT' || campo.tagName === 'TEXTAREA' || campo.isContentEditable)) {
             if(campo.isContentEditable) campo.innerText += " " + dictado;
             else campo.value += (campo.value ? " " : "") + dictado;
             campo.dispatchEvent(new Event('input', { bubbles: true }));
-        } else {
-             chrome.runtime.sendMessage({ accion: "hablar", texto: "No hay ninguna caja de texto seleccionada." });
         }
     }
-    // 5. Clic a enlaces
-    else if (comando.startsWith("abrir ") || comando.startsWith("abre ")) {
-        let textoEnlace = comando.replace("abrir ", "").replace("abre ", "").trim();
+    else if (comando.startsWith("abrir ")) {
+        let textoEnlace = comando.replace("abrir ", "").trim();
         let enlaces = Array.from(document.querySelectorAll("a, button"));
         let linkEncontrado = enlaces.find(el => el.innerText.toLowerCase().includes(textoEnlace));
         if (linkEncontrado) {
@@ -98,18 +85,13 @@ function iniciarAsistenteVoz() {
   };
 
   reconocimientoVoz.onerror = (e) => {
-      console.log("Voz error/silencio:", e.error);
-      ui.innerHTML = "💤 En pausa... Habla de nuevo.";
-      ui.style.background = "#555";
+      if (e.error !== 'aborted') {
+          ui.innerHTML = "💤 En pausa...";
+          ui.style.background = "#555";
+      }
   };
 
-  // EL TRUCO ALWAYS-ON: Si se detiene por silencio, lo forzamos a reiniciar automáticamente
-  reconocimientoVoz.onend = () => {
-    if (vozActiva) {
-        try { reconocimientoVoz.start(); } catch(e){}
-    }
-  };
-
+  reconocimientoVoz.onend = () => { if (vozActiva) { try { reconocimientoVoz.start(); } catch(e){} } };
   try { reconocimientoVoz.start(); } catch(e){}
 }
 
@@ -128,9 +110,7 @@ document.addEventListener("mouseover", (e) => {
 
   let texto = (elemento.tagName === 'IMG') ? (elemento.alt || "Imagen") : (elemento.innerText || elemento.textContent);
   if (texto && texto.trim() !== "") {
-    temporizadorTalkBack = setTimeout(() => {
-        chrome.runtime.sendMessage({ accion: "hablar", texto: texto.trim() });
-    }, 400);
+    temporizadorTalkBack = setTimeout(() => { chrome.runtime.sendMessage({ accion: "hablar", texto: texto.trim() }); }, 400);
   }
 });
 document.addEventListener("mouseout", (e) => {
@@ -153,124 +133,175 @@ function aplicarDaltonismo(tipo) {
   document.documentElement.style.filter = `url(#${tipo})`;
 }
 
-// --- 4. PUNTERO CINÉTICO ULTRA FLUIDO (CÁMARA) ---
+// --- 4. MOUSE CINÉTICO LOCAL (MATEMÁTICA DE VECTORES Y COORDENADAS) ---
 let camaraActiva = false;
-let stream = null, video = null, canvas = null, ctx = null, frameAnterior = null;
+let stream = null, videoEl = null, canvasEl = null, ctx = null, frameAnterior = null;
 let animationId = null;
-
 let punteroVirtual = null;
-let posX = window.innerWidth / 2;
-let posY = window.innerHeight / 2;
-
+let posX = window.innerWidth / 2, posY = window.innerHeight / 2;
 let tiempoFijado = 0;
-let ultimaPosX = posX;
-let ultimaPosY = posY;
+
+// Estado de calibración y vectores (basado en lógica de coordenadas)
+let centroBaseX = 160;
+let centroBaseY = 120;
+let calibrado = false;
 
 async function activarCamara(activar) {
   if (activar && !camaraActiva) {
     try {
       stream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } });
       camaraActiva = true;
+      calibrado = false;
 
-      // Ocultamos la burbuja de la cámara para no distraer, solo mostramos el puntero
-      video = document.createElement("video");
-      video.srcObject = stream;
-      video.autoplay = true;
+      // Caja inferior flotante de diagnóstico visual (tipo HUD local)
+      let burbuja = document.createElement("div");
+      burbuja.id = "adapta-pe-camara-box";
+      burbuja.style.cssText = "position:fixed; bottom:20px; right:20px; width:200px; height:150px; border-radius:12px; border: 3px solid #E30613; overflow:hidden; z-index:999999; background:#111; box-shadow: 0 8px 20px rgba(0,0,0,0.5);";
 
+      videoEl = document.createElement("video");
+      videoEl.srcObject = stream;
+      videoEl.autoplay = true;
+      videoEl.style.cssText = "display:none;";
+
+      canvasEl = document.createElement("canvas");
+      canvasEl.width = 320; canvasEl.height = 240;
+      canvasEl.style.cssText = "width:100%; height:100%; object-fit:cover; transform: scaleX(-1);";
+      ctx = canvasEl.getContext("2d", { willReadFrequently: true });
+
+      let infoHUD = document.createElement("div");
+      infoHUD.id = "adapta-pe-hud";
+      infoHUD.innerHTML = "🎯 Calibrando...";
+      infoHUD.style.cssText = "position:absolute; bottom:5px; left:5px; background:rgba(0,0,0,0.7); color:#00ff00; font-family:monospace; font-size:10px; padding:3px 6px; border-radius:4px;";
+
+      burbuja.appendChild(videoEl);
+      burbuja.appendChild(canvasEl);
+      burbuja.appendChild(infoHUD);
+      document.body.appendChild(burbuja);
+
+      // Puntero en pantalla
       punteroVirtual = document.createElement("div");
       punteroVirtual.id = "adapta-pe-cursor";
-      // Puntero rediseñado más suave
-      punteroVirtual.style.cssText = "position:fixed; width:22px; height:22px; background:rgba(227,6,19,0.85); border:2px solid white; border-radius:50%; z-index:9999999; pointer-events:none; box-shadow:0 0 12px rgba(0,0,0,0.4); transition: transform 0.1s ease-out; left:50%; top:50%; transform: translate(-50%, -50%);";
+      punteroVirtual.style.cssText = "position:fixed; width:24px; height:24px; background:rgba(227,6,19,0.9); border:2px solid white; border-radius:50%; z-index:9999999; pointer-events:none; box-shadow:0 0 10px rgba(0,0,0,0.5); left:50%; top:50%; transform: translate(-50%, -50%); transition: transform 0.1s;";
       document.body.appendChild(punteroVirtual);
 
-      canvas = document.createElement("canvas");
-      canvas.width = 320; canvas.height = 240;
-      ctx = canvas.getContext("2d", { willReadFrequently: true });
-
-      bucleCamaraFluida();
-    } catch (err) { alert("Adapta PE necesita permiso de cámara."); camaraActiva = false; }
+      bucleLocalCinetico();
+    } catch (err) {
+      alert("No se pudo acceder a la cámara.");
+      camaraActiva = false;
+    }
   } else if (!activar && camaraActiva) {
     if (stream) stream.getTracks().forEach(t => t.stop());
+    if (document.getElementById("adapta-pe-camara-box")) document.getElementById("adapta-pe-camara-box").remove();
     if (document.getElementById("adapta-pe-cursor")) document.getElementById("adapta-pe-cursor").remove();
     cancelAnimationFrame(animationId);
-    frameAnterior = null; camaraActiva = false;
+    frameAnterior = null;
+    camaraActiva = false;
   }
 }
 
-// Usamos requestAnimationFrame para 60 FPS fluidos
-function bucleCamaraFluida() {
+function bucleLocalCinetico() {
   if (!camaraActiva) return;
 
-  ctx.drawImage(video, 0, 0, 320, 240);
+  ctx.drawImage(videoEl, 0, 0, 320, 240);
   let frameActual = ctx.getImageData(0, 0, 320, 240);
 
   if (frameAnterior) {
-      let sumaX = 0, sumaY = 0, movidos = 0;
+      let sumaX = 0, sumaY = 0, totalMovidos = 0;
+      let minX = 320, maxX = 0;
 
-      for (let i = 0; i < frameActual.data.length; i += 4) {
-          let diff = Math.abs(frameActual.data[i] - frameAnterior.data[i]) +
-                     Math.abs(frameActual.data[i+1] - frameAnterior.data[i+1]) +
-                     Math.abs(frameActual.data[i+2] - frameAnterior.data[i+2]);
+      // Análisis local por coordenadas de píxeles activos (rostro, cabeza, brazos, muñones)
+      for (let y = 0; y < 240; y += 2) {
+          for (let x = 0; x < 320; x += 2) {
+              let i = (y * 320 + x) * 4;
+              let diff = Math.abs(frameActual.data[i] - frameAnterior.data[i]) +
+                         Math.abs(frameActual.data[i+1] - frameAnterior.data[i+1]) +
+                         Math.abs(frameActual.data[i+2] - frameAnterior.data[i+2]);
 
-          if (diff > 120) { // Sensibilidad ajustada
-              let pixelIndex = i / 4;
-              sumaX += (pixelIndex % 320);
-              sumaY += Math.floor(pixelIndex / 320);
-              movidos++;
+              if (diff > 45) { // Sensibilidad alta para detectar giros de cabeza o extremidades/muñones
+                  sumaX += x;
+                  sumaY += y;
+                  totalMovidos++;
+                  if (x < minX) minX = x;
+                  if (x > maxX) maxX = x;
+              }
           }
       }
 
-      if (movidos > 800) { // Umbral de ruido reducido
-          let centroX = sumaX / movidos;
-          let centroY = sumaY / movidos;
+      let hud = document.getElementById("adapta-pe-hud");
 
-          // Mapeo absoluto invertido (Espejo)
-          let targetX = window.innerWidth - ((centroX / 320) * window.innerWidth);
-          let targetY = (centroY / 240) * window.innerHeight;
+      if (totalMovidos > 200) {
+          let currentX = sumaX / totalMovidos;
+          let currentY = sumaY / totalMovidos;
 
-          // ALGORITMO DE SUAVIZADO Y DEADZONE (Evita que tiemble)
-          let dx = targetX - posX;
-          let dy = targetY - posY;
-
-          if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
-              posX += dx * 0.15; // Interpolación suave (Bajo = más suave, Alto = más rápido)
-              posY += dy * 0.15;
+          // Autocalibración inicial en los primeros segundos
+          if (!calibrado) {
+              centroBaseX = currentX;
+              centroBaseY = currentY;
+              calibrado = true;
+              if(hud) hud.innerHTML = "✅ Activo (Control OK)";
           }
+
+          // Diferencial de movimiento (Detecta giros e inclinaciones relativas al centro base)
+          let deltaX = currentX - centroBaseX;
+          let deltaY = currentY - centroBaseY;
+
+          console.log(`🧭 [LOCAL VECTORS] dX: ${deltaX.toFixed(1)}, dY: ${deltaY.toFixed(1)} | Píxeles: ${totalMovidos}`);
+          if(hud) hud.innerHTML = `dX:${deltaX.toFixed(0)} dY:${deltaY.toFixed(0)}`;
+
+          let velX = 0;
+          let velY = 0;
+          let umbralGiro = 12; // Zona muerta para evitar temblores o tics leves
+
+          // Lógica de dirección limpia por giros / inclinaciones o señalamiento con muñones/brazos
+          if (deltaX > umbralGiro) {
+              velX = -7; // Giro o inclinación a la izquierda
+          } else if (deltaX < -umbralGiro) {
+              velX = 7;  // Giro o inclinación a la derecha
+          }
+
+          if (deltaY < -umbralGiro) {
+              velY = -7; // Cabeza arriba / brazo arriba
+          } else if (deltaY > umbralGiro) {
+              velY = 7;  // Cabeza abajo / brazo abajo
+          }
+
+          posX += velX;
+          posY += velY;
+
+          posX = Math.max(0, Math.min(window.innerWidth, posX));
+          posY = Math.max(0, Math.min(window.innerHeight, posY));
 
           punteroVirtual.style.left = posX + "px";
           punteroVirtual.style.top = posY + "px";
-      }
 
-      // SISTEMA DE DWELL CLICK MEJORADO
-      let distancia = Math.hypot(posX - ultimaPosX, posY - ultimaPosY);
-      if (distancia < 5) { // Si está muy quieto
-          tiempoFijado++;
-          punteroVirtual.style.transform = `translate(-50%, -50%) scale(${1 + (tiempoFijado * 0.03)})`;
+          // Sistema Dwell Click (Autoclick si se mantiene estático tras un movimiento)
+          if (Math.abs(velX) === 0 && Math.abs(velY) === 0) {
+              tiempoFijado++;
+              punteroVirtual.style.transform = `translate(-50%, -50%) scale(${1 + (tiempoFijado * 0.04)})`;
 
-          if (tiempoFijado > 40) { // Aprox 1.5 a 2 segundos a 60fps
-              console.log("🖱️ Clic disparado");
-              punteroVirtual.style.display = "none";
-              let el = document.elementFromPoint(posX, posY);
-              if (el) el.click();
-              punteroVirtual.style.display = "block";
+              if (tiempoFijado > 45) {
+                  console.log("🖱️ [Adapta PE] Clic automático por fijación");
+                  punteroVirtual.style.display = "none";
+                  let el = document.elementFromPoint(posX, posY);
+                  if (el) el.click();
+                  punteroVirtual.style.display = "block";
 
-              // Efecto visual de clic exitoso
-              punteroVirtual.style.background = "#2ecc71";
-              setTimeout(() => punteroVirtual.style.background = "rgba(227,6,19,0.85)", 300);
-
+                  punteroVirtual.style.background = "#2ecc71";
+                  setTimeout(() => punteroVirtual.style.background = "rgba(227,6,19,0.9)", 300);
+                  tiempoFijado = 0;
+              }
+          } else {
               tiempoFijado = 0;
               punteroVirtual.style.transform = "translate(-50%, -50%) scale(1)";
           }
       } else {
+          if(hud) hud.innerHTML = "💤 En reposo (Estable)";
           tiempoFijado = 0;
-          punteroVirtual.style.transform = "translate(-50%, -50%) scale(1)";
       }
-
-      ultimaPosX = posX; ultimaPosY = posY;
   }
 
   frameAnterior = frameActual;
-  animationId = requestAnimationFrame(bucleCamaraFluida);
+  animationId = requestAnimationFrame(bucleLocalCinetico);
 }
 
 // --- CEREBRO PRINCIPAL ---
