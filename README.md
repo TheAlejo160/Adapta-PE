@@ -416,3 +416,6 @@ Adapta PE no aplica simples capas de opacidad, sino **matrices de transformació
 
 Desarrollado con dedicación para promover la inclusión digital y la accesibilidad universal en el Perú y el mundo.
 
+> 🤖 **Declaración de uso de Inteligencia Artificial:** En este proyecto se utilizaron herramientas de Inteligencia Artificial generativa para la creación y optimización de recursos gráficos/imágenes, así como para la asistencia y co-creación en partes específicas del código fuente (sin abarcar la totalidad del desarrollo, el cual fue diseñado, integrado y supervisado por el autor).
+
+
