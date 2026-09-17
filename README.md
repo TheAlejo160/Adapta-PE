@@ -380,16 +380,29 @@ El sistema cinético no requiere sensores costosos de seguimiento ocular (*eye-t
 
 ---
 
+---
+
+### Opción 2: Ecuaciones de código (Más fácil de entender para devs)
+Como estás trabajando con los valores de `feColorMatrix`, a otros programadores les resulta mucho más útil leer esto como ecuaciones directas en lugar de matrices.
+
 ## 🎨 Filtros de Daltonismo (Matrices SVG)
 
-Adapta PE no aplica simples capas de opacidad, sino **matrices de transformación de color matemáticas** estandarizadas para recalcular los canales Rojo, Verde y Azul:
+Adapta PE no aplica simples capas de opacidad, sino **matrices de transformación de color matemáticas** estandarizadas para recalcular los canales Rojo (R), Verde (G) y Azul (B):
 
 * **Protanopia (Deficiencia de Rojo):**
-  $$\begin{pmatrix} R' \\ G' \\ B' \end{pmatrix} = \begin{pmatrix} 0.567 & 0.433 & 0 \\ 0.558 & 0.442 & 0 \\ 0 & 0.242 & 0.758 \end{pmatrix} \begin{pmatrix} R \\ G \\ B \end{pmatrix}$$
+  * `R' = (0.567 * R) + (0.433 * G) + (0.000 * B)`
+  * `G' = (0.558 * R) + (0.442 * G) + (0.000 * B)`
+  * `B' = (0.000 * R) + (0.242 * G) + (0.758 * B)`
+
 * **Deuteranopia (Deficiencia de Verde):**
-  $$\begin{pmatrix} R' \\ G' \\ B' \end{pmatrix} = \begin{pmatrix} 0.625 & 0.375 & 0 \\ 0.700 & 0.300 & 0 \\ 0 & 0.300 & 0.700 \end{pmatrix} \begin{pmatrix} R \\ G \\ B \end{pmatrix}$$
+  * `R' = (0.625 * R) + (0.375 * G) + (0.000 * B)`
+  * `G' = (0.700 * R) + (0.300 * G) + (0.000 * B)`
+  * `B' = (0.000 * R) + (0.300 * G) + (0.700 * B)`
+
 * **Tritanopia (Deficiencia de Azul):**
-  $$\begin{pmatrix} R' \\ G' \\ B' \end{pmatrix} = \begin{pmatrix} 0.950 & 0.050 & 0 \\ 0 & 0.433 & 0.567 \\ 0 & 0.475 & 0.525 \end{pmatrix} \begin{pmatrix} R \\ G \\ B \end{pmatrix}$$
+  * `R' = (0.950 * R) + (0.050 * G) + (0.000 * B)`
+  * `G' = (0.000 * R) + (0.433 * G) + (0.567 * B)`
+  * `B' = (0.000 * R) + (0.475 * G) + (0.525 * B)`
 
 ---
 
