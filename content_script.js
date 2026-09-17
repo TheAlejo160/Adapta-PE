@@ -133,7 +133,7 @@ function aplicarDaltonismo(tipo) {
   document.documentElement.style.filter = `url(#${tipo})`;
 }
 
-// --- 4. MOUSE CINÉTICO LOCAL (MATEMÁTICA DE VECTORES Y COORDENADAS) ---
+// --- 4. MOUSE CINÉTICO LOCAL (CAJA DE SEGURIDAD Y FRENO AUTOMÁTICO) ---
 let camaraActiva = false;
 let stream = null, videoEl = null, canvasEl = null, ctx = null, frameAnterior = null;
 let animationId = null;
@@ -141,9 +141,11 @@ let punteroVirtual = null;
 let posX = window.innerWidth / 2, posY = window.innerHeight / 2;
 let tiempoFijado = 0;
 
-// Estado de calibración y vectores (basado en lógica de coordenadas)
-let centroBaseX = 160;
-let centroBaseY = 120;
+// Memoria de Calibración
+let headBaseX = 160, headBaseY = 60;
+let handBaseX = 160, handBaseY = 180;
+let headActualX = 160, headActualY = 60;
+let handActualX = 160, handActualY = 180;
 let calibrado = false;
 
 async function activarCamara(activar) {
@@ -153,7 +155,6 @@ async function activarCamara(activar) {
       camaraActiva = true;
       calibrado = false;
 
-      // Caja inferior flotante de diagnóstico visual (tipo HUD local)
       let burbuja = document.createElement("div");
       burbuja.id = "adapta-pe-camara-box";
       burbuja.style.cssText = "position:fixed; bottom:20px; right:20px; width:200px; height:150px; border-radius:12px; border: 3px solid #E30613; overflow:hidden; z-index:999999; background:#111; box-shadow: 0 8px 20px rgba(0,0,0,0.5);";
@@ -170,15 +171,14 @@ async function activarCamara(activar) {
 
       let infoHUD = document.createElement("div");
       infoHUD.id = "adapta-pe-hud";
-      infoHUD.innerHTML = "🎯 Calibrando...";
-      infoHUD.style.cssText = "position:absolute; bottom:5px; left:5px; background:rgba(0,0,0,0.7); color:#00ff00; font-family:monospace; font-size:10px; padding:3px 6px; border-radius:4px;";
+      infoHUD.innerHTML = "🎯 Calibrando tu centro...";
+      infoHUD.style.cssText = "position:absolute; bottom:5px; left:5px; background:rgba(0,0,0,0.8); color:#00ff00; font-family:monospace; font-size:11px; padding:4px 8px; border-radius:4px;";
 
       burbuja.appendChild(videoEl);
       burbuja.appendChild(canvasEl);
       burbuja.appendChild(infoHUD);
       document.body.appendChild(burbuja);
 
-      // Puntero en pantalla
       punteroVirtual = document.createElement("div");
       punteroVirtual.id = "adapta-pe-cursor";
       punteroVirtual.style.cssText = "position:fixed; width:24px; height:24px; background:rgba(227,6,19,0.9); border:2px solid white; border-radius:50%; z-index:9999999; pointer-events:none; box-shadow:0 0 10px rgba(0,0,0,0.5); left:50%; top:50%; transform: translate(-50%, -50%); transition: transform 0.1s;";
@@ -204,12 +204,13 @@ function bucleLocalCinetico() {
 
   ctx.drawImage(videoEl, 0, 0, 320, 240);
   let frameActual = ctx.getImageData(0, 0, 320, 240);
+  let hud = document.getElementById("adapta-pe-hud");
 
   if (frameAnterior) {
-      let sumaX = 0, sumaY = 0, totalMovidos = 0;
-      let minX = 320, maxX = 0;
+      let sumaX_cabeza = 0, sumaY_cabeza = 0, mov_cabeza = 0;
+      let sumaX_manos = 0, sumaY_manos = 0, mov_manos = 0;
 
-      // Análisis local por coordenadas de píxeles activos (rostro, cabeza, brazos, muñones)
+      // 1. Escaneo dividido con filtro de ruido más estricto
       for (let y = 0; y < 240; y += 2) {
           for (let x = 0; x < 320; x += 2) {
               let i = (y * 320 + x) * 4;
@@ -217,53 +218,84 @@ function bucleLocalCinetico() {
                          Math.abs(frameActual.data[i+1] - frameAnterior.data[i+1]) +
                          Math.abs(frameActual.data[i+2] - frameAnterior.data[i+2]);
 
-              if (diff > 45) { // Sensibilidad alta para detectar giros de cabeza o extremidades/muñones
-                  sumaX += x;
-                  sumaY += y;
-                  totalMovidos++;
-                  if (x < minX) minX = x;
-                  if (x > maxX) maxX = x;
+              if (diff > 50) { // Umbral más alto para ignorar sombras/parpadeos
+                  if (y < 120) {
+                      sumaX_cabeza += x; sumaY_cabeza += y; mov_cabeza++;
+                  } else {
+                      sumaX_manos += x; sumaY_manos += y; mov_manos++;
+                  }
               }
           }
       }
 
-      let hud = document.getElementById("adapta-pe-hud");
+      // 2. Lógica Elástica (Si no te mueves, regresa al centro exacto)
+      if (mov_cabeza > 60) {
+          headActualX += ((sumaX_cabeza / mov_cabeza) - headActualX) * 0.4;
+          headActualY += ((sumaY_cabeza / mov_cabeza) - headActualY) * 0.4;
+      } else {
+          // Gravedad: si no hay movimiento real en la cabeza, ancla al centro
+          headActualX += (headBaseX - headActualX) * 0.1;
+          headActualY += (headBaseY - headActualY) * 0.1;
+      }
 
-      if (totalMovidos > 200) {
-          let currentX = sumaX / totalMovidos;
-          let currentY = sumaY / totalMovidos;
+      // Exigimos MUCHOS más píxeles para las manos (Evita que respirar mueva el mouse)
+      if (mov_manos > 200) {
+          handActualX += ((sumaX_manos / mov_manos) - handActualX) * 0.4;
+          handActualY += ((sumaY_manos / mov_manos) - handActualY) * 0.4;
+      } else {
+          // Si no hay manos evidentes, ancla las manos al centro
+          handActualX += (handBaseX - handActualX) * 0.1;
+          handActualY += (handBaseY - handActualY) * 0.1;
+      }
 
-          // Autocalibración inicial en los primeros segundos
-          if (!calibrado) {
-              centroBaseX = currentX;
-              centroBaseY = currentY;
-              calibrado = true;
-              if(hud) hud.innerHTML = "✅ Activo (Control OK)";
+      // 3. Calibración Inicial
+      if (!calibrado && (mov_cabeza > 60 || mov_manos > 200)) {
+          headBaseX = headActualX; headBaseY = headActualY;
+          handBaseX = handActualX; handBaseY = handActualY;
+          calibrado = true;
+      }
+
+      if (calibrado) {
+          // 4. LA CAJA DE SEGURIDAD (Deadzone Estricta)
+          let deltaCabezaX = headActualX - headBaseX;
+          let deltaCabezaY = headActualY - headBaseY;
+          let distCabeza = Math.hypot(deltaCabezaX, deltaCabezaY);
+
+          let deltaManosX = handActualX - handBaseX;
+          let deltaManosY = handActualY - handBaseY;
+          let distManos = Math.hypot(deltaManosX, deltaManosY);
+
+          let activeDeltaX = 0;
+          let activeDeltaY = 0;
+          let cajaSeguridad = 20; // Tienes 20 píxeles de libertad para moverte sin que el mouse se mueva
+
+          if (distCabeza > cajaSeguridad && distCabeza > distManos) {
+              activeDeltaX = deltaCabezaX; activeDeltaY = deltaCabezaY;
+              if(hud) hud.innerHTML = "🧠 CABEZA";
+          } else if (distManos > cajaSeguridad && distManos > distCabeza) {
+              activeDeltaX = deltaManosX; activeDeltaY = deltaManosY;
+              if(hud) hud.innerHTML = "✋ MANOS";
+          } else {
+              // Si estás dentro de la caja de seguridad, el mouse NO se mueve
+              activeDeltaX = 0; activeDeltaY = 0;
+              if(hud) hud.innerHTML = "🛑 EN ZONA SEGURA";
           }
 
-          // Diferencial de movimiento (Detecta giros e inclinaciones relativas al centro base)
-          let deltaX = currentX - centroBaseX;
-          let deltaY = currentY - centroBaseY;
+          // 5. APLICAR VELOCIDAD
+          let velX = 0, velY = 0;
+          let sensibilidad = 0.2;
 
-          console.log(`🧭 [LOCAL VECTORS] dX: ${deltaX.toFixed(1)}, dY: ${deltaY.toFixed(1)} | Píxeles: ${totalMovidos}`);
-          if(hud) hud.innerHTML = `dX:${deltaX.toFixed(0)} dY:${deltaY.toFixed(0)}`;
-
-          let velX = 0;
-          let velY = 0;
-          let umbralGiro = 12; // Zona muerta para evitar temblores o tics leves
-
-          // Lógica de dirección limpia por giros / inclinaciones o señalamiento con muñones/brazos
-          if (deltaX > umbralGiro) {
-              velX = -7; // Giro o inclinación a la izquierda
-          } else if (deltaX < -umbralGiro) {
-              velX = 7;  // Giro o inclinación a la derecha
+          if (activeDeltaX !== 0) {
+              let direccionX = Math.sign(activeDeltaX);
+              velX = -(activeDeltaX - (direccionX * cajaSeguridad)) * sensibilidad;
+          }
+          if (activeDeltaY !== 0) {
+              let direccionY = Math.sign(activeDeltaY);
+              velY = (activeDeltaY - (direccionY * cajaSeguridad)) * sensibilidad;
           }
 
-          if (deltaY < -umbralGiro) {
-              velY = -7; // Cabeza arriba / brazo arriba
-          } else if (deltaY > umbralGiro) {
-              velY = 7;  // Cabeza abajo / brazo abajo
-          }
+          velX = Math.max(-7, Math.min(7, velX));
+          velY = Math.max(-7, Math.min(7, velY));
 
           posX += velX;
           posY += velY;
@@ -274,13 +306,13 @@ function bucleLocalCinetico() {
           punteroVirtual.style.left = posX + "px";
           punteroVirtual.style.top = posY + "px";
 
-          // Sistema Dwell Click (Autoclick si se mantiene estático tras un movimiento)
-          if (Math.abs(velX) === 0 && Math.abs(velY) === 0) {
+          // 6. DWELL CLICK PERFECTO
+          if (velX === 0 && velY === 0) {
               tiempoFijado++;
               punteroVirtual.style.transform = `translate(-50%, -50%) scale(${1 + (tiempoFijado * 0.04)})`;
 
-              if (tiempoFijado > 45) {
-                  console.log("🖱️ [Adapta PE] Clic automático por fijación");
+              if (tiempoFijado > 50) {
+                  console.log("🖱️ [Adapta PE] CLIC SEGURO");
                   punteroVirtual.style.display = "none";
                   let el = document.elementFromPoint(posX, posY);
                   if (el) el.click();
@@ -288,15 +320,13 @@ function bucleLocalCinetico() {
 
                   punteroVirtual.style.background = "#2ecc71";
                   setTimeout(() => punteroVirtual.style.background = "rgba(227,6,19,0.9)", 300);
+
                   tiempoFijado = 0;
               }
           } else {
               tiempoFijado = 0;
               punteroVirtual.style.transform = "translate(-50%, -50%) scale(1)";
           }
-      } else {
-          if(hud) hud.innerHTML = "💤 En reposo (Estable)";
-          tiempoFijado = 0;
       }
   }
 
