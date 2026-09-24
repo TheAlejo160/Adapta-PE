@@ -4,7 +4,7 @@
 
 # 🇵🇪 Adapta PE — Sistema Operativo de Accesibilidad Universal Hands-Free
 
-> **Versión:** 10.0 (Manifest V3)  
+> **Versión:** 10.0.1 (Manifest V3)  
 > **Compatibilidad:** Google Chrome, Brave, Microsoft Edge y navegadores basados en Chromium.  
 > **Backend Opcional:** Python 3.x (Flask + Flask-CORS).
 
@@ -44,9 +44,9 @@
 ## 🚀 Características Principales
 
 * 🗣️ **TalkBack Integrado:** Lector de pantalla contextual que verbaliza elementos al pasar el puntero sobre ellos (títulos, párrafos, enlaces, botones, imágenes con texto alternativo).
-* 🤖 **Asistente de Voz Always-On:** Reconocimiento de voz continuo en español (`es-PE`) capaz de interpretar comandos de navegación (abrir/cerrar pestañas, scroll suave arriba/abajo, búsqueda en Google, dictado en campos de texto y clic por nombre de elemento).
+* 🤖 **Asistente de Voz con Palabra de Activación:** Reconocimiento de voz continuo en español (`es-PE`). Se activa diciendo **"Computadora"** seguido de un pitido para escuchar comandos de navegación (abrir/cerrar pestañas, scroll, búsqueda, dictado y clics).
 * 👁️ **Filtros de Daltonismo en Tiempo Real:** Algoritmo basado en filtros SVG (`feColorMatrix`) que ajusta la paleta de colores para *Protanopia*, *Deuteranopia* y *Tritanopia*.
-* 🎯 **Mouse Cinético Local (Head Tracking / Extremidades):** Algoritmo de visión artificial que corre al 100% en el navegador utilizando la cámara web. Permite controlar el puntero del ratón mediante giros o inclinaciones de la cabeza, brazos o muñones, incorporando **Dwell Click** (clic automático tras mantener la fijación por 2 segundos).
+* 🎯 **Mouse Cinético Local (Head Tracking / Extremidades):** Algoritmo de visión artificial que corre al 100% en el navegador utilizando la cámara web. Permite controlar el puntero del ratón mediante giros o inclinaciones de la cabeza, brazos o muñones, incorporando **Dwell Click** (clic automático rápido tras mantener la fijación por 1 segundo).
 * 🧠 **Backend Inteligente en Python (`app.py`):** Servicio complementario en Flask para análisis de imágenes mediante modelos de Visión Artificial ("Ojo Biónico").
 
 ---
@@ -155,11 +155,18 @@ Es el archivo de configuración y registro principal exigido por las extensiones
 {
   "manifest_version": 3,
   "name": "Adapta PE",
-  "version": "10.0",
-  "description": "Sistema Operativo de Accesibilidad Universal Hands-Free.",
+  "version": "10.0.1",
+  "description": "Sistema Operativo de Accesibilidad Universal Hands-Free. Controla tu navegador con la voz y el movimiento.",
+  "author": "Rodrigo Alejandro Apcho Aliaga (TheAlejo160)",
+  "homepage_url": "https://adaptape.thealejo-dev.cc",
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "AdaptaPE.png"
+    "default_title": "Panel de Control Adapta PE",
+    "default_icon": {
+      "16": "AdaptaPE.png",
+      "48": "AdaptaPE.png",
+      "128": "AdaptaPE.png"
+    }
   },
   "icons": {
     "16": "AdaptaPE.png",
@@ -169,25 +176,30 @@ Es el archivo de configuración y registro principal exigido por las extensiones
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["activeTab", "storage", "tts", "tabs"],
+  "permissions": [
+    "storage",
+    "tts",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content_script.js"]
+      "js": ["content_script.js"],
+      "run_at": "document_end"
     }
-  ]
+  ],
+  "minimum_chrome_version": "88"
 }
 ```
 
 * **`manifest_version: 3`**: Especifica la versión más moderna y segura del motor de extensiones de Chrome.
 * **`action`**: Declara el botón visible en la barra de herramientas del navegador. Al hacer clic sobre él, despliega el archivo `popup.html`.
-* **`permissions`**: Lista de permisos especiales solicitados al navegador:
-  * `activeTab`: Acceso seguro a la pestaña activa en primer plano.
-  * `storage`: Permite guardar y recuperar las preferencias del usuario (`chrome.storage.local`) de manera persistente entre sesiones.
-  * `tts` (*Text-To-Speech*): Acceso a la síntesis de voz nativa del sistema operativo a través del navegador.
-  * `tabs`: Capacidad de consultar, crear, redirigir y cerrar pestañas del navegador mediante comandos de voz.
+* **`permissions` y `host_permissions`**: Lista de permisos (`storage`, `tts`, `tabs`) y acceso a todos los sitios web (`<all_urls>`) necesarios para inyectar la accesibilidad.
 * **`background`**: Declara a `background.js` como un **Service Worker**, el cual corre en segundo plano sin bloquear la interfaz.
-* **`content_scripts`**: Inyecta automáticamente `content_script.js` en todas las páginas web visitadas (`<all_urls>`).
+* **`content_scripts`**: Inyecta automáticamente `content_script.js` al final de la carga (`document_end`) en todas las páginas web visitadas.
 
 ---
 
@@ -195,13 +207,13 @@ Es el archivo de configuración y registro principal exigido por las extensiones
 Es la ventana emergente que se muestra al presionar el ícono de la extensión.
 
 * **Diseño e Identidad:**
-  * Utiliza la tipografía Google Font **Nunito** (`weights: 500, 800, 900`) para máxima legibilidad.
-  * Incorpora la paleta de colores institucional de Adapta PE: Rojo Bandera (`#E30613`), fondos de alto contraste y tarjetas redondeadas (`border-radius: 30px`).
+  * Utiliza la tipografía Google Font **Nunito** para máxima legibilidad, integrando un diseño moderno tipo tarjeta (`border-radius: 24px`).
+  * Incorpora la paleta de colores institucional de Adapta PE: Rojo Bandera (`#E30613`) y un footer con información de licencia CC BY-NC-SA 4.0.
 * **Controles Interactivos:**
   * `checkTalkBack`: Switch toggle para encender/apagar el lector de pantalla por cursor.
-  * `checkVoz`: Switch toggle para encender el asistente de voz. Al activarse, muestra dinámicamente un bloque de ayuda (`hintVoz`) con los comandos reconocidos.
-  * `selectDaltonismo`: Menú desplegable `<select>` para escoger filtros visuales: *Normal*, *Protanopia*, *Deuteranopia* o *Tritanopia*.
-  * `checkOjos`: Switch toggle para activar el Mouse Cinético. Muestra la guía `hintGestos` indicando cómo utilizar la cámara y el tiempo de fijación para clics.
+  * `checkVoz`: Switch toggle para encender el asistente de voz. Al activarse, muestra dinámicamente un bloque de ayuda explicando el uso de la palabra clave **"Computadora"**.
+  * `selectDaltonismo`: Menú desplegable `<select>` para escoger filtros visuales universales: *Normal*, *Protanopia*, *Deuteranopia* o *Tritanopia*.
+  * `checkOjos`: Switch toggle para activar el Mouse Cinético. Muestra una guía indicando que se debe permanecer quieto por 1 segundo para ejecutar un clic.
 
 ---
 
@@ -254,8 +266,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   else if (request.accion === "cerrar_pestana") {
     chrome.tabs.remove(sender.tab.id);
   }
-  else if (request.accion === "buscar_google") {
-    chrome.tabs.update(sender.tab.id, { url: "https://www.google.com/search?q=" + encodeURIComponent(request.query) });
+  else if (request.accion === "buscar_inteligente") {
+    // Lógica para redirigir la búsqueda a YouTube, MercadoLibre, Amazon, Wikipedia, Google, etc.
+    // ...
   }
 });
 ```
@@ -268,7 +281,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   * `"callar"`: Interrumpe inmediatamente la voz sintética cuando el usuario retira el cursor del elemento.
   * `"abrir_pestana"`: Crea una nueva pestaña (`chrome.tabs.create`) navegando a la URL indicada.
   * `"cerrar_pestana"`: Cierra la pestaña desde donde se originó el mensaje (`chrome.tabs.remove(sender.tab.id)`).
-  * `"buscar_google"`: Actualiza la pestaña con los resultados de Google codificando de manera segura la cadena consultada (`encodeURIComponent`).
+  * `"buscar_inteligente"`: Procesa las intenciones de búsqueda y navegación rápida. Incluye un diccionario de plataformas (YouTube, MercadoLibre, Facebook, Wikipedia, Amazon, Instagram, ChatGPT, Google) para abrir o buscar directamente en la URL correspondiente (abriendo en la pestaña actual o en una nueva).
 
 ---
 
@@ -277,12 +290,14 @@ Es el núcleo técnico de Adapta PE. Este script se inyecta directamente dentro 
 
 #### Módulo 1: Asistente de Voz Always-On
 * Emplea la API nativa del navegador `webkitSpeechRecognition`.
-* Se configura con idioma `es-PE` (Español de Perú), modo continuo (`continuous = true`) y resultados finales listos para parsing (`interimResults = false`).
+* Se configura con idioma `es-PE` (Español de Perú), modo continuo (`continuous = true`) y resultados intermedios para mayor agilidad (`interimResults = true`).
 * **Auto-recuperación:** Cuenta con un controlador `reconocimientoVoz.onend` que reinicia automáticamente el motor si se desconecta, asegurando una experiencia *Always-On*.
-* **HUD Visual:** Añade una insignia flotante en la esquina inferior izquierda (`#adapta-pe-mic-status`) que muestra el estado ("🎙️ Escuchando..." o "💤 En pausa...").
-* **Parser de Intenciones Verbales:**
+* **HUD Visual y Wake Word:** Añade una insignia flotante en la esquina inferior izquierda (`#adapta-pe-mic-status`) indicando "🎙️ Activo. Di 'Computadora'". Al pronunciar la palabra clave, el asistente emite un *beep* y abre una ventana de 8 segundos ("👂 Dime...") para que des el comando de voz.
+* **Parser de Intenciones Verbales Inteligente (`ejecutarComandoInteligente`):**
   * Expresiones como `"bajar"` o `"subir"` invocan `window.scrollBy({ top: ..., behavior: 'smooth' })`.
-  * `"escribir [texto]"` detecta el elemento enfocado (`document.activeElement`) y concatena el texto tanto en campos estándar (`input`, `textarea`) como en editores enriquecidos (`isContentEditable`), despachando el evento `Event('input')` para activar la reactividad de frameworks como React, Angular o Vue.
+  * `"escribir [texto]"` detecta el elemento enfocado (`document.activeElement`) y concatena el texto tanto en campos estándar (`input`, `textarea`) como en editores enriquecidos (`isContentEditable`), despachando el evento `Event('input')` para activar la reactividad de frameworks.
+  * `"abre [sitio]"` (ej. "abre youtube") detecta plataformas conocidas y solicita a `background.js` abrirlas. Soporta el modificador "en nueva pestaña".
+  * `"busca [texto] en [sitio]"` o `"buscar [texto]"` detecta el sitio de destino e invoca búsquedas directas. Si no se especifica sitio, intenta escribir la búsqueda en un input local (e.g., barra de búsqueda de la página actual) o recurre a Google.
   * `"abrir [nombre]"` recorre todos los elementos `<a>` y `<button>` del documento, encuentra la coincidencia de texto, resalta el enlace con un borde rojo `#E30613` y simula un `.click()`.
 
 #### Módulo 2: TalkBack Inteligente
@@ -302,16 +317,19 @@ Es el núcleo técnico de Adapta PE. Este script se inyecta directamente dentro 
 
 #### Módulo 4: Mouse Cinético y Visión Artificial Local
 * Utiliza `navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } })` para capturar la cámara web local.
-* Procesa los fotogramas en memoria a través de un `<canvas>` HTML5 invisible configurado con `{ willReadFrequently: true }`.
+* Procesa los fotogramas en memoria a través de un `<canvas>` HTML5 invisible configurado con `{ willReadFrequently: true }`. Además, dibuja un HUD en tiempo real sobre el video.
 * **Cálculo de Movimiento Óptico:** Compara el fotograma actual con el anterior píxel por píxel:
   $$\Delta = |R_{actual} - R_{prev}| + |G_{actual} - G_{prev}| + |B_{actual} - B_{prev}|$$
-* Aquellos píxeles cuya diferencia supere el umbral de sensibilidad (`diff > 45`) se consideran píxeles activos (cabeza, extremidades, hombros o muñones).
-* Calcula el centroide medio $(X_{prom}, Y_{prom})$ de los píxeles en movimiento.
-* **Autocalibración y Zona Muerta:** Durante los primeros segundos fija un centro base $(centroBaseX, centroBaseY)$. Para eliminar temblores involuntarios y tics leves, se aplica una zona muerta (`umbralGiro = 12`).
+* Aquellos píxeles cuya diferencia supere el umbral de sensibilidad (`diff > 50`) se consideran píxeles activos. Puede detectar si el movimiento proviene de la "Cabeza" o el "Brazo/Mano" basado en la posición.
+* **Sistema de Joystick Absoluto (Físicas):** Cuenta con un centro inamovible (cruz fija) y aplica EMA (Exponential Moving Average) agresivo para lograr suavidad y estabilidad.
+* **Zonas de Acción:**
+  * **Zona Muerta (Verde):** Radio central fijo donde el cursor es seguro y estable. Aquí se carga el clic.
+  * **Zona de Atracción (Naranja):** Borde ajustado con movimiento extremadamente lento para control preciso.
+  * **Zona Libre:** Movimiento fluido hacia la dirección deseada (máx 8px/frame).
 * **Dwell Click (Autoclic por permanencia):**
-  * Cuando el usuario detiene el movimiento en una coordenada deseada, se incrementa `tiempoFijado`.
-  * El puntero visual (`#adapta-pe-cursor`) realiza una animación de pulsación y aumento de escala gradual (`scale(...)`).
-  * Tras 45 cuadros estables (~2 segundos), se identifica el elemento exacto bajo las coordenadas con `document.elementFromPoint(posX, posY)` y se ejecuta automáticamente `.click()`, emitiendo una confirmación visual en color verde `#2ecc71`.
+  * Al retornar el movimiento al centro absoluto (Zona Muerta), el cursor incrementa `tiempoFijado`.
+  * El HUD muestra el progreso "🛑 SEGURO (X%)" y el cursor aumenta de tamaño.
+  * Tras lograr la permanencia segura (aproximadamente 1 segundo / 125 cuadros), se identifica el elemento exacto bajo las coordenadas `(posX, posY)` con `document.elementFromPoint`, se ejecuta `.click()`, y se emite un destello visual verde.
 
 ---
 
@@ -355,7 +373,7 @@ if __name__ == '__main__':
 
 ## 🎙️ Catálogo de Comandos de Voz
 
-Cuando el **Asistente Always-On** está activo, puedes pronunciar con naturalidad cualquiera de las siguientes instrucciones:
+Cuando el **Asistente Always-On** está activo, primero debes decir la palabra clave **"Computadora"**, esperar el pitido, y luego pronunciar con naturalidad cualquiera de las siguientes instrucciones:
 
 | Comando Verbal | Acción Ejecutada |
 | :--- | :--- |
@@ -363,8 +381,9 @@ Cuando el **Asistente Always-On** está activo, puedes pronunciar con naturalida
 | `"cerrar pestaña"` | Cierra la pestaña activa en ese momento. |
 | `"bajar"` o `"hacia abajo"` | Hace scroll suave del 70% de la pantalla hacia abajo. |
 | `"subir"` o `"hacia arriba"` | Hace scroll suave del 70% de la pantalla hacia arriba. |
-| `"buscar [término]"` | Abre una búsqueda en Google con el término solicitado (ej. *“buscar noticias de tecnología”*). |
+| `"buscar [término]"` o `"busca [término] en [sitio]"` | Intenta buscar en una barra local de la página; si no hay, busca en Google o directamente en el sitio pedido (ej. *“busca laptops en mercado libre”*, *“buscar gatos en youtube”*). |
 | `"escribir [texto]"` | Escribe el texto dictado en el campo de texto o editor enfocado activando eventos reactivos. |
+| `"abre [sitio]"` o `"entra a [sitio]"` | Navega rápidamente a sitios conocidos (YouTube, Wikipedia, Amazon, ChatGPT, etc.) (ej. *“abre youtube en una pestaña nueva”*). |
 | `"abrir [nombre del botón o link]"` | Busca enlaces o botones en la página que contengan dicho texto y hace clic sobre ellos (ej. *“abrir Contacto”*). |
 
 ---
@@ -374,9 +393,9 @@ Cuando el **Asistente Always-On** está activo, puedes pronunciar con naturalida
 El sistema cinético no requiere sensores costosos de seguimiento ocular (*eye-trackers*) ni hardware dedicado:
 
 1. **Captura en Espejo:** El canvas invierte el video horizontalmente (`scaleX(-1)`) para que el movimiento sea intuitivo (al moverte a tu derecha, el puntero va a la derecha).
-2. **Diagnóstico HUD:** En la esquina inferior derecha se despliega una ventana de video de 200x150 px con indicadores en tiempo real de desplazamiento vectorial ($dX, dY$) y estado de control.
-3. **Puntero Virtual Autónomo:** Se dibuja un círculo rojo flotante con borde blanco en el nivel más alto de la capa de renderizado (`z-index: 9999999`).
-4. **Dwell Click:** Permite a personas sin motricidad en manos hacer clic en botones, reproducir videos o seguir hipervínculos simplemente posando su mirada o cabeza sobre el objetivo durante 2 segundos.
+2. **Diagnóstico HUD:** En la esquina inferior derecha se despliega una ventana interactiva (burbuja flotante) con el video, una cruz central fija, indicadores de progreso de clic, fuentes de movimiento (Cabeza vs Brazo) y zonas dibujadas (Muerta/Verde, Atracción/Naranja).
+3. **Puntero Virtual Autónomo:** Se dibuja un círculo rojo flotante con borde blanco en el nivel más alto de la capa de renderizado (`z-index: 9999999`), el cual está restringido a una velocidad segura (8 píxeles por frame máximo).
+4. **Joystick Absoluto y Dwell Click:** Emula un joystick donde retornar la cabeza/cuerpo a la postura inicial central (Zona Muerta) inicia el contador de permanencia. Tras 125 frames (unos instantes de inmovilidad en el centro), se ejecuta un clic en la coordenada del puntero virtual, garantizando una postura ergonómica para las personas sin motricidad en las manos.
 
 ---
 

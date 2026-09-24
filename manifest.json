@@ -1,11 +1,18 @@
 {
   "manifest_version": 3,
   "name": "Adapta PE",
-  "version": "10.0",
-  "description": "Sistema Operativo de Accesibilidad Universal Hands-Free.",
+  "version": "10.0.1",
+  "description": "Sistema Operativo de Accesibilidad Universal Hands-Free. Controla tu navegador con la voz y el movimiento.",
+  "author": "Rodrigo Alejandro Apcho Aliaga (TheAlejo160)",
+  "homepage_url": "https://adaptape.thealejo-dev.cc",
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "AdaptaPE.png"
+    "default_title": "Panel de Control Adapta PE",
+    "default_icon": {
+      "16": "AdaptaPE.png",
+      "48": "AdaptaPE.png",
+      "128": "AdaptaPE.png"
+    }
   },
   "icons": {
     "16": "AdaptaPE.png",
@@ -15,11 +22,20 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["activeTab", "storage", "tts", "tabs"],
+  "permissions": [
+    "storage",
+    "tts",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content_script.js"]
+      "js": ["content_script.js"],
+      "run_at": "document_end"
     }
-  ]
+  ],
+  "minimum_chrome_version": "88"
 }

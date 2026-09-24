@@ -4,52 +4,132 @@
   <meta charset="UTF-8">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@500;800;900&display=swap');
-    :root { --rojo: #E30613; --bg: #e4e8ec; --card: #ffffff; --text: #2d3436; }
-    body { width: 340px; padding: 15px; font-family: 'Nunito', sans-serif; background: var(--bg); margin: 0; color: var(--text); }
-    .container { background: var(--card); border-radius: 30px; padding: 25px; box-shadow: 0 12px 35px rgba(0,0,0,0.1); }
-    .header { display: flex; align-items: center; justify-content: center; flex-direction: column; border-bottom: 2px dashed #f1f2f6; padding-bottom: 18px; margin-bottom: 20px; }
-    .header img { width: 70px; height: 70px; border-radius: 22px; box-shadow: 0 8px 15px rgba(227, 6, 19, 0.25); object-fit: cover; margin-bottom: 12px; }
-    .header h3 { margin: 0; color: var(--rojo); font-size: 28px; font-weight: 900; letter-spacing: -1px; }
-    .header p { margin: 0; font-size: 12px; color: #b2bec3; font-weight: 800; letter-spacing: 2px; }
+
+    :root {
+      --rojo: #E30613;
+      --bg: #e4e8ec;
+      --card: #ffffff;
+      --text: #2d3436;
+      --muted: #b2bec3;
+    }
+
+    body {
+      width: 360px; /* Un poco más ancho para acomodar la licencia */
+      padding: 15px;
+      font-family: 'Nunito', sans-serif;
+      background: var(--bg);
+      margin: 0;
+      color: var(--text);
+    }
+
+    .container {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 25px;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.1);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      border-bottom: 2px dashed #f1f2f6;
+      padding-bottom: 18px;
+      margin-bottom: 15px;
+    }
+
+    .header img {
+      width: 70px;
+      height: 70px;
+      border-radius: 20px;
+      box-shadow: 0 8px 15px rgba(227, 6, 19, 0.25);
+      object-fit: cover;
+      margin-bottom: 10px;
+      transition: transform 0.3s ease;
+    }
+    .header img:hover { transform: scale(1.05); }
+
+    .header h3 { margin: 0; color: var(--rojo); font-size: 26px; font-weight: 900; letter-spacing: -1px; }
+    .header p { margin: 0; font-size: 11px; color: var(--muted); font-weight: 800; letter-spacing: 1.5px; }
+
     .opcion { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #f8f9fa; flex-wrap: wrap; }
-    .opcion-info { display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 800; color: #2d3436; }
-    .switch { position: relative; display: inline-block; width: 54px; height: 30px; }
+    .opcion-info { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 800; color: #2d3436; }
+
+    /* Toggle Switch Moderno */
+    .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
     .switch input { opacity: 0; width: 0; height: 0; }
     .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #dfe6e9; transition: .4s; border-radius: 30px; }
-    .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+    .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s cubic-bezier(0.68, -0.55, 0.265, 1.55); border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
     input:checked + .slider { background-color: var(--rojo); }
-    input:checked + .slider:before { transform: translateX(24px); }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    /* Dropdown */
     .select-box { margin-top: 10px; padding-bottom: 15px; border-bottom: 1px solid #f8f9fa; }
-    select { width: 100%; padding: 14px; border-radius: 18px; border: 2px solid #f1f2f6; font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 800; color: var(--text); background: var(--bg); cursor: pointer; outline: none; transition: 0.3s; }
-    select:focus { border-color: var(--rojo); background: white; }
-    .hint-box { display: none; width: 100%; background: #fff0f1; border-left: 4px solid var(--rojo); padding: 10px 12px; margin-top: 12px; border-radius: 0 10px 10px 0; font-size: 13px; color: #d63031; box-sizing: border-box; line-height: 1.4; }
+    select { width: 100%; padding: 12px; border-radius: 14px; border: 2px solid #f1f2f6; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800; color: var(--text); background: var(--card); cursor: pointer; outline: none; transition: 0.3s; }
+    select:focus { border-color: var(--rojo); }
+
+    /* Cajas de Ayuda */
+    .hint-box { display: none; width: 100%; background: #fff0f1; border-left: 4px solid var(--rojo); padding: 10px 12px; margin-top: 12px; border-radius: 0 10px 10px 0; font-size: 12px; color: #d63031; box-sizing: border-box; line-height: 1.4; }
+
+    /* --- SECCIÓN LICENCIA CC --- */
+    .footer {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 2px dashed #f1f2f6;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .footer img { border-radius: 4px; transition: opacity 0.2s; }
+    .footer img:hover { opacity: 0.8; }
+
+    .footer p {
+      margin: 0;
+      font-size: 10px;
+      color: #636e72;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    .footer a.link {
+      color: var(--rojo);
+      text-decoration: none;
+      font-weight: 800;
+      transition: color 0.2s;
+    }
+    .footer a.link:hover { text-decoration: underline; color: #b7000c; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <img src="AdaptaPE.png" alt="Adapta PE Logo" onerror="this.src='https://via.placeholder.com/70/d32f2f/fff?text=PE'">
+      <img src="AdaptaPE.png" alt="Adapta PE Logo" onerror="this.src='https://via.placeholder.com/70/E30613/fff?text=PE'">
       <h3>Adapta PE</h3>
-      <p>OS V10.0 (HANDS-FREE)</p>
+      <p>EXTENSIÓN V10.0 (HANDS-FREE)</p>
     </div>
 
+    <!-- Opciones del Sistema -->
     <div class="opcion">
-      <div class="opcion-info">🗣️ TalkBack</div>
+      <div class="opcion-info">🗣️ Lector TalkBack</div>
       <label class="switch"><input type="checkbox" id="checkTalkBack"><span class="slider"></span></label>
     </div>
 
     <div class="opcion" style="flex-direction: column; align-items: flex-start;">
       <div style="display:flex; justify-content:space-between; width:100%;">
-        <div class="opcion-info">🤖 Asistente Always-On</div>
+        <div class="opcion-info">🤖 Asistente de Voz Activo</div>
         <label class="switch"><input type="checkbox" id="checkVoz"><span class="slider"></span></label>
       </div>
-      <div class="hint-box" id="hintVoz" style="margin-top: 8px;">
-        <strong>Comandos:</strong> "Buscar [texto]", "Bajar/Subir", "Nueva pestaña", "Cerrar pestaña".
+      <div class="hint-box" id="hintVoz">
+        <strong>Comandos:</strong> Di "Computadora", espera el beep, y di: "Abre YouTube", "Busca gatitos", "Bajar", o "Cerrar pestaña".
       </div>
     </div>
 
     <div class="select-box">
-      <div class="opcion-info" style="margin-bottom: 12px;">👁️ Visión (Daltonismo)</div>
+      <div class="opcion-info" style="margin-bottom: 12px;">👁️ Filtro Universal (Daltonismo)</div>
       <select id="selectDaltonismo">
         <option value="ninguno">Normal (Sin Filtros)</option>
         <option value="protanopia">Protanopia (Sin Rojos)</option>
@@ -60,13 +140,26 @@
 
     <div class="opcion" style="border:none; padding-bottom: 0;">
       <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-        <div class="opcion-info">🎯 Mouse Cinético</div>
+        <div class="opcion-info">🎯 Mouse Cinético (Cámara)</div>
         <label class="switch"><input type="checkbox" id="checkOjos"><span class="slider"></span></label>
       </div>
       <div class="hint-box" id="hintGestos">
-        <strong>Puntero Fluido:</strong> Sigue tu movimiento general (cabeza/manos). Quédate quieto 2 seg. para hacer Clic.
+        <strong>Puntero Inteligente:</strong> Mueve tu rostro. Quédate totalmente quieto por 1 segundo para ejecutar un Clic.
       </div>
     </div>
+
+    <!-- FOOTER Y LICENCIA -->
+    <div class="footer">
+      <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" title="Ver Licencia Creative Commons">
+        <img src="https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png" alt="CC BY-NC-SA 4.0">
+      </a>
+      <p>
+        <a href="https://thealejo-dev.cc" target="_blank" class="link">Adapta PE</a> © 2026 by
+        <a href="https://github.com/TheAlejo160" target="_blank" class="link">Rodrigo Alejandro Apcho Aliaga</a>.<br>
+        Licenciado bajo <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" class="link">CC BY-NC-SA 4.0 Internacional</a>.
+      </p>
+    </div>
+
   </div>
   <script src="popup.js"></script>
 </body>
