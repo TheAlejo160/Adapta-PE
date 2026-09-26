@@ -1,3 +1,4 @@
+document.documentElement.setAttribute('data-adapta-extension', 'true');
 // --- VARIABLES GLOBALES ---
 let talkbackActivo = false;
 let vozActiva = false;
