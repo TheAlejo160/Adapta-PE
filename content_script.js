@@ -1,4 +1,5 @@
 document.documentElement.setAttribute('data-adapta-extension', 'true');
+
 // --- VARIABLES GLOBALES ---
 let talkbackActivo = false;
 let vozActiva = false;
@@ -132,8 +133,6 @@ function procesarFraseContinua(ui) {
 }
 
 function ejecutarComandoInteligente(cmd) {
-    console.log("🧠 [Intención Final]:", cmd);
-
     let enNuevaPestana = cmd.includes("nueva pestaña") || cmd.includes("en otra pestaña") || cmd.includes("en una pestaña nueva");
     let cmdLimpio = cmd.replace(/en una nueva pestaña/g, "").replace(/nueva pestaña/g, "").replace(/en otra pestaña/g, "").trim();
 
@@ -192,13 +191,9 @@ function ejecutarComandoInteligente(cmd) {
             if (searchInput) {
                 searchInput.value = objetivo;
                 searchInput.dispatchEvent(new Event('input', { bubbles: true }));
-
                 let form = searchInput.closest('form');
-                if (form) {
-                    form.submit();
-                } else {
-                    searchInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, bubbles: true }));
-                }
+                if (form) form.submit();
+                else searchInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, bubbles: true }));
             } else {
                 chrome.runtime.sendMessage({ accion: "buscar_inteligente", query: objetivo, sitio: "google", nuevaPestana: false });
             }
@@ -206,33 +201,53 @@ function ejecutarComandoInteligente(cmd) {
         return;
     }
 
-    if (cmdLimpio.startsWith("abrir ")) {
-        let textoEnlace = cmdLimpio.replace("abrir ", "").trim();
-        let enlaces = Array.from(document.querySelectorAll("a, button"));
-        let linkEncontrado = enlaces.find(el => el.innerText.toLowerCase().includes(textoEnlace));
+    if (cmdLimpio.startsWith("abrir ") || cmdLimpio.startsWith("click en ") || cmdLimpio.startsWith("clic en ")) {
+        let textoEnlace = cmdLimpio.replace(/^(abrir |click en |clic en )/, "").trim();
+        let enlaces = Array.from(document.querySelectorAll("a, button, [role='button']"));
+        let linkEncontrado = enlaces.find(el => {
+            let t = el.innerText.toLowerCase();
+            let aria = el.getAttribute('aria-label')?.toLowerCase() || "";
+            return t.includes(textoEnlace) || aria.includes(textoEnlace);
+        });
+
         if (linkEncontrado) {
-            linkEncontrado.style.outline = "4px solid #E30613";
-            linkEncontrado.click();
+            let prevOutline = linkEncontrado.style.outline;
+            linkEncontrado.style.outline = "3px solid #2ecc71";
+            setTimeout(() => {
+                linkEncontrado.style.outline = prevOutline;
+                linkEncontrado.click();
+            }, 400);
         }
     }
 }
 
 // --- 2. TALKBACK ---
-const etiquetasValidas = ['P', 'H1', 'H2', 'H3', 'A', 'BUTTON', 'IMG', 'LI', 'SPAN'];
 document.addEventListener("mouseover", (e) => {
     if (!talkbackActivo) return;
+    let validTags = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'A', 'BUTTON', 'SPAN', 'LI', 'LABEL', 'IMG', 'SVG'];
+
     let elemento = e.target;
-    if (!etiquetasValidas.includes(elemento.tagName)) return;
-    if (elemento === elementoActual) return;
+    let contenedor = elemento.closest('button, a, [role="button"]');
+    let finalEl = contenedor || elemento;
+
+    if (!validTags.includes(finalEl.tagName.toUpperCase()) && !finalEl.hasAttribute('aria-label')) return;
+    if (finalEl === elementoActual) return;
 
     clearTimeout(temporizadorTalkBack);
     if (elementoActual) elementoActual.style.outline = "none";
-    elementoActual = elemento;
-    elemento.style.outline = "4px solid #E30613";
 
-    let texto = (elemento.tagName === 'IMG') ? (elemento.alt || "Imagen") : (elemento.innerText || elemento.textContent);
+    elementoActual = finalEl;
+    finalEl.style.outline = "3px solid #E30613";
+    finalEl.style.outlineOffset = "2px";
+    finalEl.style.borderRadius = "4px";
+
+    let texto = finalEl.getAttribute('aria-label') || finalEl.getAttribute('alt') || finalEl.innerText || finalEl.textContent;
+    if (!texto || texto.trim() === "") {
+        if (finalEl.querySelector('svg')) texto = "Botón";
+    }
+
     if (texto && texto.trim() !== "") {
-        temporizadorTalkBack = setTimeout(() => { chrome.runtime.sendMessage({ accion: "hablar", texto: texto.trim() }); }, 400);
+        temporizadorTalkBack = setTimeout(() => { chrome.runtime.sendMessage({ accion: "hablar", texto: texto.trim() }); }, 300);
     }
 });
 document.addEventListener("mouseout", (e) => {
@@ -262,22 +277,20 @@ function aplicarDaltonismo(tipo) {
     document.documentElement.style.setProperty('filter', `url(#${tipo})`, 'important');
 }
 
-// --- 4. MOTOR FÍSICO CINÉTICO (ESTABILIZADO Y CENTRO BLOQUEADO) ---
+// --- 4. MOTOR FÍSICO CINÉTICO MASTER ---
 let camaraActiva = false;
 let stream = null, videoEl = null, canvasEl = null, ctx = null, hudCanvasEl = null, hudCtx = null;
 let animationId = null, punteroVirtual = null, frameAnterior = null;
 let posX = window.innerWidth / 2, posY = window.innerHeight / 2;
 
-// Físicas Joystick Absoluto
-const basePoint = { x: 0.5, y: 0.5 }; // ¡ESTRICTAMENTE INAMOVIBLE!
+const basePoint = { x: 0.5, y: 0.5 };
 let rawTarget = { x: 0.5, y: 0.5 };
 let smoothedPoint = { x: 0.5, y: 0.5 };
 let tiempoFijado = 0;
 
-// Zonas de Acción Reducidas
-const zonaMuerta = 0.05;      // Zona verde para hacer clic (fija al centro)
-const zonaAtraccion = 0.08;   // Zona naranja más ajustada y con poca fuerza
-const framesParaClick = 125;   // Tiempo equilibrado para hacer clic
+const zonaMuerta = 0.045;
+const zonaAtraccion = 0.06;
+const framesParaClick = 100;
 let targetSource = "Buscando...";
 
 async function activarCamara(activar) {
@@ -291,7 +304,7 @@ async function activarCamara(activar) {
 
             let burbuja = document.createElement("div");
             burbuja.id = "adapta-pe-camara-box";
-            burbuja.style.cssText = "position:fixed; bottom:20px; right:20px; width:220px; height:165px; border-radius:16px; border: 3px solid #E30613; overflow:hidden; z-index:999999; background:#111; box-shadow: 0 8px 20px rgba(0,0,0,0.5);";
+            burbuja.style.cssText = "position:fixed; bottom:20px; right:20px; width:220px; height:165px; border-radius:16px; border: 3px solid #2ecc71; overflow:hidden; z-index:999999; background:#111; box-shadow: 0 8px 20px rgba(0,0,0,0.5); transition: border-color 0.3s;";
 
             videoEl = document.createElement("video");
             videoEl.srcObject = stream;
@@ -350,6 +363,7 @@ function bucleCineticoNativoHUD() {
 
     if (frameAnterior) {
         let sumaX = 0, sumaY = 0, pixelesMovidos = 0;
+        let minX = 320, maxX = 0, minY = 240, maxY = 0;
 
         for (let y = 0; y < 240; y += 4) {
             for (let x = 0; x < 320; x += 4) {
@@ -358,89 +372,87 @@ function bucleCineticoNativoHUD() {
                            Math.abs(frameActual.data[i+1] - frameAnterior.data[i+1]) +
                            Math.abs(frameActual.data[i+2] - frameAnterior.data[i+2]);
 
-                if (diff > 50) {
+                if (diff > 40) { // Umbral mejorado
                     sumaX += x; sumaY += y; pixelesMovidos++;
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
                 }
             }
         }
 
-        // Filtro Anti-Salto Fuerte
-        if (pixelesMovidos > 60) {
-            let instX = 1.0 - ((sumaX / pixelesMovidos) / 320);
-            let instY = (sumaY / pixelesMovidos) / 240;
+        if (pixelesMovidos > 40) {
+            let masaX = sumaX / pixelesMovidos;
+            let masaY = sumaY / pixelesMovidos;
 
-            targetSource = (instY > 0.65) ? "💪 Brazo/Mano" : "🧠 Cabeza";
+            let estableX = masaX;
+            let estableY = masaY;
 
-            // EMA Agresivo: El punto sigue tu movimiento de forma fluida y lenta
-            rawTarget.x = rawTarget.x * 0.85 + instX * 0.15;
-            rawTarget.y = rawTarget.y * 0.85 + instY * 0.15;
+            let isHead = masaY < 150; // Detección de cabeza
+
+            if (isHead) {
+                targetSource = "🧠 Cabeza";
+                // SOLUCIÓN PARA MIRAR ARRIBA: 70% de peso a la cima de la cabeza (minY)
+                // Ignoramos el cuello (masaY) para que no jale el punto hacia abajo
+                estableY = (minY * 0.7) + (masaY * 0.3);
+            } else {
+                targetSource = "✋ Brazo/Mano";
+                estableY = masaY; // Para manos el centro está bien
+            }
+
+            let instX = 1.0 - (estableX / 320); // Espejo
+            let instY = estableY / 240;
+
+            // AMPLIFICADOR VERTICAL: Incrementa el movimiento Y en un 40%
+            instY = 0.5 + (instY - 0.5) * 1.4;
+
+            rawTarget.x = rawTarget.x * 0.75 + instX * 0.25;
+            rawTarget.y = rawTarget.y * 0.75 + instY * 0.25;
         } else {
-            // Regreso suave al centro absoluto si no hay movimiento (Mejora Postura)
             rawTarget.x = rawTarget.x * 0.95 + basePoint.x * 0.05;
             rawTarget.y = rawTarget.y * 0.95 + basePoint.y * 0.05;
         }
 
-        // Segundo Suavizado para hyper-fluidez
         smoothedPoint.x = smoothedPoint.x * 0.80 + rawTarget.x * 0.20;
         smoothedPoint.y = smoothedPoint.y * 0.80 + rawTarget.y * 0.20;
 
-        // --- RENDERIZADO DEL HUD DE JOYSTICK FIJO ---
-        let drawBaseX = basePoint.x * 320; // 160 Fijo
-        let drawBaseY = basePoint.y * 240; // 120 Fijo
+        // --- RENDER HUD ---
+        let drawBaseX = basePoint.x * 320;
+        let drawBaseY = basePoint.y * 240;
         let drawSmoothX = smoothedPoint.x * 320;
         let drawSmoothY = smoothedPoint.y * 240;
 
-        // Cruz Central Fija
         hudCtx.strokeStyle = "rgba(255, 255, 255, 0.2)";
-        hudCtx.setLineDash([4, 4]);
-        hudCtx.lineWidth = 1;
-        hudCtx.beginPath();
+        hudCtx.setLineDash([4, 4]); hudCtx.lineWidth = 1; hudCtx.beginPath();
         hudCtx.moveTo(drawBaseX, 0); hudCtx.lineTo(drawBaseX, 240);
-        hudCtx.moveTo(0, drawBaseY); hudCtx.lineTo(320, drawBaseY);
-        hudCtx.stroke();
+        hudCtx.moveTo(0, drawBaseY); hudCtx.lineTo(320, drawBaseY); hudCtx.stroke();
         hudCtx.setLineDash([]);
 
-        // Zona Atracción (Naranja) Reducida
         let pxAtraccion = zonaAtraccion * 320;
-        hudCtx.strokeStyle = "rgba(255, 165, 0, 0.8)";
-        hudCtx.setLineDash([5, 5]);
-        hudCtx.lineWidth = 2;
-        hudCtx.beginPath();
-        hudCtx.arc(drawBaseX, drawBaseY, pxAtraccion, 0, 2 * Math.PI);
-        hudCtx.stroke();
-        hudCtx.setLineDash([]);
+        hudCtx.strokeStyle = "rgba(255, 165, 0, 0.8)"; hudCtx.setLineDash([5, 5]); hudCtx.lineWidth = 2;
+        hudCtx.beginPath(); hudCtx.arc(drawBaseX, drawBaseY, pxAtraccion, 0, 2 * Math.PI); hudCtx.stroke(); hudCtx.setLineDash([]);
 
-        // Zona Muerta Verde (Segura / Fija)
         let pxMuerta = zonaMuerta * 320;
-        hudCtx.strokeStyle = "rgba(46, 204, 113, 0.9)";
-        hudCtx.fillStyle = "rgba(46, 204, 113, 0.1)";
-        hudCtx.lineWidth = 2;
-        hudCtx.beginPath();
-        hudCtx.arc(drawBaseX, drawBaseY, pxMuerta, 0, 2 * Math.PI);
-        hudCtx.fill();
-        hudCtx.stroke();
+        hudCtx.strokeStyle = "rgba(46, 204, 113, 0.9)"; hudCtx.fillStyle = "rgba(46, 204, 113, 0.1)"; hudCtx.lineWidth = 2;
+        hudCtx.beginPath(); hudCtx.arc(drawBaseX, drawBaseY, pxMuerta, 0, 2 * Math.PI); hudCtx.fill(); hudCtx.stroke();
 
-        // Punto Rastreador Fluido
-        hudCtx.fillStyle = targetSource.includes("Cabeza") ? "#3498db" : "#e74c3c";
-        hudCtx.beginPath();
-        hudCtx.arc(drawSmoothX, drawSmoothY, 6, 0, 2 * Math.PI);
-        hudCtx.fill();
-        hudCtx.shadowColor = 'white';
-        hudCtx.shadowBlur = 4;
-        hudCtx.fill();
-        hudCtx.shadowBlur = 0;
+        hudCtx.fillStyle = targetSource.includes("Cabeza") ? "#e74c3c" : "#3498db";
+        hudCtx.beginPath(); hudCtx.arc(drawSmoothX, drawSmoothY, 6, 0, 2 * Math.PI); hudCtx.fill();
 
-        // --- LÓGICA DE MOVIMIENTO DESACELERADO ---
+        // --- FÍSICA MEJORADA ---
         let deltaX = smoothedPoint.x - basePoint.x;
         let deltaY = smoothedPoint.y - basePoint.y;
         let distancia = Math.hypot(deltaX, deltaY);
 
         if (distancia <= zonaMuerta) {
-            // ZONA SEGURA: Clic (Posición firme y saludable)
             tiempoFijado++;
             let progreso = Math.min(100, (tiempoFijado / framesParaClick) * 100);
             if(hud) hud.innerHTML = `🛑 SEGURO (${Math.round(progreso)}%)`;
             punteroVirtual.style.transform = `translate(-50%, -50%) scale(${1 + (tiempoFijado * 0.02)})`;
+
+            let box = document.getElementById("adapta-pe-camara-box");
+            if(box) box.style.borderColor = "#2ecc71";
 
             if (tiempoFijado >= framesParaClick) {
                 punteroVirtual.style.display = "none";
@@ -450,49 +462,45 @@ function bucleCineticoNativoHUD() {
 
                 punteroVirtual.style.background = "#2ecc71";
                 setTimeout(() => punteroVirtual.style.background = "rgba(227,6,19,0.9)", 300);
-
                 tiempoFijado = 0;
             }
         } else {
             tiempoFijado = 0;
-
             let dirX = deltaX / distancia;
             let dirY = deltaY / distancia;
             let velX = 0, velY = 0;
 
+            let box = document.getElementById("adapta-pe-camara-box");
+            if(box) box.style.borderColor = "#E30613";
+
+            // SENSIBILIDAD DINÁMICA: Manos lentas, Cabeza rápida
+            let factorSensibilidad = targetSource.includes("Cabeza") ? 1.2 : 0.7;
+
             if (distancia <= zonaAtraccion) {
-                // ZONA ATRACCIÓN: Movimiento extremadamente débil y lento (Máximo control)
-                if(hud) hud.innerHTML = `🧲 ATRACCIÓN <span style='font-size:9px; color:#aaa'>(${targetSource})</span>`;
-                punteroVirtual.style.transform = "translate(-50%, -50%) scale(1)";
-
-                let suavidadAtraccion = window.innerWidth * 0.001; // Casi imperceptible
-                velX = dirX * suavidadAtraccion;
-                velY = dirY * suavidadAtraccion;
+                if(hud) hud.innerHTML = `🧲 PRECISIÓN <span style='font-size:9px; color:#aaa'>(${targetSource})</span>`;
+                let precisionSpeed = window.innerWidth * 0.002 * factorSensibilidad;
+                velX = dirX * precisionSpeed;
+                velY = dirY * precisionSpeed;
             } else {
-                // ZONA LIBRE: Movimiento fluido, pero tope de velocidad bajo
                 if(hud) hud.innerHTML = `🚀 MOVIENDO <span style='font-size:9px; color:#aaa'>(${targetSource})</span>`;
-                punteroVirtual.style.transform = "translate(-50%, -50%) scale(1)";
-
                 let activeDelta = distancia - zonaAtraccion;
-                let aceleracionControlada = activeDelta * 10;
-                let sensibilidadPaso = window.innerWidth * 0.006;
 
-                velX = (dirX * aceleracionControlada * sensibilidadPaso);
-                velY = (dirY * aceleracionControlada * sensibilidadPaso);
+                let aceleracion = Math.pow(activeDelta * 10, 1.15);
+                let sensibilidad = window.innerWidth * 0.007 * factorSensibilidad;
+
+                velX = (dirX * aceleracion * sensibilidad);
+                velY = (dirY * aceleracion * sensibilidad);
             }
 
-            // FRENO ABSOLUTO: El mouse no pasará de 8 píxeles de velocidad por frame
-            velX = Math.max(-8, Math.min(8, velX));
-            velY = Math.max(-8, Math.min(8, velY));
+            velX = Math.max(-15, Math.min(15, velX));
+            velY = Math.max(-15, Math.min(15, velY));
 
-            posX += velX;
-            posY += velY;
-
-            posX = Math.max(0, Math.min(window.innerWidth, posX));
-            posY = Math.max(0, Math.min(window.innerHeight, posY));
+            posX = Math.max(0, Math.min(window.innerWidth, posX + velX));
+            posY = Math.max(0, Math.min(window.innerHeight, posY + velY));
 
             punteroVirtual.style.left = posX + "px";
             punteroVirtual.style.top = posY + "px";
+            punteroVirtual.style.transform = "translate(-50%, -50%) scale(1)";
         }
     }
 
