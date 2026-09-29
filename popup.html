@@ -14,7 +14,7 @@
     }
 
     body {
-      width: 360px; /* Un poco más ancho para acomodar la licencia */
+      width: 360px;
       padding: 15px;
       font-family: 'Nunito', sans-serif;
       background: var(--bg);
@@ -68,9 +68,12 @@
     .select-box { margin-top: 10px; padding-bottom: 15px; border-bottom: 1px solid #f8f9fa; }
     select { width: 100%; padding: 12px; border-radius: 14px; border: 2px solid #f1f2f6; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800; color: var(--text); background: var(--card); cursor: pointer; outline: none; transition: 0.3s; }
     select:focus { border-color: var(--rojo); }
+    optgroup { font-weight: 900; color: var(--rojo); }
 
     /* Cajas de Ayuda */
-    .hint-box { display: none; width: 100%; background: #fff0f1; border-left: 4px solid var(--rojo); padding: 10px 12px; margin-top: 12px; border-radius: 0 10px 10px 0; font-size: 12px; color: #d63031; box-sizing: border-box; line-height: 1.4; }
+    .hint-box { display: none; width: 100%; background: #fff0f1; border-left: 4px solid var(--rojo); padding: 10px 12px; margin-top: 12px; border-radius: 0 10px 10px 0; font-size: 12px; color: #d63031; box-sizing: border-box; line-height: 1.4; animation: fadeIn 0.3s ease-in-out; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
     /* --- SECCIÓN LICENCIA CC --- */
     .footer {
@@ -109,19 +112,19 @@
     <div class="header">
       <img src="AdaptaPE.png" alt="Adapta PE Logo" onerror="this.src='https://via.placeholder.com/70/E30613/fff?text=PE'">
       <h3>Adapta PE</h3>
-      <p>EXTENSIÓN V10.0 (HANDS-FREE)</p>
+      <p>EXTENSIÓN V11.0 (HANDS-FREE)</p>
     </div>
 
     <!-- Opciones del Sistema -->
     <div class="opcion">
       <div class="opcion-info">🗣️ Lector TalkBack</div>
-      <label class="switch"><input type="checkbox" id="checkTalkBack"><span class="slider"></span></label>
+      <label class="switch"><input type="checkbox" id="checkTalkBack" aria-label="Activar Lector TalkBack"><span class="slider"></span></label>
     </div>
 
     <div class="opcion" style="flex-direction: column; align-items: flex-start;">
       <div style="display:flex; justify-content:space-between; width:100%;">
         <div class="opcion-info">🤖 Asistente de Voz Activo</div>
-        <label class="switch"><input type="checkbox" id="checkVoz"><span class="slider"></span></label>
+        <label class="switch"><input type="checkbox" id="checkVoz" aria-label="Activar Asistente de Voz"><span class="slider"></span></label>
       </div>
       <div class="hint-box" id="hintVoz">
         <strong>Comandos:</strong> Di "Computadora", espera el beep, y di: "Abre YouTube", "Busca gatitos", "Bajar", o "Cerrar pestaña".
@@ -129,22 +132,35 @@
     </div>
 
     <div class="select-box">
-      <div class="opcion-info" style="margin-bottom: 12px;">👁️ Filtro Universal (Daltonismo)</div>
-      <select id="selectDaltonismo">
-        <option value="ninguno">Normal (Sin Filtros)</option>
-        <option value="protanopia">Protanopia (Sin Rojos)</option>
-        <option value="deuteranopia">Deuteranopia (Sin Verdes)</option>
-        <option value="tritanopia">Tritanopia (Sin Azules)</option>
+      <div class="opcion-info" style="margin-bottom: 12px;">👁️ Filtro de Daltonismo</div>
+      <select id="selectDaltonismo" aria-label="Seleccionar filtro de daltonismo">
+        <option value="ninguno">Visión Normal (Sin Filtros)</option>
+
+        <optgroup label="🔴🟢 Rojo-Verde">
+          <option value="deuteranomalia">Deuteranomalía (Verdes se ven rojizos)</option>
+          <option value="protanomalia">Protanomalía (Rojos se ven verdes y opacos)</option>
+          <option value="deuteranopia">Deuteranopía (Confusión total rojo/verde por falta de conos verdes)</option>
+          <option value="protanopia">Protanopía (Confusión total rojo/verde por falta de conos rojos)</option>
+        </optgroup>
+
+        <optgroup label="🔵🟡 Azul-Amarillo">
+          <option value="tritanomalia">Tritanomalía (Dificultad entre azul/verde y amarillo/rojo)</option>
+          <option value="tritanopia">Tritanopía (Sin conos azules. Dificultad azul/verde, amarillo/rosa)</option>
+        </optgroup>
+
+        <optgroup label="⚫⚪ Daltonismo Completo">
+          <option value="acromatopsia">Acromatopsia (Solo tonos de gris, blanco y negro)</option>
+        </optgroup>
       </select>
     </div>
 
     <div class="opcion" style="border:none; padding-bottom: 0;">
       <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
         <div class="opcion-info">🎯 Mouse Cinético (Cámara)</div>
-        <label class="switch"><input type="checkbox" id="checkOjos"><span class="slider"></span></label>
+        <label class="switch"><input type="checkbox" id="checkOjos" aria-label="Activar Mouse Cinético"><span class="slider"></span></label>
       </div>
       <div class="hint-box" id="hintGestos">
-        <strong>Puntero Inteligente:</strong> Mueve tu rostro. Quédate totalmente quieto por 1 segundo para ejecutar un Clic.
+        <strong>Puntero Inteligente:</strong> Mueve tu rostro o mano respecto al centro. Quédate totalmente quieto por 1 segundo para ejecutar un Clic.
       </div>
     </div>
 

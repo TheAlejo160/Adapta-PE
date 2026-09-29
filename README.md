@@ -24,7 +24,7 @@
    - [2. `popup.html`](#2-popuphtml)
    - [3. `popup.js`](#3-popupjs)
    - [4. `background.js`](#4-backgroundjs)
-   - [5. `content_script.js`](#5-content_scriptjs)
+   - [5. `content_script.js` y Clases Modulares (POO)](#5-content_scriptjs-y-clases-modulares-poo)
    - [6. `app.py`](#6-apppy)
 6. [Catálogo de Comandos de Voz](#-catálogo-de-comandos-de-voz)
 7. [Mecánica del Mouse Cinético y Dwell Click](#-mecánica-del-mouse-cinético-y-dwell-click)
@@ -58,7 +58,7 @@ Asegúrate de tener la carpeta del proyecto en tu equipo local:
 ```bash
 git clone https://github.com/TheAlejo160/Adapta-PE.git
 ```
-La carpeta contiene los archivos: `manifest.json`, `popup.html`, `popup.js`, `background.js`, `content_script.js`, `app.py` y `AdaptaPE.png`.
+La carpeta contiene los archivos principales: `manifest.json`, `popup.html`, `popup.js`, `background.js`, `content_script.js`, `app.py`, `AdaptaPE.png` y el directorio `classes/` con los módulos (POO).
 
 ### Paso 2: Cargar la extensión en Google Chrome
 1. Abre Google Chrome y escribe en la barra de direcciones:
@@ -112,13 +112,13 @@ El siguiente diagrama ilustra cómo interactúan los diferentes componentes de l
                     |                    |                    |
                     v                    v                    v
           +---------------------------------------------------------------+
-          |                      content_script.js                        |
-          |  (Inyectado en la pestaña activa / Manipula el DOM directamente)|
+          |                 content_script.js (Controlador)               |
+          |  (Inyectado en la pestaña activa / Delega estado a Clases)    |
           |                                                               |
-          |  1. Motor de Voz (SpeechRecognition es-PE)                     |
-          |  2. Motor TalkBack (Hover semántico + Outline visual)          |
-          |  3. Filtros Daltonismo (SVG feColorMatrix dinámico)           |
-          |  4. Mouse Cinético (Diferenciación de frames Canvas + Dwell)   |
+          |  +-- classes/VoiceAssistant.js  (Motor de Voz / Comandos)     |
+          |  +-- classes/TalkBack.js        (Hover Semántico / Outline)   |
+          |  +-- classes/FiltrosDaltonismo.js (Filtros SVG dinámicos)     |
+          |  +-- classes/KineticEngine.js   (Físicas Canvas / Head Track) |
           +-------------------------------+-------------------------------+
                                           |
                       chrome.runtime.sendMessage()
@@ -285,51 +285,42 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 ---
 
-### 5. `content_script.js`
-Es el núcleo técnico de Adapta PE. Este script se inyecta directamente dentro de cada página web que el usuario visita y ejecuta cuatro módulos independientes:
+### 5. `content_script.js` y Clases Modulares (POO)
+Adapta PE ha sido refactorizado aplicando principios de **Programación Orientada a Objetos (POO)**. `content_script.js` ahora actúa como un **controlador de estado central** que instancia las clases, lee las preferencias del usuario e inicializa los diferentes módulos de manera encapsulada.
 
-#### Módulo 1: Asistente de Voz Always-On
-* Emplea la API nativa del navegador `webkitSpeechRecognition`.
+Los submódulos se encuentran en el directorio `classes/`:
+
+#### `classes/VoiceAssistant.js` (Asistente de Voz Always-On)
+* Encapsula la API nativa del navegador `webkitSpeechRecognition`.
 * Se configura con idioma `es-PE` (Español de Perú), modo continuo (`continuous = true`) y resultados intermedios para mayor agilidad (`interimResults = true`).
-* **Auto-recuperación:** Cuenta con un controlador `reconocimientoVoz.onend` que reinicia automáticamente el motor si se desconecta, asegurando una experiencia *Always-On*.
-* **HUD Visual y Wake Word:** Añade una insignia flotante en la esquina inferior izquierda (`#adapta-pe-mic-status`) indicando "🎙️ Activo. Di 'Computadora'". Al pronunciar la palabra clave, el asistente emite un *beep* y abre una ventana de 8 segundos ("👂 Dime...") para que des el comando de voz.
-* **Parser de Intenciones Verbales Inteligente (`ejecutarComandoInteligente`):**
-  * Expresiones como `"bajar"` o `"subir"` invocan `window.scrollBy({ top: ..., behavior: 'smooth' })`.
-  * `"escribir [texto]"` detecta el elemento enfocado (`document.activeElement`) y concatena el texto tanto en campos estándar (`input`, `textarea`) como en editores enriquecidos (`isContentEditable`), despachando el evento `Event('input')` para activar la reactividad de frameworks.
-  * `"abre [sitio]"` (ej. "abre youtube") detecta plataformas conocidas y solicita a `background.js` abrirlas. Soporta el modificador "en nueva pestaña".
-  * `"busca [texto] en [sitio]"` o `"buscar [texto]"` detecta el sitio de destino e invoca búsquedas directas. Si no se especifica sitio, intenta escribir la búsqueda en un input local (e.g., barra de búsqueda de la página actual) o recurre a Google.
-  * `"abrir [nombre]"` recorre todos los elementos `<a>` y `<button>` del documento, encuentra la coincidencia de texto, resalta el enlace con un borde rojo `#E30613` y simula un `.click()`.
+* **Auto-recuperación:** Cuenta con un controlador interno `onend` que reinicia automáticamente el motor si se desconecta, asegurando una experiencia *Always-On*.
+* **HUD Visual y Wake Word:** Añade una insignia flotante en la esquina inferior izquierda indicando "🎙️ Activo. Di 'Computadora'". Al pronunciar la palabra clave, el asistente emite un *beep* y abre una ventana de 8 segundos ("👂 Dime...") para que des el comando de voz.
+* **Parser de Intenciones Verbales Inteligente:**
+  * Expresiones como `"bajar"` o `"subir"` invocan `window.scrollBy`.
+  * `"escribir [texto]"` detecta el elemento enfocado (`document.activeElement`) y concatena el texto despachando eventos para reactividad.
+  * `"abre [sitio]"` detecta plataformas conocidas y solicita a `background.js` abrirlas.
+  * `"abrir [nombre]"` recorre todos los elementos `<a>` y `<button>`, encuentra la coincidencia, resalta el enlace y simula un `.click()`.
 
-#### Módulo 2: TalkBack Inteligente
-* Monitorea eventos `mouseover` y `mouseout` en todo el árbol DOM.
+#### `classes/TalkBack.js` (TalkBack Inteligente)
+* Clase dedicada a monitorear eventos `mouseover` y `mouseout` en el DOM.
 * Filtra únicamente elementos que aportan valor semántico: `P`, `H1`, `H2`, `H3`, `A`, `BUTTON`, `IMG`, `LI`, `SPAN`.
 * Al posarse sobre un elemento:
-  1. Le aplica un contorno de accesibilidad de alto contraste: `outline: 4px solid #E30613`.
-  2. Extrae el texto legible o el atributo `alt` si es una imagen.
-  3. Aplica un mecanismo de **Debounce** con temporizador de 400ms (`temporizadorTalkBack`) para evitar hablar en ráfagas cuando el usuario pasa el mouse rápidamente por la pantalla.
-  4. Al confirmarse la permanencia, envía el mensaje `{ accion: "hablar", texto }` a `background.js`.
-* Al salir (`mouseout`): remueve el contorno y cancela la lectura activa.
+  1. Le aplica un contorno de accesibilidad de alto contraste (`outline: 4px solid #E30613`).
+  2. Extrae el texto legible o el atributo `alt`.
+  3. Aplica un mecanismo de **Debounce** con temporizador de 400ms para evitar hablar en ráfagas.
+  4. Envía el mensaje `{ accion: "hablar", texto }` a `background.js`.
 
-#### Módulo 3: Filtros de Daltonismo por SVG
+#### `classes/FiltrosDaltonismo.js` (Filtros por SVG)
 * Inyecta dinámicamente un nodo `<svg>` oculto en el `<body>` con definiciones `<feColorMatrix>` especializadas.
-* Aplica el filtro en la raíz de la página mediante CSS: `document.documentElement.style.filter = url(#tipo)`.
-* Al seleccionar "ninguno", retira el filtro limpiando el estilo global.
+* Maneja la aplicación y limpieza del filtro a nivel raíz mediante CSS (`document.documentElement.style.filter`).
 
-#### Módulo 4: Mouse Cinético y Visión Artificial Local
-* Utiliza `navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } })` para capturar la cámara web local.
-* Procesa los fotogramas en memoria a través de un `<canvas>` HTML5 invisible configurado con `{ willReadFrequently: true }`. Además, dibuja un HUD en tiempo real sobre el video.
-* **Cálculo de Movimiento Óptico:** Compara el fotograma actual con el anterior píxel por píxel:
-  $$\Delta = |R_{actual} - R_{prev}| + |G_{actual} - G_{prev}| + |B_{actual} - B_{prev}|$$
-* Aquellos píxeles cuya diferencia supere el umbral de sensibilidad (`diff > 50`) se consideran píxeles activos. Puede detectar si el movimiento proviene de la "Cabeza" o el "Brazo/Mano" basado en la posición.
-* **Sistema de Joystick Absoluto (Físicas):** Cuenta con un centro inamovible (cruz fija) y aplica EMA (Exponential Moving Average) agresivo para lograr suavidad y estabilidad.
-* **Zonas de Acción:**
-  * **Zona Muerta (Verde):** Radio central fijo donde el cursor es seguro y estable. Aquí se carga el clic.
-  * **Zona de Atracción (Naranja):** Borde ajustado con movimiento extremadamente lento para control preciso.
-  * **Zona Libre:** Movimiento fluido hacia la dirección deseada (máx 8px/frame).
-* **Dwell Click (Autoclic por permanencia):**
-  * Al retornar el movimiento al centro absoluto (Zona Muerta), el cursor incrementa `tiempoFijado`.
-  * El HUD muestra el progreso "🛑 SEGURO (X%)" y el cursor aumenta de tamaño.
-  * Tras lograr la permanencia segura (aproximadamente 1 segundo / 125 cuadros), se identifica el elemento exacto bajo las coordenadas `(posX, posY)` con `document.elementFromPoint`, se ejecuta `.click()`, y se emite un destello visual verde.
+#### `classes/KineticEngine.js` (Mouse Cinético y Visión Artificial)
+* Encargada del procesamiento de fotogramas del `<canvas>` y la webcam.
+* **Cálculo de Movimiento Óptico:** Compara el fotograma actual con el anterior píxel por píxel buscando la mayor concentración de movimiento para detectar la cabeza.
+* **Sistema de Joystick Absoluto (Físicas):** Maneja la lógica de EMA (Exponential Moving Average), Zona Muerta, y movimiento del puntero virtual.
+* **Zonas de Acción y Dwell Click:**
+  * Si el puntero virtual retorna al centro absoluto (Zona Muerta), se inicia el Dwell Click.
+  * Tras lograr la permanencia segura (aproximadamente 1 segundo), se identifica el elemento exacto bajo las coordenadas con `document.elementFromPoint`, se ejecuta `.click()`, y se emite un destello visual verde.
 
 ---
 
