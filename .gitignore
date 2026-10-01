@@ -1,0 +1,60 @@
+# Configuración local de PyCharm y otros editores
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+*~
+
+# Python: cachés y entornos del servidor Flask opcional
+__pycache__/
+*.py[cod]
+venv/
+env/
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Variables locales y secretos (conservar las plantillas)
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+
+# Dependencias locales de Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos del sistema operativo
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+
+# Registros, temporales e informes generados
+*.log
+/tmp/
+/temp/
+/coverage/
+.coverage
+.coverage.*
+/htmlcov/
+
+# Pruebas e instrucciones de desarrollo: conservar sólo en el equipo
+/tests/
+/AGENTS.md
+/Posibles_cambios.md
+
+# Paquetes de distribución generados localmente
+/dist/
+/build/
+*.zip
+*.tar.gz
+
+# Versionar voz/ y todo vision/:
+# los modelos .task, el runtime .js, los .wasm y sus licencias son necesarios.

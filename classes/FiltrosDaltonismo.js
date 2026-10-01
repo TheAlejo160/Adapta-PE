@@ -1,3 +1,4 @@
+(() => {
 class FiltrosDaltonismo {
     constructor() {
         this.idFiltro = "adapta-pe-filtros-svg";
@@ -73,3 +74,5 @@ class FiltrosDaltonismo {
         document.documentElement.insertAdjacentHTML('afterbegin', svg);
     }
 }
+globalThis.FiltrosDaltonismo = FiltrosDaltonismo;
+})();

@@ -1,3 +1,4 @@
+(() => {
 class TalkBack {
     constructor() {
         this.activo = false;
@@ -12,16 +13,27 @@ class TalkBack {
 
     setEstado(estado) {
         this.activo = estado;
+        if (!estado) clearTimeout(this.temporizador);
         if (!estado && this.elementoActual) {
             this.elementoActual.style.outline = "none";
             this.elementoActual = null;
-            chrome.runtime.sendMessage({ accion: "callar" });
+            this.enviar({ accion: "callar" });
         }
     }
 
     inicializarEventos() {
         document.addEventListener("mouseover", this.onMouseOver);
         document.addEventListener("mouseout", this.onMouseOut);
+    }
+
+    destruir() {
+        this.setEstado(false);
+        document.removeEventListener('mouseover', this.onMouseOver);
+        document.removeEventListener('mouseout', this.onMouseOut);
+    }
+
+    enviar(peticion) {
+        try { chrome.runtime.sendMessage(peticion).catch(() => {}); } catch (_) {} // Contexto anterior a una actualización.
     }
 
     onMouseOver(e) {
@@ -49,7 +61,7 @@ class TalkBack {
 
         if (texto && texto.trim() !== "") {
             this.temporizador = setTimeout(() => {
-                chrome.runtime.sendMessage({ accion: "hablar", texto: texto.trim() });
+                if (this.activo && finalEl === this.elementoActual) this.enviar({ accion: "hablar", texto: texto.trim() });
             }, 300);
         }
     }
@@ -60,7 +72,9 @@ class TalkBack {
         if (this.elementoActual) {
             this.elementoActual.style.outline = "none";
             this.elementoActual = null;
-            chrome.runtime.sendMessage({ accion: "callar" });
+            this.enviar({ accion: "callar" });
         }
     }
 }
+globalThis.TalkBack = TalkBack;
+})();

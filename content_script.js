@@ -1,56 +1,89 @@
-document.documentElement.setAttribute('data-adapta-extension', 'true');
-
-// Instanciar Módulos
-const voiceAssistant = new VoiceAssistant();
-const talkBack = new TalkBack();
-const filtrosDaltonismo = new FiltrosDaltonismo();
-const kineticEngine = new KineticEngine();
-
-// Controlador de Estado Global
-function revisarPreferencias() {
-    chrome.storage.local.get(["talkback", "voz", "daltonismo", "ojos"], (res) => {
-        talkBack.setEstado(res.talkback || false);
-        voiceAssistant.setEstado(res.voz || false);
-        filtrosDaltonismo.aplicar(res.daltonismo || "ninguno");
-        kineticEngine.setEstado(res.ojos || false);
-    });
-}
-
-// Inicialización e inyección al cargar la página por primera vez
-window.addEventListener("load", revisarPreferencias);
-
-// 1. Escucha Activa: Captura el pulso directo de popup.js (Respuesta instantánea)
-chrome.runtime.onMessage.addListener((request) => {
-    if (request.accion === "actualizar_estado") {
-        revisarPreferencias();
+(() => {
+    if (globalThis.adaptaPEControlador?.vigente()) return;
+    globalThis.adaptaPEControlador?.destruir();
+    const runtimeOriginal = chrome.runtime;
+    const idRecuperacion = 'adapta-pe-reconectar-' + runtimeOriginal.id;
+    // El mundo aislado anterior puede sobrevivir a una actualización; retirar sus recursos.
+    document.dispatchEvent(new Event(idRecuperacion));
+    // Liberar motores anteriores a este arranque sin recargar la página.
+    try { if (typeof kineticEngine !== 'undefined') kineticEngine.setEstado(false); } catch (_) {}
+    try { if (typeof talkBack !== 'undefined') talkBack.setEstado(false); } catch (_) {}
+    try { if (typeof voiceAssistant !== 'undefined') voiceAssistant.setEstado(false); } catch (_) {}
+    let prioridad = false, destruido = false;
+    const voiceAssistantNuevo = new globalThis.VoiceAssistant(accion => motorCinetico.ejecutarAccion(accion));
+    const filtros = new globalThis.FiltrosDaltonismo();
+    const motorCinetico = new globalThis.KineticEngine();
+    motorCinetico.actualizarVisibilidad(false);
+    const lector = new globalThis.TalkBack();
+    const idIndicador = 'adapta-pe-voz-indicador-' + runtimeOriginal.id;
+    voiceAssistantNuevo.alEstado = texto => chrome.runtime.sendMessage({ accion: 'voz_resultado', texto }).catch(() => {});
+    async function revisarPreferencias() {
+        const res = await chrome.storage.local.get(['voz', 'daltonismo', 'ojos', 'talkback', 'ajustesCineticos']);
+        if (destruido) return;
+        voiceAssistantNuevo.permitidoPorUsuario = Boolean(res.voz);
+        filtros.aplicar(res.daltonismo || 'ninguno');
+        motorCinetico.aplicarAjustes(res.ajustesCineticos);
+        motorCinetico.setEstado(Boolean(res.ojos));
+        lector.setEstado(Boolean(res.talkback) && prioridad && !document.hidden);
+        if (!res.voz) document.getElementById(idIndicador)?.remove();
     }
-});
-
-// 2. Escucha Pasiva: Captura cambios por detrás (Fallback para pestañas dormidas)
-chrome.storage.onChanged.addListener((cambios, areaName) => {
-    if (areaName === "local") {
-        if (cambios.talkback) talkBack.setEstado(cambios.talkback.newValue);
-        if (cambios.voz) voiceAssistant.setEstado(cambios.voz.newValue);
-        if (cambios.daltonismo) filtrosDaltonismo.aplicar(cambios.daltonismo.newValue);
-        if (cambios.ojos) kineticEngine.setEstado(cambios.ojos.newValue);
+    function actualizarVisibilidad() {
+        motorCinetico.actualizarVisibilidad(prioridad && !document.hidden);
+        if (!prioridad || document.hidden) lector.setEstado(false);
     }
-});
-
-// --- CONTROL DE PESTAÑAS (OPTIMIZACIÓN DE RECURSOS) ---
-document.addEventListener("visibilitychange", () => {
-    if (typeof voiceAssistant.actualizarVisibilidad === "function") {
-        voiceAssistant.actualizarVisibilidad(!document.hidden);
+    function alMensaje(peticion, emisor, responder) {
+        if (destruido || emisor.id !== runtimeOriginal.id) return;
+        if (peticion.accion === 'pagina_comprobar') { responder({ ok: true }); return; }
+        if (peticion.accion === 'control_prioridad') {
+            prioridad = Boolean(peticion.activa);
+            if (!prioridad) document.getElementById(idIndicador)?.remove();
+            actualizarVisibilidad();
+            revisarPreferencias().then(() => responder({ ok: true })).catch(() => responder({ ok: false }));
+            return true;
+        }
+        if (peticion.accion === 'camara_fotograma' && prioridad && !document.hidden) { motorCinetico.recibirFotograma(peticion.datos); return; }
+        if (peticion.accion === 'camara_error' && prioridad) { motorCinetico.mostrarError(String(peticion.texto)); return; }
+        if (peticion.accion === 'voz_ejecutar') {
+            if (typeof peticion.texto !== 'string' || peticion.texto.length > 4000) return;
+            voiceAssistantNuevo.ejecutarComando(peticion.texto); responder({ ok: true }); return;
+        }
+        if (peticion.accion === 'voz_indicador') {
+            let indicador = document.getElementById(idIndicador);
+            if (!peticion.activa || !prioridad) { indicador?.remove(); return; }
+            if (!indicador) {
+                indicador = document.createElement('div'); indicador.id = idIndicador;
+                indicador.setAttribute('role', 'status');
+                indicador.style.cssText = 'position:fixed;bottom:20px;left:20px;max-width:80vw;padding:10px 20px;background:#8b1420;color:white;border-radius:20px;font:14px sans-serif;z-index:999999;pointer-events:none';
+                document.body.appendChild(indicador);
+            }
+            indicador.textContent = String(peticion.texto || 'Voz activa · di Computadora'); return;
+        }
+        if (peticion.accion === 'actualizar_estado') revisarPreferencias().catch(() => {});
     }
-});
-
-window.addEventListener("focus", () => {
-    if (typeof voiceAssistant.actualizarVisibilidad === "function") {
-        voiceAssistant.actualizarVisibilidad(true);
+    function alCambiar(cambios, area) {
+        if (area === 'local') revisarPreferencias().catch(() => {});
     }
-});
-
-window.addEventListener("blur", () => {
-    if (typeof voiceAssistant.actualizarVisibilidad === "function") {
-        voiceAssistant.actualizarVisibilidad(false);
+    function registrar() {
+        chrome.runtime.sendMessage({ accion: 'pagina_lista' }).catch(() => {});
     }
-});
+    function alOcultar() { prioridad = false; actualizarVisibilidad(); }
+    function destruir() {
+        if (destruido) return;
+        destruido = true; prioridad = false; actualizarVisibilidad();
+        voiceAssistantNuevo.limpiarSeleccion(); filtros.limpiar();
+        motorCinetico.setEstado(false); lector.destruir();
+        document.getElementById(idIndicador)?.remove();
+        document.removeEventListener('visibilitychange', actualizarVisibilidad);
+        document.removeEventListener(idRecuperacion, destruir);
+        window.removeEventListener('pagehide', alOcultar); window.removeEventListener('pageshow', registrar);
+        try { runtimeOriginal.onMessage.removeListener(alMensaje); chrome.storage.onChanged.removeListener(alCambiar); } catch (_) {}
+    }
+    globalThis.adaptaPEControlador = { voz: voiceAssistantNuevo, filtros, cinetico: motorCinetico, talkback: lector,
+        vigente() { try { return !destruido && Boolean(runtimeOriginal.getManifest()); } catch (_) { return false; } }, destruir };
+    document.documentElement.setAttribute('data-adapta-extension', 'true');
+    runtimeOriginal.onMessage.addListener(alMensaje); chrome.storage.onChanged.addListener(alCambiar);
+    document.addEventListener('visibilitychange', actualizarVisibilidad);
+    document.addEventListener(idRecuperacion, destruir);
+    window.addEventListener('pagehide', alOcultar); window.addEventListener('pageshow', registrar);
+    revisarPreferencias().catch(() => {}); registrar();
+})();
