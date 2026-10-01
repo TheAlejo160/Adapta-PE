@@ -106,12 +106,19 @@ class KineticEngine {
         if (Array.isArray(datos.grises) && datos.grises.length === this.grises.length) {
             this.grises.set(datos.grises); this.grisesRecibidos = true;
         }
-        if (typeof datos.vista === 'string' && datos.vista.startsWith('data:image/jpeg;base64,') && datos.vista.length < 100000) {
-            const generacion = this.generacion;
-            const vista = new Image();
-            vista.onload = () => { if (this.activa && generacion === this.generacion) this.ctx.drawImage(vista, 0, 0, this.ancho, this.alto); };
-            vista.src = datos.vista;
-        }
+    }
+
+    recibirVista(imagen) {
+        if (!this.activa || typeof imagen !== 'string' || !imagen.startsWith('data:image/jpeg;base64,') || imagen.length >= 100000 || this.vistaPendiente) return;
+        const generacion = this.generacion;
+        const vista = new Image();
+        this.vistaPendiente = vista;
+        vista.onload = () => {
+            if (this.activa && generacion === this.generacion) this.ctx.drawImage(vista, 0, 0, this.ancho, this.alto);
+            if (this.vistaPendiente === vista) this.vistaPendiente = null;
+        };
+        vista.onerror = () => { if (this.vistaPendiente === vista) this.vistaPendiente = null; };
+        vista.src = imagen;
     }
 
     solicitarModelo() {
@@ -168,6 +175,7 @@ class KineticEngine {
 
     detenerCamara() {
         ++this.generacion;
+        this.vistaPendiente = null;
         this.numeroFotograma = 0; this.grisesRecibidos = false;
         this.deteccion = null;
         this.fuenteControl = null;

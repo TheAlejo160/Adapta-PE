@@ -148,9 +148,15 @@ chrome.runtime.onMessage.addListener((peticion, emisor, responder) => {
         chrome.runtime.sendMessage({ destino: 'voz_central', accion: 'camara_modelo', modo: peticion.modo, fuente: peticion.fuente }).catch(() => {});
         return;
     }
-    if (peticion.accion === 'camara_fotograma' || peticion.accion === 'camara_error') {
+    if (peticion.accion === 'camara_fotograma' || peticion.accion === 'camara_error' || peticion.accion === 'camara_vista') {
         if (!admiteCinetico || emisor.url !== chrome.runtime.getURL('voz/escucha.html')) return;
         const destino = pestanaConControl;
+        if (peticion.accion === 'camara_vista') {
+            if (!destino) { responder({ ok: false }); return; }
+            chrome.tabs.sendMessage(destino.id, peticion, { documentId: destino.documentId })
+                .then(() => responder({ ok: true }), () => responder({ ok: false }));
+            return true;
+        }
         if (destino) chrome.tabs.sendMessage(destino.id, peticion, { documentId: destino.documentId }).catch(() => {});
         return;
     }

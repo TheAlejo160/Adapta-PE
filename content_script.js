@@ -42,6 +42,7 @@
             return true;
         }
         if (peticion.accion === 'camara_fotograma' && prioridad && !document.hidden) { motorCinetico.recibirFotograma(peticion.datos); return; }
+        if (peticion.accion === 'camara_vista' && prioridad && !document.hidden) { motorCinetico.recibirVista(peticion.vista); return; }
         if (peticion.accion === 'camara_error' && prioridad) { motorCinetico.mostrarError(String(peticion.texto)); return; }
         if (peticion.accion === 'voz_ejecutar') {
             if (typeof peticion.texto !== 'string' || peticion.texto.length > 4000) return;
