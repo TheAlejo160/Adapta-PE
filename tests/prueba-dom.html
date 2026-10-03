@@ -1,0 +1,50 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><title>Prueba DOM Adapta PE</title><body>
+<input id="campo" aria-label="Nombre" value="Hola Perú"><input id="casilla" type="checkbox"><div id="editor" contenteditable="true">Buenos días</div>
+<form id="formulario"><input id="buscador" name="q" type="search"><button type="submit">Buscar</button></form>
+<a id="enlace" href="https://example.org/">Contacto</a><pre id="resultado">Pendiente</pre><script>
+window.chrome={runtime:{sendMessage(peticion, respuesta){window.mensajes.push(peticion);respuesta?.({ok:true});}},storage:{local:{async set(){}}}};window.mensajes=[];
+</script><script src="../sitios.js"></script><script src="../classes/VoiceAssistant.js"></script><script src="../classes/KineticEngine.js"></script><script>
+try {
+ const exigir=(condicion,texto)=>{if(!condicion) throw new Error(texto);};
+ const arranques=[];
+ window.SpeechRecognition=window.webkitSpeechRecognition=class { start(){arranques.push(this);this.onstart?.();} abort(){} };
+ const primera=new VoiceAssistant(); const segunda=new VoiceAssistant();
+ chrome.runtime.id='completa'; primera.setEstado(true);
+ chrome.runtime.id='lite'; segunda.setEstado(true);
+ exigir(arranques.length===1,'Una sola voz con ambas extensiones');
+ primera.setEstado(false); segunda.evaluarEstado();
+ exigir(arranques.length===2,'Lite recupera micrófono al apagar Completa');
+ segunda.setEstado(false);
+ const voz=new VoiceAssistant();
+ const campo=document.getElementById('campo');campo.focus();campo.setSelectionRange(5,9);
+ voz.ejecutarComando('escribe Lima');exigir(campo.value==='Hola Lima','Reemplazo de selección');
+ const editor=document.getElementById('editor');editor.focus();const rango=document.createRange();rango.selectNodeContents(editor);
+ const seleccion=window.getSelection();seleccion.removeAllRanges();seleccion.addRange(rango);
+ voz.ejecutarComando('dicta Buenas tardes');exigir(editor.textContent==='Buenas tardes','Dictado en editor');
+ let envios=0;document.getElementById('formulario').addEventListener('submit',evento=>{evento.preventDefault();envios++;});
+ const buscador=document.getElementById('buscador');buscador.focus();voz.ejecutarComando('buscar Perú');
+ exigir(buscador.value==='Perú'&&envios===1,'Búsqueda mediante requestSubmit');
+ const motor=new KineticEngine();
+ const canvas=document.createElement('canvas');canvas.width=320;canvas.height=240;
+ motor.activa=true;motor.crearInterfaz();
+ exigir(!motor.burbuja.querySelector('button'),'Cámara sin botones que exijan apuntar');
+ exigir(getComputedStyle(motor.burbuja).pointerEvents==='none','La cámara no intercepta clics en la web');
+ const vozCinetica=new VoiceAssistant(accion=>motor.ejecutarAccion(accion));
+ vozCinetica.ejecutarComando('activar temblor');vozCinetica.ejecutarComando('activar temblor');
+ exigir(motor.zonaMuerta===0.07,'Ajuste repetido no desactiva temblor');
+ vozCinetica.ejecutarComando('movimientos pequeños');exigir(motor.amplitudControl===0.55,'Movilidad reducida por voz');
+ vozCinetica.ejecutarComando('siguiente clic derecho');exigir(motor.tipoClick==='derecho','Clic derecho por voz sin apuntar controles');
+ const casilla=document.getElementById('casilla');motor.hacerClick('izquierdo',casilla);
+ exigir(casilla.checked,'Click activa checkbox');
+ const enlace=document.getElementById('enlace');motor.posX=30;motor.posY=50;
+ let coordenadas;enlace.addEventListener('click',evento=>{evento.preventDefault();coordenadas=[evento.clientX,evento.clientY];});
+ motor.hacerClick('izquierdo',enlace);exigir(coordenadas[0]===30&&coordenadas[1]===50,'Click conserva coordenadas');
+ motor.hacerClick('derecho',enlace);exigir(document.getElementById('adapta-pe-menu-contextual'),'Menú contextual alternativo');
+ const boton=motor.menu.querySelector('button');motor.hacerClick('izquierdo',boton);
+ exigir(mensajes.at(-1).destino==='pestana'&&!document.getElementById('adapta-pe-menu-contextual'),'Menú navegable por cursor');
+ let nativoSitio=0;enlace.addEventListener('contextmenu',evento=>{evento.preventDefault();nativoSitio++;});
+ motor.hacerClick('derecho',enlace);exigir(nativoSitio===1&&!document.getElementById('adapta-pe-menu-contextual'),'Respetar menú del sitio');
+ motor.detenerCamara();exigir(!document.getElementById('adapta-pe-cursor')&&!document.getElementById('adapta-pe-camara-box'),'Limpieza de cámara y cursor');
+ document.getElementById('resultado').textContent='OK: dictado, selección, formulario, cámara sin botones, ajustes por voz, checkbox, coordenadas, menú, limpieza, micrófono compartido';
+} catch(error) {document.getElementById('resultado').textContent='FALLO: '+error.stack;}
+</script></body></html>

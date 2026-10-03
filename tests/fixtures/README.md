@@ -1,0 +1,1 @@
+Imágenes de prueba públicas de MediaPipe: `https://storage.googleapis.com/mediapipe-assets/portrait.jpg`, `pose.jpg`, `right_hands.jpg`. Se usan exclusivamente para regresiones de los modelos originales, sin cámara ni micrófono de personas usuarias. Proyecto de origen: https://github.com/google-ai-edge/mediapipe (Apache 2.0).

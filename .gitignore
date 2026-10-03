@@ -45,8 +45,7 @@ Desktop.ini
 .coverage.*
 /htmlcov/
 
-# Pruebas e instrucciones de desarrollo: conservar sólo en el equipo
-/tests/
+# Instrucciones personales de desarrollo: conservar sólo en el equipo
 /AGENTS.md
 /Posibles_cambios.md
 
@@ -58,3 +57,13 @@ Desktop.ini
 
 # Versionar voz/ y todo vision/:
 # los modelos .task, el runtime .js, los .wasm y sus licencias son necesarios.
+
+# Memoria y sesiones locales de agentes
+.codex/
+.codebase-memory/
+# Credenciales de firma o acceso
+*.p12
+*.pfx
+*.pem
+*.key
+# Conservar tests/ y sus fixtures públicos para reproducir las comprobaciones.
