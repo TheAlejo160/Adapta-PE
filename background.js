@@ -9,6 +9,7 @@ const conexiones = new Map();
 let transicionPaginas = Promise.resolve(), revisionPaginas = 0, conectarTodas = false;
 let pestanaConControl = null;
 let retornoCamara = null;
+let detenerMascotaLectura = null;
 function paginaPermitida(pestana) { return /^(https?|file):/.test(pestana?.url || ''); }
 
 function asegurarControlador(pestana) {
@@ -21,6 +22,8 @@ function asegurarControlador(pestana) {
             if (!estado || estado.result === null) return null;
             if (!estado.result) await chrome.scripting.executeScript({ target: { tabId: pestana.id, documentIds: [estado.documentId] }, injectImmediately: true,
                 files: chrome.runtime.getManifest().content_scripts[0].js });
+            if (!estado.result) await chrome.scripting.executeScript({ target: { tabId: pestana.id, allFrames: true }, injectImmediately: true,
+                files: chrome.runtime.getManifest().content_scripts[1].js }).catch(() => {});
             return { id: pestana.id, documentId: estado.documentId };
         } catch (_) { return null; } // Chrome protege sus páginas y la tienda de extensiones.
     })().finally(() => conexiones.delete(pestana.id));
@@ -77,7 +80,7 @@ function sincronizarVoz(reintentar = false) {
         await chrome.runtime.sendMessage({ destino: 'voz_central', accion: 'voz_configurar', activa: Boolean(preferencias.voz) });
         if (!preferencias.voz) estadoVoz = 'Voz desactivada';
         if (admiteCinetico) await chrome.runtime.sendMessage({ destino: 'voz_central', accion: 'camara_configurar', activa: camara,
-            procesar: Boolean(pestanaConControl), modo: preferencias.ajustesCineticos?.modo || 'automatico', reintentar });
+            procesar: Boolean(pestanaConControl), modo: preferencias.ajustesCineticos?.modo || 'cabeza', reintentar });
     });
     return transicionVoz;
 }
@@ -144,9 +147,13 @@ chrome.runtime.onMessage.addListener((peticion, emisor, responder) => {
         if (emisor.tab && (emisor.frameId ?? 0) === 0) sincronizarPaginas().catch(() => {});
         responder({ ok: true }); return;
     }
-    if (peticion.accion === 'camara_modo' && admiteCinetico && emisor.tab?.id === pestanaConControl?.id) {
-        chrome.runtime.sendMessage({ destino: 'voz_central', accion: 'camara_modelo', modo: peticion.modo, fuente: peticion.fuente }).catch(() => {});
-        return;
+    if (peticion.accion === 'camara_modo' && admiteCinetico) {
+        if (!pestanaConControl || emisor.tab?.id !== pestanaConControl.id || emisor.documentId !== pestanaConControl.documentId) {
+            responder({ ok: false }); return;
+        }
+        chrome.runtime.sendMessage({ destino: 'voz_central', accion: 'camara_modelo', modo: peticion.modo, fuente: peticion.fuente })
+            .then(responder).catch(() => responder({ ok: false }));
+        return true;
     }
     if (peticion.accion === 'camara_fotograma' || peticion.accion === 'camara_error' || peticion.accion === 'camara_vista') {
         if (!admiteCinetico || emisor.url !== chrome.runtime.getURL('voz/escucha.html')) return;
@@ -181,38 +188,58 @@ chrome.runtime.onMessage.addListener((peticion, emisor, responder) => {
         gestionarVoz(peticion, emisor).then(responder).catch(() => responder({ ok: false }));
         return true;
     }
-    const acciones = ['hablar', 'callar', 'abrir_url', 'buscar_inteligente', 'cerrar_pestana',
+    const acciones = ['mascota', 'hablar', 'callar', 'abrir_url', 'buscar_inteligente', 'cerrar_pestana',
         'cerrar_ventana', 'crear_pestana', 'crear_ventana', 'recargar', 'atras', 'adelante', 'cambiar_pestana', 'zoom'];
     if (!acciones.includes(peticion.accion)) return;
     (async () => {
         const pestana = emisor.tab || (emisor.url === chrome.runtime.getURL('voz/escucha.html') ? ultimaVentanaVoz || await pestanaActual() : null);
-        await ejecutarAccion(peticion, pestana);
+        await ejecutarAccion(peticion, pestana, emisor.documentId);
         responder({ ok: true });
     })().catch(() => responder({ ok: false, error: 'No se pudo realizar la acción en esta página.' }));
     return true;
 });
 chrome.storage.onChanged.addListener((cambios, area) => {
     if (area === 'local' && (cambios.voz || cambios.ojos)) sincronizarVoz().catch(() => {});
-    if (area === 'local' && ['voz', 'ojos', 'talkback', 'daltonismo', 'ajustesCineticos'].some(clave => cambios[clave])) sincronizarPaginas(true).catch(() => {});
+    if (area === 'local' && ['voz', 'ojos', 'talkback', 'daltonismo', 'ajustesCineticos', 'mascota'].some(clave => cambios[clave])) sincronizarPaginas(true).catch(() => {});
 });
 chrome.runtime.onStartup.addListener(() => sincronizarPaginas(true).catch(() => {}));
 chrome.runtime.onInstalled.addListener(() => sincronizarPaginas(true).catch(() => {}));
 chrome.tabs.onActivated.addListener(() => sincronizarPaginas().catch(() => {}));
-chrome.tabs.onUpdated.addListener((_, cambios) => { if (cambios.status === 'complete') sincronizarPaginas().catch(() => {}); });
+chrome.tabs.onUpdated.addListener((_, cambios) => { if (cambios.status === 'complete' || cambios.url) sincronizarPaginas().catch(() => {}); });
 chrome.windows.onFocusChanged.addListener(() => sincronizarPaginas().catch(() => {}));
 chrome.windows.onRemoved.addListener(() => sincronizarPaginas().catch(() => {}));
 // Recuperar también al reiniciarse el worker o recargar la extensión sin cambiar versión.
 sincronizarPaginas(true).catch(() => {});
 
-async function ejecutarAccion(peticion, pestana) {
+async function ejecutarAccion(peticion, pestana, documentId) {
     const accion = peticion.accion;
+    const notificarMascota = (estado, hablando) => {
+        if (pestana?.id != null) chrome.tabs.sendMessage(pestana.id, { accion: 'mascota_estado', estado, hablando },
+            documentId ? { documentId } : { frameId: 0 }).catch(() => {});
+    };
+    if (accion === 'mascota') {
+        if (['tinku', 'cuchu', 'yati', 'ninguna'].includes(peticion.nombre)) return chrome.storage.local.set({ mascota: peticion.nombre });
+        if (!['wave', 'sleep', 'wake'].includes(peticion.estado)) throw new Error('Mascota inválida');
+        notificarMascota(peticion.estado); return;
+    }
     if (accion === 'hablar') {
         if (!chrome.tts || typeof peticion.texto !== 'string') return;
+        detenerMascotaLectura?.();
         chrome.tts.stop();
-        chrome.tts.speak(peticion.texto, { lang: 'es-ES', rate: 1.05 });
+        const finalizar = () => {
+            if (detenerMascotaLectura !== finalizar) return;
+            detenerMascotaLectura = null; notificarMascota('idle', false);
+        };
+        detenerMascotaLectura = finalizar;
+        notificarMascota(peticion.origen === 'lectura' ? 'read' : 'talk', true);
+        try {
+            chrome.tts.speak(peticion.texto, { lang: 'es-ES', rate: 1.05,
+                onEvent: evento => { if (['end', 'interrupted', 'cancelled', 'error'].includes(evento.type)) finalizar(); }
+            }, () => { if (chrome.runtime.lastError) finalizar(); });
+        } catch (error) { finalizar(); throw error; }
         return;
     }
-    if (accion === 'callar') { chrome.tts?.stop(); return; }
+    if (accion === 'callar') { detenerMascotaLectura?.(); chrome.tts?.stop(); return; }
     if (accion === 'crear_pestana') return chrome.tabs.create({});
     if (accion === 'crear_ventana') return chrome.windows.create({});
     if (accion === 'abrir_url') return gestionarAperturaURL(peticion.url, peticion.destino, pestana);

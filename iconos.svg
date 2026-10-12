@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <symbol id="voz" viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/></symbol>
+  <symbol id="lectura" viewBox="0 0 24 24"><path d="M3 9h4l5-5v16l-5-5H3zM16 8a6 6 0 0 1 0 8M19 5a10 10 0 0 1 0 14"/></symbol>
+  <symbol id="color" viewBox="0 0 24 24">
+    <defs><clipPath id="rojo"><circle cx="12" cy="8" r="7"/></clipPath><clipPath id="verde"><circle cx="8" cy="15" r="7"/></clipPath></defs>
+    <g stroke="none">
+      <circle cx="12" cy="8" r="7" fill="#d71920"/><circle cx="8" cy="15" r="7" fill="#087b37"/><circle cx="16" cy="15" r="7" fill="#1952b3"/>
+      <circle cx="8" cy="15" r="7" fill="#e5af00" clip-path="url(#rojo)"/><circle cx="16" cy="15" r="7" fill="#b23bbf" clip-path="url(#rojo)"/>
+      <circle cx="16" cy="15" r="7" fill="#00818b" clip-path="url(#verde)"/>
+      <g clip-path="url(#verde)"><circle cx="16" cy="15" r="7" fill="#fff" clip-path="url(#rojo)"/></g>
+    </g>
+  </symbol>
+  <symbol id="cursor" viewBox="0 0 24 24"><path d="m4 3 15 9-7 2-3 7zM15 16l4 5"/></symbol>
+  <symbol id="camara" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="4"/></symbol>
+  <symbol id="mascota" viewBox="0 0 24 24"><ellipse cx="5" cy="8" rx="2" ry="3"/><ellipse cx="10" cy="5" rx="2" ry="3"/><ellipse cx="16" cy="5" rx="2" ry="3"/><ellipse cx="21" cy="9" rx="2" ry="3"/><path d="M7 16c0-3 2-5 5-5s5 2 5 5c4 6-4 5-5 4s-8 2-5-4z"/></symbol>
+</svg>

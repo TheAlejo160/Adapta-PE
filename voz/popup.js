@@ -1,17 +1,21 @@
 // Estado visible también en Nueva pestaña y páginas protegidas de Chrome.
 const ayudaVoz = document.getElementById('hintVoz');
-const indicadorVoz = document.createElement('p');
-indicadorVoz.id = 'adapta-pe-voz-global-estado';
+const indicadorVoz = document.getElementById('estadoVoz');
 indicadorVoz.setAttribute('role', 'status');
-ayudaVoz?.appendChild(indicadorVoz);
+indicadorVoz.textContent = 'Consultando el estado del micrófono…';
 const configurarMicrofono = document.createElement('button');
 configurarMicrofono.type = 'button';
 configurarMicrofono.textContent = 'Configurar micrófono';
-configurarMicrofono.addEventListener('click', () => chrome.tabs.create({ url: chrome.runtime.getURL('voz/permisos.html') }));
-ayudaVoz?.appendChild(configurarMicrofono);
+configurarMicrofono.addEventListener('click', () => chrome.tabs.create({ url: chrome.runtime.getURL('voz/permisos.html') }).catch(() => {
+    indicadorVoz.textContent = 'No se abrió la configuración. Vuelve a pulsar Configurar micrófono.';
+}));
+ayudaVoz?.querySelector('details').appendChild(configurarMicrofono);
 function actualizarEstadoVoz() {
     chrome.runtime.sendMessage({ accion: 'voz_estado' }, respuesta => {
-        if (!chrome.runtime.lastError) indicadorVoz.textContent = respuesta?.texto || 'Activa Voz para escuchar en todo Chrome.';
+        const texto = chrome.runtime.lastError
+            ? 'No se pudo consultar el micrófono. Cierra y vuelve a abrir el panel.'
+            : respuesta?.texto || 'Activa Control por voz para escuchar tus órdenes.';
+        if (indicadorVoz.textContent !== texto) indicadorVoz.textContent = texto;
     });
 }
 actualizarEstadoVoz();

@@ -39,7 +39,7 @@ class VoiceAssistant {
         } else this.detener();
     }
 
-    mostrarEstado(texto = "🎙️ Activo. Di 'Computadora'") {
+    mostrarEstado(texto = "Voz activa. Di «Computadora».") {
         this.alEstado?.(texto);
         if (this.ui) {
             this.ui.textContent = texto;
@@ -112,7 +112,7 @@ class VoiceAssistant {
             this.indiceResultado = 0;
             this.resultadosConsumidos.clear();
             this.textoReconocido = '';
-            this.mostrarEstado(this.esperandoComando ? '👂 Dime...' : undefined);
+            this.mostrarEstado(this.esperandoComando ? 'Di tu comando.' : undefined);
         };
         reconocimiento.onresult = evento => {
             if (this.reconocimientoVoz !== reconocimiento) return;
@@ -133,7 +133,7 @@ class VoiceAssistant {
             if (!texto || texto === this.textoReconocido) return;
             this.textoReconocido = texto;
             this.fallos = 0;
-            this.mostrarEstado('🎙️ Escuché: ' + texto);
+            this.mostrarEstado('Escuché: ' + texto);
             clearTimeout(this.temporizadorSilencio);
             this.temporizadorSilencio = setTimeout(() => {
                 // No consumir una intención incompleta si sigue siendo provisional.
@@ -156,7 +156,7 @@ class VoiceAssistant {
                 this.mostrarEstado('Micrófono no disponible. Revisa el permiso y vuelve a activar Voz.');
             } else {
                 this.fallos = Math.min(this.fallos + 1, 4);
-                this.mostrarEstado('💤 Reconectando micrófono...');
+                this.mostrarEstado('Reconectando micrófono…');
             }
         };
         reconocimiento.onend = () => {
@@ -197,7 +197,7 @@ class VoiceAssistant {
         } else {
             this.reproducirBeep();
             this.esperandoComando = true;
-            this.mostrarEstado('👂 Dime...');
+            this.mostrarEstado('Di tu comando.');
             clearTimeout(this.temporizadorEspera);
             this.temporizadorEspera = setTimeout(() => { this.cancelarEspera(); this.mostrarEstado(); }, 8000);
         }
@@ -208,7 +208,7 @@ class VoiceAssistant {
             chrome.runtime.sendMessage(peticion, respuesta => {
                 if (chrome.runtime.lastError || respuesta?.ok === false) this.mostrarEstado('No se pudo realizar la acción en esta página.');
             });
-        } catch (_) { this.mostrarEstado('Adapta PE se está reconectando. Vuelve a decir el comando.'); }
+        } catch (_) { this.mostrarEstado('AdaptaPE se está reconectando. Vuelve a decir el comando.'); }
     }
 
     esEditable(campo) {
@@ -327,6 +327,16 @@ class VoiceAssistant {
         if (dictado) { this.escribirEnCampo(document.activeElement, original.slice(dictado[0].length)); return; }
         original = original.replace(/[, ]+por favor[.!?]*$/i, '').replace(/[.!?]+$/, '');
         comando = normalizarVoz(original);
+        const mascota = /^(?:(?:elige|cambia a)(?: la)? )?mascota ([a-z\s.-]+)$/.exec(comando);
+        if (mascota) {
+            const nombre = mascota[1].replace(/[\s.-]/g, '').replace(/([a-z])\1+/g, '$1');
+            const variantes = { tinku: 'tinku', tincu: 'tinku', tinko: 'tinku', tinco: 'tinku',
+                cuchu: 'cuchu', kuchu: 'cuchu', cucho: 'cuchu', yati: 'yati', yaty: 'yati', yate: 'yati' };
+            if (Object.hasOwn(variantes, nombre)) { this.enviar({ accion: 'mascota', nombre: variantes[nombre] }); return; }
+        }
+        if (/^(oculta|quita)(?: la)? mascota$/.test(comando)) { this.enviar({ accion: 'mascota', nombre: 'ninguna' }); return; }
+        const gestoMascota = /^(saluda|duerme|despierta)(?: la)? mascota$/.exec(comando);
+        if (gestoMascota) { this.enviar({ accion: 'mascota', estado: { saluda: 'wave', duerme: 'sleep', despierta: 'wake' }[gestoMascota[1]] }); return; }
         if (/^(cancelar|cancela|olvidalo|no hagas nada|cancelar seleccion|quita la seleccion)$/.test(comando)) { this.cancelarEspera(); this.limpiarSeleccion(); this.mostrarEstado('Comando cancelado.'); return; }
         const seleccionar = /^(?:selecciona(?:r)?|resalta(?:r)?)(?:\s+|$)/.exec(comando);
         if (seleccionar) {

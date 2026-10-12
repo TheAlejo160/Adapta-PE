@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "wide-tracking",
+        "value": "*",
+        "files": [
+          "popup.html"
+        ],
+        "createdAt": "2026-10-08T21:17:25.313Z",
+        "reason": "Revisión del asistente: el único espaciado positivo de popup.html está en .header p, subtítulo corto en mayúsculas. El detector lo clasifica como texto de párrafo; se conserva el estilo existente."
+      }
+    ]
+  }
+}

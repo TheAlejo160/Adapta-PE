@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<title>Prueba de filtros en juegos</title>
+<style>
+body { margin:0; background:white; font:16px sans-serif; }
+canvas, video { width:160px; height:100px; display:inline-block; }
+iframe { width:520px; height:300px; border:0; }
+canvas:fullscreen, video:fullscreen { width:100vw; height:100vh; object-fit:fill; }
+</style>
+<h1>Canvas, WebGL y vídeo</h1>
+<canvas id="lienzo" width="160" height="100"></canvas>
+<canvas id="grafico" width="160" height="100"></canvas>
+<video id="transmision" autoplay muted playsinline></video>
+<p><button id="pantalla" onclick="lienzo.requestFullscreen().catch(error=>parent.postMessage({falloPantalla:error.message},'*'))">Pantalla completa</button></p>
+<script>
+const lienzo = document.getElementById('lienzo');
+const dibujo = lienzo.getContext('2d');
+dibujo.fillStyle = '#ff0000'; dibujo.fillRect(0, 0, 160, 100);
+const grafico = document.getElementById('grafico').getContext('webgl', {preserveDrawingBuffer:true});
+grafico.clearColor(1, 0, 0, 1); grafico.clear(grafico.COLOR_BUFFER_BIT);
+const video = document.getElementById('transmision');
+video.srcObject = lienzo.captureStream(10); video.play();
+window.redibujar = () => { dibujo.fillRect(0, 0, 160, 100); grafico.clear(grafico.COLOR_BUFFER_BIT); };
+if (window === window.top) {
+    window.fallosPantalla = [];
+    window.addEventListener('message', evento=>{if(evento.data?.falloPantalla) window.fallosPantalla.push(evento.data.falloPantalla);});
+    for (const [id, host] of [['mismo', location.hostname], ['otro', location.hostname === 'localhost' ? '127.0.0.1' : 'localhost']]) {
+        const marco = document.createElement('iframe'); marco.id = id; marco.allowFullscreen = true;
+        marco.src = location.protocol + '//' + host + ':' + location.port + location.pathname;
+        document.body.append(marco);
+    }
+    fetch(location.href).then(respuesta=>respuesta.text()).then(html=>{
+        for (const id of ['contenido', 'blob']) {
+            const marco=document.createElement('iframe');marco.id=id;marco.allowFullscreen=true;
+            if(id==='contenido') marco.srcdoc=html; else marco.src=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+            document.body.append(marco);
+        }
+    });
+}
+</script>
+</html>

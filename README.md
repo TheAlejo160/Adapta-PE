@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="AdaptaPE.png" alt="Logo de Adapta PE" width="250">
+  <img src="AdaptaPE.png" alt="Logo de AdaptaPE" width="250">
 </p>
 
-# 🇵🇪 Adapta PE — Sistema de accesibilidad por voz y movimiento
+# 🇵🇪 AdaptaPE — Sistema de accesibilidad por voz y movimiento
 
-> **Versión del código:** 12.0 · Manifest V3.
-> **Requisito mínimo del manifest:** Chromium 116 o posterior.
+> **Versión del código Base:** 13.0 · Manifest V3.
+> **Requisito mínimo del manifest:** Chromium 119 o posterior.
 > **Navegadores objetivo:** Google Chrome y derivados Chromium, como Edge y Brave; la voz requiere una API de reconocimiento disponible.
 > **Sitio oficial:** [adaptape.thealejo-dev.cc](https://adaptape.thealejo-dev.cc).
 > **Código fuente:** [TheAlejo160/Adapta-PE](https://github.com/TheAlejo160/Adapta-PE).
@@ -21,6 +21,7 @@
 - [Comandos de voz](#comandos-de-voz)
 - [Cursor cinético y TalkBack](#cursor-cinético-y-talkback-sólo-base)
 - [Filtros de color](#filtros-de-color)
+- [Mascotas](#mascotas)
 - [Arquitectura y código](#arquitectura-y-código)
 - [Backend Python opcional](#backend-python-opcional-estado-real)
 - [Privacidad y alcance](#privacidad-y-alcance)
@@ -29,11 +30,23 @@
 - [Trabajo futuro](#trabajo-futuro)
 - [Autoría, licencia y uso de IA](#autoría-licencia-y-uso-de-ia)
 
+## Mascotas
+
+Base 13.0 y Lite 3.0 permiten elegir **Tinku** (gallito de las rocas), **Cuchu** (cuy) o **Yati** (llama) en «Tu mascota». «Sin mascota» desactiva este acompañamiento opcional.
+
+La mascota aparece abajo a la derecha en las webs permitidas, sigue el cursor físico y, en Base, el cinético. Arrastra su nombre o enfócalo con Tab y usa las flechas para moverla. La posición se guarda entre páginas y se adapta al tamaño de la ventana. Las páginas internas de Chrome y la tienda impiden esta interfaz, igual que el cursor y TalkBack.
+
+Con Voz activada, di «Computadora» y después «mascota Tinku», «mascota Cuchu» o «mascota Yati». «Saluda mascota», «duerme mascota», «despierta mascota» y «oculta mascota» controlan sus animaciones. Reacciona a la espera de comandos, errores de reconocimiento y respuestas habladas. En Base también lee con TalkBack mientras dura la locución; Lite conserva sus módulos de voz y filtros.
+
+Los nombres toleran separaciones y letras repetidas, como «Y Atti», «Ya ti», «Tin cu» y «Cu chu», además de variantes acotadas como Tincu, Tinko, Kuchu, Cucho, Yaty y Yate. Sólo se corrigen dentro de la orden para elegir mascota; búsquedas y dictado conservan su texto.
+
+Los sprites son WebP locales con transparencia, codificados sin pérdida a su resolución original. Cada pestaña visible carga sólo la mascota elegida; al perder prioridad pausa la animación y conserva su imagen, incluso al cambiar ayudas o abrir el panel. Una pestaña oculta libera los sprites y los recupera al volver, sin recargar. Respeta «reducir movimiento» del sistema. Se guardan sólo el nombre y la posición, sin grabaciones ni imágenes de cámara. El motor se reutiliza del proyecto Mascota-Modular-Adapta-PE; no requiere librerías externas.
+
 ## Qué es y qué versión elegir
 
-**Adapta PE** es un sistema de accesibilidad Hands-Free distribuido como extensión de navegador. Facilita la navegación para personas con movilidad reducida o necesidades visuales mediante voz, un puntero controlado con cámara, lectura contextual y filtros de color. La versión **Base**, también llamada **Completa**, incluye todos esos módulos.
+**AdaptaPE** es un sistema de accesibilidad Hands-Free distribuido como extensión de navegador. Facilita la navegación para personas con movilidad reducida o necesidades visuales mediante voz, un puntero controlado con cámara, lectura contextual y filtros de color. La versión **Base**, también llamada **Completa**, incluye todos esos módulos.
 
-| Función | Adapta PE (Base / Completa) | Adapta PE Lite |
+| Función | AdaptaPE (Base / Completa) | AdaptaPE Lite |
 | --- | --- | --- |
 | Voz global, navegación, búsquedas y dictado | Sí | Sí |
 | Siete filtros de color | Sí | Sí |
@@ -46,7 +59,7 @@ Cada variante es una extensión independiente, con sus propias preferencias y pe
 
 ## A quién está dirigida
 
-Adapta PE Base está dirigida al público general, con especial atención a quienes encuentran difícil usar un ratón o teclado de forma continuada:
+AdaptaPE Base está dirigida al público general, con especial atención a quienes encuentran difícil usar un ratón o teclado de forma continuada:
 
 - Personas con movilidad limitada, temblores, ausencia de extremidades o dificultades para realizar movimientos precisos. Pueden combinar voz con seguimiento de la parte del cuerpo que les resulte más cómoda.
 - Personas con necesidades visuales que buscan modificar los colores o escuchar el texto del elemento señalado.
@@ -59,11 +72,15 @@ Puedes activar cada módulo por separado. El diseño busca permitir control desd
 | Módulo | Qué aporta | Cómo se controla |
 | --- | --- | --- |
 | Asistente de voz | Aperturas, búsquedas, pestañas, ventanas, dictado, selección y clic por nombre. | «Computadora» seguida de una orden. |
-| Mouse cinético | Puntero virtual con movimiento de cabeza, torso, brazos, manos o textura visible. | Cámara, postura cómoda y órdenes de calibración, pausa, velocidad y amplitud. |
+| Mouse cinético | Puntero virtual con movimiento de cabeza, torso, brazos, manos o textura visible. | Cámara, gestos suaves y órdenes de pausa, velocidad y amplitud; calibración sólo para cabeza/torso. |
 | TalkBack | Lectura contextual del elemento señalado. | Activarlo en el panel y señalar con el ratón o el puntero cinético. |
 | Filtros de color | Siete transformaciones de presentación visual. | Elegir un filtro en el panel. |
 
 La voz sigue disponible al cambiar de página o ventana. La cámara se abre una sola vez para la extensión, y el cursor y TalkBack reciben prioridad únicamente en la pestaña de la ventana enfocada. Los filtros se conservan también en las webs de fondo. Las páginas ya abiertas se conectan automáticamente; no necesitas recargarlas para empezar a usar los módulos.
+
+El indicador conserva el último estado de voz mientras la página sea visible, también al abrir el panel. Si una web sustituye su contenido al navegar, se recuperan mascota, indicador, filtros y, en Base, la vista de cámara y el cursor existentes. No se reinicia el micrófono ni la postura por reconstruir esta interfaz.
+
+Al actualizar una extensión instalada como carpeta, recárgala una vez en `chrome://extensions` para que Chrome lea los archivos y permisos nuevos. Las pestañas web se reconectan automáticamente. Los recursos de mascotas están declarados en ambos manifests. Los avisos nativos de MediaPipe sobre XNNPACK, comprobación OpenGL y tensores de feedback son diagnósticos del SDK; la [advertencia de proyección NORM_RECT está reportada en su repositorio](https://github.com/google-ai-edge/mediapipe/issues/5639). Se conservan los diagnósticos y errores reales; no se silencian globalmente.
 
 La preparación inicial incluye los permisos visibles del navegador. Si necesitas apoyo para esa configuración, otra persona puede ayudarte a concederlos; después utiliza las órdenes disponibles para navegar y ajustar el cursor. En `chrome://` y otras páginas protegidas, usa «abre…», «busca…» o comandos de pestañas y ventanas: el cursor, los filtros y las acciones DOM sólo pueden actuar donde Chrome permite scripts de la extensión.
 
@@ -71,13 +88,13 @@ La preparación inicial incluye los permisos visibles del navegador. Si necesita
 
 ### Chrome Web Store
 
-Abre [Adapta PE en Chrome Web Store](https://chromewebstore.google.com/detail/haglphebolbegbchdkgejkoblocehogp?utm_source=item-share-cb), pulsa **Añadir a Chrome** y confirma la instalación y los permisos. Después fija el icono de la extensión y sigue [Primer uso](#primer-uso).
+Abre [AdaptaPE en Chrome Web Store](https://chromewebstore.google.com/detail/haglphebolbegbchdkgejkoblocehogp?utm_source=item-share-cb), pulsa **Añadir a Chrome** y confirma la instalación y los permisos. Después fija el icono de la extensión y sigue [Primer uso](#primer-uso).
 
 La versión de la tienda puede diferir del código del repositorio descrito aquí. Para revisar o probar los cambios del código fuente, usa la instalación descomprimida.
 
 ### Desde el repositorio: ZIP o Git
 
-**Descarga ZIP:** abre [el repositorio de Adapta PE](https://github.com/TheAlejo160/Adapta-PE), selecciona **Code → Download ZIP** y extrae el archivo en una carpeta permanente.
+**Descarga ZIP:** abre [el repositorio de AdaptaPE](https://github.com/TheAlejo160/Adapta-PE), selecciona **Code → Download ZIP** y extrae el archivo en una carpeta permanente.
 
 **Con Git:**
 
@@ -90,7 +107,7 @@ No necesitas compilar, ejecutar `npm install` ni iniciar Python. Selecciona siem
 1. Abre `chrome://extensions/` en Chrome.
 2. Activa **Modo de desarrollador**.
 3. Pulsa **Cargar descomprimida** y selecciona esa carpeta.
-4. Comprueba que aparezca **Adapta PE** habilitada y fija su icono en la barra de herramientas.
+4. Comprueba que aparezca **AdaptaPE** habilitada y fija su icono en la barra de herramientas.
 5. Las webs ya abiertas reciben los scripts automáticamente, sin recargarlas.
 
 En Edge o Brave utiliza su página de extensiones equivalente. El soporte de reconocimiento de voz puede variar entre navegadores. No elimines ni muevas la carpeta mientras la instalación descomprimida la utilice.
@@ -108,12 +125,14 @@ No hay un comando `npm install` ni una compilación para usarla. Conserva los ar
 
 ## Primer uso
 
+El panel muestra iconos con nombres y estados **Activado / Desactivado**. **Control por voz** permite dar órdenes; **Lectura en voz alta** corresponde a TalkBack y **Cursor con cámara** al mouse cinético. **Filtros de color** se identifica con el símbolo RGB. Los ajustes se guardan automáticamente; el panel avisa si no pudo guardarlos. Puedes desplegar los ejemplos y la ayuda de gestos cuando los necesites.
+
 1. Fija el icono de la extensión desde el menú de extensiones de Chrome y abre su panel.
-2. Activa **Voz**. Si falta autorización, se abrirá una página de la extensión: pulsa **Permitir micrófono** y acepta el permiso del navegador. También puedes abrirla con **Configurar micrófono** en el panel.
+2. Activa **Control por voz**. Si falta autorización, se abrirá una página de la extensión: pulsa **Permitir micrófono** y acepta el permiso del navegador. También puedes abrirla con **Configurar micrófono**, incluso con la voz apagada.
 3. Di **«Computadora, abre YouTube»**. También puedes decir sólo **«Computadora»**, esperar el pitido y dar el comando dentro de los siguientes **8 segundos**.
 4. Repite «Computadora» para cada nueva orden. Prueba «Computadora, busca accesibilidad en Wikipedia» o «Computadora, siguiente pestaña».
 5. Para dictar, abre una web con un formulario, di «Computadora, enfoca correo» y después «Computadora, escribe Hola Perú». El campo debe ser visible y editable; su etiqueta o nombre debe coincidir con el que pronuncias.
-6. Elige un filtro en el panel si lo necesitas. **Visión Normal (Sin Filtros)** restablece la presentación sin el filtro de Adapta PE.
+6. Elige un filtro en el panel si lo necesitas. **Sin filtro** o **Quitar filtro** restablece la presentación sin el filtro de AdaptaPE.
 
 La escucha continúa al navegar, cambiar de pestaña o ventana y usar Nueva pestaña. En las webs, un indicador muestra el estado; en páginas protegidas puedes consultarlo desde el panel. **Desactivar Voz libera el micrófono.** En Base, el documento central permanece mientras la cámara esté activa. El permiso pertenece a la extensión, no a cada sitio; una instalación diferente puede requerir su propia autorización.
 
@@ -127,7 +146,7 @@ La configuración inicial requiere abrir el panel y aceptar los permisos del nav
 | Navegar entre tareas | «Computadora, abre Gmail en una nueva pestaña» y «Computadora, siguiente pestaña». |
 | Completar un formulario | «Computadora, enfoca correo», «Computadora, escribe mi dirección» y, al terminar, «Computadora, enviar formulario». |
 | Elegir un elemento de una tienda | «Computadora, selecciona zapatos azules», revisar el resaltado y después «Computadora, dale clic». |
-| Ajustar la presentación de una web | Elegir un filtro de color en el panel o retirarlo con **Visión Normal**. |
+| Ajustar la presentación de una web | Elegir un filtro de color en el panel o retirarlo con **Quitar filtro**. |
 
 Las frases son ejemplos: cambia el nombre del campo, producto o enlace por el que realmente aparezca en la web. Una orden como «enviar formulario» o «clic en Confirmar» ejecuta la acción del sitio; revisa su contenido antes de dar la orden.
 
@@ -190,13 +209,13 @@ La compatibilidad con formularios, reproductores, editores complejos, iframes y 
 
 ### Empezar con la cámara
 
-1. Abre una web donde Chrome permita content scripts. Activa **Mouse Cinético** desde el panel o di «Computadora, activar cursor» con Voz ya habilitada.
-2. Adapta PE abre su página visible de autorización: permite la cámara **una vez al origen de la extensión**, independiente del micrófono. El botón recibe el foco para poder usar Enter. Después vuelve automáticamente a tu página; cambiar de sitio no solicita otro permiso de cámara.
-3. Colócate en una postura cómoda, con iluminación y la parte del cuerpo elegida visible. Descansa aproximadamente un segundo, o hasta escuchar **«Cursor listo. Postura cómoda calibrada»**. No tienes que mantener la cabeza en el centro de la imagen.
-4. Muévete ligeramente desde esa postura para dirigir el puntero virtual. Recupera tu postura cómoda para detenerlo en la zona segura.
+1. Abre una web donde Chrome permita content scripts. Activa **Cursor con cámara** desde el panel o di «Computadora, activar cursor» con Voz ya habilitada.
+2. AdaptaPE abre su página visible de autorización: permite la cámara **una vez al origen de la extensión**, independiente del micrófono. El botón recibe el foco para poder usar Enter. Después vuelve automáticamente a tu página; cambiar de sitio no solicita otro permiso de cámara.
+3. Elige **Cabeza / torso**, **Brazos, manos o puños** o **Muñón / mano parcial**. Sólo cabeza/torso aprende la postura cómoda durante aproximadamente un segundo. Las extremidades usan un centro seguro fijo, sin calibración ni necesidad de extender todo el brazo o colocar la mano en el centro. Para muñón/mano parcial, un movimiento breve adquiere una textura visible.
+4. Con cabeza/torso, muévete desde tu postura de reposo y vuelve para detenerte. Con extremidades, la primera posición detectada es el reposo de un **joystick invisible**, sin calibración manual. Desplaza un poco la mano, brazo o muñón en cualquier dirección y mantén esa posición para seguir moviendo el cursor; vuelve al reposo inicial para detenerlo. La línea celeste muestra la dirección; la zona segura permanece central.
 5. Para un clic automático, mueve primero fuera de la zona de atracción durante al menos **180 ms**, vuelve a la zona segura y permanece sobre el mismo objetivo durante **1.000 ms**. Tras hacer clic debes repetir la salida y el regreso para habilitar otro.
 
-La burbuja de cámara y su indicador son informativos, sin botones ni selección manual de puntos. La postura se calibra sin clic en cada página que recibe el control. Una sola cámara permanece en el documento central al navegar o cambiar de ventana; sólo la pestaña enfocada muestra y controla el cursor y TalkBack. Al pasar a páginas protegidas o salir del navegador se suspende la inferencia y el control, conservando el flujo hasta desactivar Mouse Cinético. La cámara no depende del permiso ni de la política de cámara de cada sitio.
+La burbuja de cámara y su indicador son informativos, sin botones ni selección manual de puntos. Sólo cabeza/torso calibra postura sin clic al recibir el control; las extremidades conservan el centro fijo. Una sola cámara permanece en el documento central al navegar o cambiar de ventana; sólo la pestaña enfocada muestra y controla el cursor y TalkBack. Al pasar a páginas protegidas o salir del navegador se suspende la inferencia y el control, conservando el flujo hasta desactivar Mouse Cinético. La cámara no depende del permiso ni de la política de cámara de cada sitio.
 
 ### Órdenes del cursor
 
@@ -205,36 +224,44 @@ Añade «Computadora» antes de cada orden:
 | Orden | Acción |
 | --- | --- |
 | `activar cursor`, `desactivar cursor` | Activa o apaga la cámara y guarda el estado del módulo. |
-| `postura cómoda`, `calibrar cursor`, `recalibrar`, `centrar cursor` | Aprende de nuevo tu postura de reposo sin mover el cursor ni habilitar clic durante la calibración. |
+| `postura cómoda`, `calibrar cursor`, `recalibrar`, `centrar cursor` | Cabeza/torso aprende de nuevo el reposo sin mover ni habilitar clic. Con extremidades cancela el clic pendiente y confirma el centro fijo; no aprende postura. |
 | `pausar cursor`, `descansar` | Pausa movimiento y clic; mantiene la cámara del módulo activo. |
-| `reanudar cursor`, `continuar cursor` | Reanuda con una nueva calibración. |
-| `control automático` | Selecciona una mano visible al iniciar, o cabeza/torso, y mantiene la fuente mientras siga visible. |
-| `control cabeza`, `control rostro`, `control torso` | Selecciona la fuente indicada. |
-| `control brazo izquierdo`, `control brazo derecho` | Sigue una articulación visible del brazo elegido y la conserva mientras sea visible. |
-| `control manos` | Usa detección de manos. |
-| `control zona libre`, `control muñón` | Sigue textura visible, sin identificar anatomía. |
+| `reanudar cursor`, `continuar cursor` | Reanuda; sólo cabeza/torso aprende otra vez la postura. |
+| `control cabeza`, `control rostro`, `control torso` | Selecciona Cabeza / torso: rostro, con respaldo corporal si se pierde. |
+| `control manos`, `control brazos`, `control extremidades`, `control puños` | Sólo Base: sigue mano o muñeca/codo visible sin exigir dedos extendidos. Excluye cabeza y torso. |
+| `control zona libre`, `control muñón`, `control mano parcial` | Adquiere textura por movimiento en cualquier parte visible, sin identificar anatomía. |
 | `activar temblor`, `ajustar temblor`, `desactivar temblor` | Amplía o restablece la zona segura; repetir la activación no la desactiva. |
-| `movimientos pequeños`, `movilidad reducida`, `movimientos normales` | Ajusta la amplitud necesaria y recalibra para la nueva escala. |
+| `movimientos pequeños`, `movilidad reducida`, `movimientos normales` | Ajusta la amplitud; sólo cabeza/torso recalibra. Conserva la textura de extremidades. |
 | `cursor más lento`, `cursor más rápido` | Ajusta la sensibilidad de velocidad dentro de sus límites. |
-| `clic`, `clic derecho`, `anticlic`, `menú contextual` | Solicita clic izquierdo o derecho cuando el seguimiento está listo. |
+| `clic`, `da clic`, `dale clic`, `clic derecho`, `anticlic`, `menú contextual` | Solicita clic cuando el seguimiento está listo. En Base, «da clic»/«dale clic» priorizan selección por voz; sin selección usan el cursor. |
 | `siguiente clic derecho`, `activar clic derecho` | Prepara un clic derecho para el siguiente clic por permanencia. |
 | `cancelar clic` | Cancela la fijación y el menú propio, y restablece el siguiente clic a izquierdo. |
 
-Las órdenes de ajuste necesitan la cámara activa. El clic derecho emite `contextmenu`: si la web no lo maneja, aparece un menú propio de Adapta PE. **Los eventos sintéticos no abren el menú nativo de Chrome.**
+Las órdenes de ajuste necesitan la cámara activa. El clic derecho emite `contextmenu`: si la web no lo maneja, aparece un menú propio de AdaptaPE. **Los eventos sintéticos no abren el menú nativo de Chrome.**
 
 ### Cómo funciona el seguimiento
 
-`voz/camara.js` captura en el documento offscreen de Base y utiliza `vision/trabajador.js` con MediaPipe local en CPU: rostro, Pose Lite y manos. La inferencia recibe hasta **320 × 240** conservando la proporción, con hasta **20 imágenes nuevas/s**; la vista y Zona libre usan **160 × 120**. La vista previa se actualiza por separado, hasta **30 imágenes/s** según la cámara y el equipo, sin esperar inferencias y sin acumular envíos. El worker del navegador entrega los puntos sólo al controlador prioritario. `KineticEngine` se ocupa de calibración, física, interacción y vista; nunca abre cámaras en las webs. Sólo hay un `ImageBitmap` en vuelo; se libera tras la inferencia. El paquete, WASM y modelos se distribuyen con la extensión, sin CDN ni backend Python.
+El selector ofrece sólo **Cabeza / torso** (predeterminado), **Brazos, manos o puños** y **Muñón / mano parcial**. Cambiarlo con la cámara activa actualiza la detección sin recargar la página ni volver a autorizar o abrir la cámara; un envío rechazado durante el cambio de pestaña se reintenta. Las preferencias anteriores se convierten al modo equivalente conservando temblor, velocidad y amplitud: torso pasa a cabeza/torso, Automático y brazos separados pasan a brazos/manos, y las zonas laterales pasan al único modo de textura. Los comandos anteriores siguen como alias, sin seleccionar lados. Cabeza/torso usa rostro y, si falta, puntos corporales visibles; brazos/manos excluye cabeza y torso.
 
-La calibración necesita al menos cuatro inferencias distintas durante 900 ms, en una ventana de 1.200 ms. Usa mediana, percentil 80 y deriva para no aprender un movimiento en curso. Una mediana de tres inferencias y suavizado por tiempo real filtran el movimiento. La zona segura circular conserva el centro fijo; la desviación de la postura se escala igual en ambos ejes. La velocidad se calcula en píxeles por segundo, sin depender del número de frames.
+La mano abierta y el puño conservan la muñeca como referencia de seguimiento. El control funciona como un **joystick invisible**: la primera posición detectada queda como reposo y los pequeños desplazamientos desde ahí dirigen el cursor mientras los mantengas. Los desplazamientos verticales y horizontales tienen la misma ganancia al normalizar ambos ejes. No se exige una palma frontal ni mover todo el brazo hasta los bordes.
 
-Cambiar de fuente requiere tres detecciones y 1.200 ms antes de recalibrar. Detecciones con más de 500 ms de antigüedad no mueven el cursor; pérdida, pausa, calibración y saltos de tiempo desarman el clic. Una pérdida prolongada o descanso contra un borde puede iniciar recuperación de postura; mantener una dirección dentro de la página no debe recentrarla.
+El **desplazamiento tiene prioridad**. Cerca del reposo también puedes inclinar la palma o el puño respecto a su orientación inicial, o **señalar con uno o dos dedos alineados**, sin trasladar la muñeca. Se usa la dirección del nudillo a la punta de los dedos disponibles, sin exigir puntos válidos de los cuatro dedos ni restar la dirección inicial cuando ya estás señalando. Doblarlos deja de señalar. La palma abierta sigue usando inclinación; dedos divergentes no producen una dirección combinada. Esto aprovecha los puntos que entregue el modelo: no garantiza reconocimiento de todas las manos parciales. La inclinación usa el plano de muñeca y nudillos y no exige dedos extendidos; su profundidad procede de estimaciones de [MediaPipe Hand Landmarker](https://ai.google.dev/edge/mediapipe/solutions/vision/hand_landmarker/web_js). Proximidad conserva la misma mano entre etiquetas/modelos; una muñeca cercana de Pose respalda pérdidas de dedos. Un cambio de codo a mano necesita tres imágenes y 150 ms; mientras se confirma sigue el codo visible. Pérdidas, pausas, cambios de fuente o interrupciones de más de 200 ms detienen el gesto y desarman clic; la primera posición al recuperar seguimiento se toma como reposo sin esperar una calibración ni convertir el salto en movimiento. Sólo vive en memoria. La precisión necesita comprobarse con cada cámara y postura.
 
-El modo Zona libre sigue textura y puede perderla con oclusiones o bajo contraste. **No hay validación universal para amputaciones, ayudas técnicas o todas las cámaras.** Consulta [la documentación de visión local](vision/README.md) para procedencia de modelos y licencias de terceros.
+**Muñón / mano parcial** adquiere textura por movimiento local, sin exigir dedos, muñeca o codo ni seleccionar lado. Usa el mismo joystick: desplazar ligeramente la textura desde su posición inicial y mantenerla dirige en cuatro sentidos; volver a esa posición detiene el control en el centro seguro fijo. Cerca del reposo, giros locales de aproximadamente 7° o 14° entre imágenes aportan dirección horizontal. El ángulo se acumula respecto al inicial: mantener el giro conserva la dirección y regresar al ángulo inicial la detiene, sin sumar imágenes repetidas. El recuadro muestra la textura seguida y la línea celeste el gesto. La correlación normaliza contraste y prueba giros locales para tolerar pequeñas rotaciones. Este modo sigue textura y no reconoce dedos ni estima hacia dónde apunta anatómicamente un muñón. No exige calibración manual. Ropa o vendajes pueden aportar detalle. Pérdidas breves conservan la plantilla; tras 1.200 ms sin textura fiable, otro movimiento debe adquirirla. Superficies uniformes, patrones repetidos, fondo móvil y oclusiones pueden impedir o confundir el seguimiento.
+
+Al moverse despacio o descansar, el cursor se acerca suavemente a controles visibles detectados hasta **28 píxeles** alrededor. El sondeo local evita recorrer toda la página y descarta controles deshabilitados, inertes u ocultos por otros elementos. Un movimiento decidido permite salir de la atracción. Acercarse por sí solo no habilita el clic automático: se conservan salida, regreso y permanencia. Puedes decir «Computadora, da clic» aunque el movimiento haya sido pequeño.
+
+`voz/camara.js` captura en el documento offscreen de Base y utiliza `vision/trabajador.js` con MediaPipe local en CPU: rostro, Pose Lite y manos. La captura solicita **640 × 480**; la inferencia de brazos/manos conserva hasta **640 × 480**, y cabeza/torso hasta **320 × 240**, siempre sin deformar ni ampliar una cámara de menor resolución, con hasta **20 imágenes nuevas/s**; la vista y Zona libre usan **160 × 120**. La vista previa se actualiza por separado, hasta **30 imágenes/s** según la cámara y el equipo, sin esperar inferencias y sin acumular envíos. El worker del navegador entrega los puntos sólo al controlador prioritario. `KineticEngine` se ocupa de calibración, física, interacción y vista; nunca abre cámaras en las webs. Sólo hay un `ImageBitmap` en vuelo; se libera tras la inferencia. El paquete, WASM y modelos se distribuyen con la extensión, sin CDN ni backend Python.
+
+Cabeza/torso necesita al menos cuatro inferencias distintas durante 900 ms, en una ventana de 1.200 ms, con mediana, percentil 80 y deriva para aprender reposo. Las extremidades no aprenden postura; la primera imagen fiable prepara el seguimiento y las siguientes permiten estimar el gesto. Una mediana de tres inferencias y suavizado por tiempo real filtran el movimiento. El centro matemático permanece fijo; el HUD usa ese centro en extremidades y la referencia de reposo sólo en cabeza/torso. La escala es igual por eje y la velocidad se calcula en píxeles por segundo.
+
+Detecciones de más de 500 ms no controlan el cursor. Pérdida, pausa, cambio de referencia y saltos de tiempo desarman clic. Los primeros 250 ms de seguimiento estabilizan el clic sin bloquear movimiento. Sólo cabeza/torso recupera postura al descansar contra un borde; las extremidades nunca desplazan su centro seguro.
+
+**No hay validación universal para amputaciones, ayudas técnicas o todas las cámaras.** Consulta [la documentación de visión local](vision/README.md) para procedencia de modelos y licencias de terceros.
 
 ### Usar TalkBack
 
-Activa **TalkBack** en el panel y pasa el puntero sobre un elemento. Tras **300 ms**, lee su nombre accesible, texto alternativo o contenido legible y lo destaca con un contorno. Funciona con el ratón y con el cursor cinético, que emite eventos de entrada/salida al cambiar de objetivo. Usa la síntesis de voz `chrome.tts` del navegador; depende de las voces disponibles.
+Activa **Lectura en voz alta** (TalkBack) en el panel y pasa el puntero sobre un elemento. Tras **300 ms**, lee su nombre accesible, texto alternativo o contenido legible y lo destaca con un contorno. Funciona con el ratón y con el cursor cinético, que emite eventos de entrada/salida al cambiar de objetivo. Usa la síntesis de voz `chrome.tts` del navegador; depende de las voces disponibles.
 
 Es una lectura contextual por puntero, sin navegación completa por teclado ni todas las funciones de un lector de pantalla del sistema. En imágenes usa el texto alternativo disponible; no genera una descripción con IA.
 
@@ -242,15 +269,27 @@ Es una lectura contextual por puntero, sin navegación completa por teclado ni t
 
 El panel ofrece siete filtros y una opción sin filtro:
 
+Los tres círculos RGB superpuestos identifican los filtros. Al seleccionar uno, un contorno de color resalta la sección; cada filtro tiene un color distinto y el panel muestra **Activo: nombre del filtro** en negrita, sin depender sólo del color. **Quitar filtro** o **Sin filtro** retira el filtro de AdaptaPE y el contorno. El estado se recupera al abrir el panel y se actualiza si cambia la preferencia mientras permanece abierto. Este indicador muestra la preferencia elegida; el aviso de guardado confirma si pudo conservarse. Las páginas protegidas del navegador siguen sin admitir filtros.
+
 | Opción | Transformación disponible |
 | --- | --- |
 | Protanomalía y Protanopia | Matrices para variaciones en los canales asociados al rojo/verde. |
 | Deuteranomalía y Deuteranopia | Matrices para variaciones en los canales asociados al verde/rojo. |
 | Tritanomalía y Tritanopia | Matrices para variaciones en los canales asociados al azul/amarillo. |
 | Acromatopsia | Escala de grises. |
-| Visión Normal | Retira el filtro de Adapta PE. |
+| Sin filtro | Retira el filtro de AdaptaPE. |
 
-`FiltrosDaltonismo` inserta un SVG con `feColorMatrix` y aplica una referencia CSS al documento y a los selectores de pantalla completa. Por ejemplo, la matriz de Protanopia calcula `R′ = 0.567R + 0.433G`, `G′ = 0.558R + 0.442G` y `B′ = 0.242G + 0.758B`.
+`FiltrosDaltonismo` inserta un SVG con `feColorMatrix` y aplica una referencia CSS al documento y a los selectores de pantalla completa. En Google Docs (`docs.google.com/document/`) se aplica al cuerpo de la página, evitando el fallo de dibujo de su interfaz en ventanas grandes; el filtro permanece activo.
+
+### Juegos y pantalla completa
+
+Selecciona un filtro en el panel y entra en pantalla completa desde el juego o reproductor. El filtro se mantiene; puedes cambiarlo o usar **Quitar filtro** sin recargar la página ni salir de pantalla completa. Canvas, WebGL y vídeo se filtran en su presentación, sin modificar sus datos.
+
+Los filtros también se preparan dentro de marcos incrustados, incluidos `srcdoc` y los creados con `about:blank`, `data:` o `blob:` desde una web permitida. Los marcos del mismo origen reciben el filtro de la página principal en modo normal; los de otro origen tienen su propio filtro. En pantalla completa se coordina el filtro del marco con el de la página para evitar transformar dos veces los colores.
+
+Las referencias SVG usan la URL del documento y se renuevan al cambiar de ruta, para conservar el filtro en páginas con navegación interna o una etiqueta `<base>`. Las páginas protegidas y las restricciones de acceso de Chrome siguen vigentes. Se han comprobado juegos de prueba con Canvas, WebGL y vídeo; queda pendiente validar una sesión real de GeForce NOW y no se garantiza compatibilidad con todos los juegos.
+
+Por ejemplo, la matriz de Protanopia calcula `R′ = 0.567R + 0.433G`, `G′ = 0.558R + 0.442G` y `B′ = 0.242G + 0.758B`.
 
 Son transformaciones visuales fijas: no diagnostican ni corrigen médicamente el daltonismo, y su utilidad puede variar entre personas y sitios. Elige la opción que te resulte más cómoda; los nombres no implican una corrección personalizada.
 
@@ -278,8 +317,9 @@ flowchart TD
 
 | Archivo | Función |
 | --- | --- |
-| `manifest.json` | Versión, permisos, service worker y orden de inyección. Exige Chromium 116 o posterior. |
+| `manifest.json` | Versión, permisos, service worker y orden de inyección. Exige Chromium 119 o posterior. |
 | `popup.html` / `popup.js` | Panel, lectura y escritura de preferencias en `chrome.storage.local`; avisos `actualizar_estado` a las pestañas. |
+| `interfaz.css` / `iconos.svg` | Estilos e iconos locales del panel y las páginas de permisos. |
 | `voz/popup.js` | Estado global de escucha en el panel y botón para configurar micrófono. |
 | `sitios.js` | Catálogo único de portadas, rutas de búsqueda y alias; `normalizarVoz()` y `reconocerSitio()`. También se carga en el worker con `importScripts`. |
 | `background.js` | `sincronizarPaginas()` reconecta y asigna prioridad; `sincronizarVoz()` serializa creación/cierre offscreen; `gestionarVoz()` fija la pestaña activa por frase; `ejecutarAccion()` y `gestionarAperturaURL()` usan las APIs del navegador. |
@@ -287,6 +327,7 @@ flowchart TD
 | `voz/permisos.html` / `voz/permisos.js` | Autorización visible: solicita micrófono o cámara, detiene el flujo de prueba y reinicia la entrada central. Tras autorizar cámara, vuelve a la página anterior. |
 | `classes/VoiceAssistant.js` | Clase reutilizable: reconocimiento en offscreen y parser de comandos DOM en la página. |
 | `classes/FiltrosDaltonismo.js` | Inserta, aplica y retira filtros SVG/CSS. |
+| `filtros_frames.js` | Aplica preferencias a los marcos y coordina sus filtros en pantalla completa; evita duplicar la transformación de colores. |
 | `content_script.js` | Instancia los módulos de esta variante, aplica preferencias y recibe órdenes e indicadores. Añade `data-adapta-extension="true"` para detección por la web oficial. |
 | `classes/TalkBack.js` | Lectura semántica por hover, contorno y debounce de 300 ms. |
 | `classes/KineticEngine.js` | Recibe detecciones recientes; calibración, movimiento, clic por permanencia y menú contextual. |
@@ -335,11 +376,13 @@ El manifest incluye CSP con `wasm-unsafe-eval` para el runtime local de visión.
 | --- | --- |
 | `storage` | Preferencias locales de la extensión. |
 | `tabs` | Consultar la pestaña de destino y gestionar navegación/pestañas. |
-| `scripting` | Conectar o recuperar los módulos en webs ya abiertas sin recargar la página. |
+| `scripting` | Conectar o recuperar los módulos y los filtros de marcos en webs ya abiertas sin recargar la página. |
 | `system.display` | Consultar pantallas al abrir una URL en otra ventana. |
 | `offscreen` | Mantener una sola cámara y escucha independientes de las páginas. |
 | `tts` | Síntesis de voz para TalkBack, avisos del cursor y selección por voz. |
 | `<all_urls>` | Inyectar funciones de accesibilidad en los sitios permitidos por Chrome; no evita sus restricciones de páginas protegidas. |
+
+Los filtros de juegos y pantalla completa usan los permisos existentes; no necesitan un permiso adicional. Ambos manifests requieren **Chromium 119 o posterior** y declaran una segunda regla de content scripts con `all_frames: true` y `match_origin_as_fallback: true`. Esta regla carga sólo el motor de filtros y `filtros_frames.js`; el controlador principal permanece en la página superior. El acceso a sitios concedido en Chrome debe permitir tanto la página como sus marcos incrustados.
 
 El permiso de micrófono y el permiso de cámara se concede mediante las APIs de medios y sus avisos correspondientes; no lo reemplaza el acceso a sitios del manifest.
 
@@ -372,9 +415,9 @@ Comprueba el estado en `http://127.0.0.1:5000/estado`. El script arranca en modo
 - Los comandos leen los elementos necesarios de la página para encontrar campos, enlaces y botones. Las búsquedas envían la consulta al sitio o buscador elegido como una navegación normal.
 - El código de la extensión no implementa recopilación de cookies, contraseñas ni un registro de historial. El comando «atrás/adelante» utiliza el historial de la pestaña mediante las APIs del navegador.
 - La cámara cinética se procesa localmente en memoria. La extensión no guarda ni envía a servidores sus fotogramas; MediaPipe y sus modelos se cargan del paquete local. Esto es independiente del posible procesamiento en línea de la voz.
-- Sólo se conserva la postura mientras funciona el motor. Cambiar de pestaña o ventana conserva la cámara central; el nuevo controlador calibra sin clic y no exige volver a conceder el permiso.
+- Sólo se conserva la postura mientras funciona el motor. Cambiar de pestaña o ventana conserva la cámara central; el nuevo controlador calibra cabeza/torso sin clic, conserva centro fijo en extremidades y no exige volver a conceder el permiso.
 
-El funcionamiento depende del reconocimiento disponible, los permisos y la estructura de cada web. Adapta PE facilita acciones de accesibilidad; no garantiza acceso completo a cualquier sitio ni reemplaza todas las funciones de un lector de pantalla del sistema.
+El funcionamiento depende del reconocimiento disponible, los permisos y la estructura de cada web. AdaptaPE facilita acciones de accesibilidad; no garantiza acceso completo a cualquier sitio ni reemplaza todas las funciones de un lector de pantalla del sistema.
 
 ## Actualizaciones y solución de problemas
 
@@ -384,23 +427,24 @@ Para una instalación desde el repositorio, descarga los cambios o ejecuta `git 
 | --- | --- |
 | No escucha o indica micrófono no disponible | Abre **Configurar micrófono**, revisa el permiso de la extensión y del sistema operativo, y desactiva/activa Voz después de corregirlo. |
 | El navegador no admite reconocimiento | Comprueba la disponibilidad de su API de voz. Ser Chromium no garantiza reconocimiento; prueba en Google Chrome con los permisos concedidos. |
-| Repite órdenes o compite por el micrófono | Comprueba que Voz esté activa en una sola variante de Adapta PE. |
+| Repite órdenes o compite por el micrófono | Comprueba que Voz esté activa en una sola variante de AdaptaPE. |
 | «Reconectando micrófono» persiste | Revisa conexión, disponibilidad del servicio de reconocimiento y dispositivo de audio; el motor reintenta automáticamente los fallos recuperables. |
 | Dictado, clic o filtros no funcionan en Nueva pestaña | Son acciones de página; prueba en una web permitida. Usa «abre…» o «busca…» para salir de Nueva pestaña. |
 | El dictado no se inserta | Enfoca un campo visible y editable; comprueba su nombre con «enfoca…». |
 | No responde tras actualizar | Recarga la extensión; reconecta las webs permitidas automáticamente. Comprueba el acceso al sitio concedido en Chrome. |
+| Un juego o su pantalla completa queda sin filtro | Comprueba Chromium 119 o posterior, el filtro activo en el panel y el acceso de la extensión al sitio del juego y a sus marcos. Las páginas protegidas no admiten filtros. |
 | La cámara no arranca | Comprueba permiso de cámara de la extensión y del sistema y la disponibilidad del dispositivo; apaga y vuelve a activar el cursor tras corregirlo. |
-| El cursor no calibra o pierde seguimiento | Mantén una postura estable e iluminación suficiente; prueba el modo de control apropiado o «postura cómoda». En Zona libre evita texturas uniformes y oclusiones. |
-| No hace clic por permanencia | Espera la calibración, sal de la atracción y vuelve a la zona segura sobre el mismo objetivo durante un segundo. |
+| El cursor no calibra o pierde seguimiento | Usa iluminación suficiente. Sólo cabeza/torso necesita postura estable o «recalibrar». En extremidades haz gestos cortos; en muñón/mano parcial evita texturas uniformes y oclusiones. |
+| No hace clic por permanencia | Espera seguimiento fiable (calibración sólo en cabeza/torso), sal de la atracción y vuelve a la zona segura sobre el mismo objetivo durante un segundo. |
 | Service worker aparece «Inactiva» | Es normal en Manifest V3: despierta cuando recibe eventos. |
 
-Los avisos de publicidad de YouTube, `ERR_BLOCKED_BY_CLIENT`, `ublock-filters.js` o `ryd.content-script.js` pueden proceder del sitio o de otras extensiones. Para reportar un fallo de Adapta PE, indica variante, versión del manifest, navegador, comando, estado del indicador, nombre del archivo y excepción; evita incluir datos privados.
+Los avisos de publicidad de YouTube, `ERR_BLOCKED_BY_CLIENT`, `ublock-filters.js` o `ryd.content-script.js` pueden proceder del sitio o de otras extensiones. Para reportar un fallo de AdaptaPE, indica variante, versión del manifest, navegador, comando, estado del indicador, nombre del archivo y excepción; evita incluir datos privados.
 
 ## Desarrollo y comprobaciones
 
 Mantén JavaScript nativo, nombres y mensajes en español, IDs propios con prefijo `adapta-pe-` y manejo de desconexiones en mensajes a pestañas. Revisa las funciones por nombre; los números de línea cambian al editar.
 
-Los módulos de voz, filtros, `sitios.js`, `voz/escucha.js`, `voz/permisos.js`, `voz/popup.js` y funciones compartidas de `background.js` deben mantenerse sincronizados entre variantes. Base utiliza `classes/` y Lite `clases/`; los cambios comunes de manifest/controlador respetan los permisos y módulos de cada una. **No copies TalkBack, KineticEngine ni visión a Lite.**
+Los módulos de voz, filtros, `filtros_frames.js`, `sitios.js`, `voz/escucha.js`, `voz/permisos.js`, `voz/popup.js` y funciones compartidas de `background.js` deben mantenerse sincronizados entre variantes. Base utiliza `classes/` y Lite `clases/`; los cambios comunes de manifest/controlador respetan los permisos y módulos de cada una. **No copies TalkBack, KineticEngine ni visión a Lite.**
 
 Las pruebas compartidas se publican en `tests/` del repositorio **Base** y buscan Lite como carpeta hermana llamada `extensiónLite`. Lite no tiene un runner propio. Para disponer de ambas fuentes y las pruebas:
 
@@ -421,6 +465,8 @@ node tests/browser.test.cjs
 
 Requiere un Node con `fetch` y `WebSocket` globales (por ejemplo Node 22) y Chrome compatible con CDP `Extensions.loadUnpacked`. Busca Chrome en `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`; permite otra ruta mediante `ADAPTA_CHROME`. Usa perfil temporal, cámara/audio sintéticos y comandos inyectados; silencia salida de audio y conserva avisos TTS sólo en memoria. Los fixtures y su procedencia están en [tests/fixtures/README.md](tests/fixtures/README.md) de Base. La prueba no acredita precisión de reconocimiento hablado ni accesibilidad universal con personas usuarias.
 
+El runner de navegador compara los colores visibles de Canvas, WebGL y vídeo en ambas variantes, tanto en modo normal como en pantalla completa. Incluye marcos del mismo origen, de otro origen, `srcdoc` y `blob:`; comprueba que no se aplique el filtro dos veces y que cambiarlo o quitarlo funcione sin recargar. Usa contenido de prueba local, sin una sesión de GeForce NOW.
+
 Antes de distribuir cambios, prueba además la autorización visible, navegación entre webs/ventanas, dictado en un formulario, desactivación de Voz y los filtros. En Base verifica también calibración, pérdida de seguimiento, pausa, clic por permanencia y liberación de cámara.
 
 ## Trabajo futuro
@@ -429,12 +475,12 @@ Estas ideas del proyecto no forman parte de las funciones actuales ni tienen una
 
 - Integrar un modelo real y conectar el «Ojo Biónico» con la interfaz.
 - Incorporar reconocimiento de voz sin conexión.
-- Evaluar una guía adicional de calibración de varios puntos; hoy existe calibración automática por postura, sin selección física de puntos.
+- Evaluar una guía adicional de calibración de varios puntos para cabeza/torso; las extremidades usan centro fijo y gestos, sin calibración de postura.
 - Ampliar idiomas a quechua, aymara, inglés y portugués.
 
 ## Autoría, licencia y uso de IA
 
-<a href="https://adaptape.thealejo-dev.cc">Adapta PE</a> © 2026 by <a href="https://thealejo-dev.cc">Rodrigo Alejandro Apcho Aliaga</a> is licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
+<a href="https://adaptape.thealejo-dev.cc">AdaptaPE</a> © 2026 by <a href="https://thealejo-dev.cc">Rodrigo Alejandro Apcho Aliaga</a> is licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" alt="" style="max-width: 1em;max-height:1em;margin-left: .2em;">
 
 Desarrollado con dedicación para promover la inclusión digital y la accesibilidad universal en el Perú y el mundo.
 
@@ -463,7 +509,7 @@ Los componentes de visión mantienen sus propias licencias y atribuciones, disti
 
 El 3 de octubre de 2026 pasaron 28 grupos de regresión compartidos con Node, sin sensores ni red de reconocimiento. Se comprobaron recursos del manifest y enlaces locales del README. No se repitió integración física ni el runner CDP en esta revisión documental.
 
-## Proyectos de la familia Adapta PE
+## Proyectos de la familia AdaptaPE
 
 | Programa | Código y alcance |
 | --- | --- |
@@ -471,7 +517,7 @@ El 3 de octubre de 2026 pasaron 28 grupos de regresión compartidos con Node, si
 | Extensión Lite | [Adapta-PE-Lite](https://github.com/TheAlejo160/Adapta-PE-Lite): voz y filtros. |
 | Windows Base | [Adapta-PE-Win](https://github.com/TheAlejo160/Adapta-PE-Win): aplicación WPF independiente. |
 | Windows Lite | [Adapta-PE-Lite-Win](https://github.com/TheAlejo160/Adapta-PE-Lite-Win): voz, lectura manual y filtros. |
-| macOS Base y Lite funcional | [Adapta-PE-MacOS-Intel-Apple-Silicon-](https://github.com/TheAlejo160/Adapta-PE-MacOS-Intel-Apple-Silicon-): dos proyectos Xcode que comparten motores. |
+| macOS completo | [Adapta-PE-MacOS-Intel-Apple-Silicon-](https://github.com/TheAlejo160/Adapta-PE-MacOS-Intel-Apple-Silicon-): sólo Adapta PE completo, con su proyecto Xcode. Lite tiene repositorio y fuentes independientes. |
 | macOS Lite independiente | [Adapta-PE-Lite-MacOS](https://github.com/TheAlejo160/Adapta-PE-Lite-MacOS): voz y siete filtros en una aplicación autónoma. |
 
 Los números de versión y permisos pertenecen a cada plataforma. Un ZIP de la extensión no instala la aplicación de escritorio. Los repositorios publican fuentes y recursos necesarios; los instaladores generados y la configuración personal quedan fuera de Git.

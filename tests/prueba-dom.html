@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><meta charset="utf-8"><title>Prueba DOM Adapta PE</title><body>
+<!doctype html><html lang="es"><meta charset="utf-8"><title>Prueba DOM AdaptaPE</title><body>
 <input id="campo" aria-label="Nombre" value="Hola Perú"><input id="casilla" type="checkbox"><div id="editor" contenteditable="true">Buenos días</div>
 <form id="formulario"><input id="buscador" name="q" type="search"><button type="submit">Buscar</button></form>
 <a id="enlace" href="https://example.org/">Contacto</a><pre id="resultado">Pendiente</pre><script>
@@ -30,6 +30,20 @@ try {
  exigir(!motor.burbuja.querySelector('button'),'Cámara sin botones que exijan apuntar');
  exigir(getComputedStyle(motor.burbuja).pointerEvents==='none','La cámara no intercepta clics en la web');
  const vozCinetica=new VoiceAssistant(accion=>motor.ejecutarAccion(accion));
+ const objetivoAtraccion=document.createElement('button');objetivoAtraccion.textContent='Atracción';
+ objetivoAtraccion.style.cssText='position:fixed;left:200px;top:300px;width:80px;height:40px';document.body.appendChild(objetivoAtraccion);
+ motor.posX=190;motor.posY=320;motor.atraerCursor(33);
+ exigir(motor.posX>190&&motor.posX<204,'Atracción gradual a control cercano');
+ for(let paso=0;paso<8;paso++) motor.atraerCursor(33);
+ exigir(motor.elementoBajoCursor()===objetivoAtraccion,'Atracción termina sobre control real');
+ let clicsAtraccion=0;objetivoAtraccion.addEventListener('click',()=>clicsAtraccion++);
+ motor.neutroListo=true;motor.fiableDesde=performance.now()-350;motor.ultimoTiempo=performance.now();
+ vozCinetica.ejecutarComando('clic');exigir(clicsAtraccion===1,'Voz hace clic sin exigir armado por movimiento');
+ motor.posX=190;objetivoAtraccion.disabled=true;motor.atraerCursor(33);
+ exigir(motor.posX===190,'Control deshabilitado no atrae');
+ objetivoAtraccion.disabled=false;const grupoDeshabilitado=document.createElement('fieldset');grupoDeshabilitado.disabled=true;
+ grupoDeshabilitado.appendChild(objetivoAtraccion);document.body.appendChild(grupoDeshabilitado);motor.atraerCursor(33);
+ exigir(motor.posX===190,'Grupo deshabilitado no atrae');grupoDeshabilitado.remove();
  vozCinetica.ejecutarComando('activar temblor');vozCinetica.ejecutarComando('activar temblor');
  exigir(motor.zonaMuerta===0.07,'Ajuste repetido no desactiva temblor');
  vozCinetica.ejecutarComando('movimientos pequeños');exigir(motor.amplitudControl===0.55,'Movilidad reducida por voz');

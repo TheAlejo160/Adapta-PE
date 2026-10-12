@@ -13,6 +13,9 @@ class KineticEngine {
         this.ancho = 160;
         this.alto = 120;
         this.grises = new Float32Array(this.ancho * this.alto);
+        this.grisesAnteriores = null;
+        this.muestraGesto = null;
+        this.puntoGesto = null;
         this.puntoBase = { x: this.ancho / 2, y: this.alto / 2 };
         this.origenControl = { ...this.puntoBase };
         this.puntoActual = { ...this.origenControl };
@@ -20,7 +23,7 @@ class KineticEngine {
         this.plantilla = null;
         this.radioPlantilla = 12;
         this.zonaMuerta = 0.045;
-        this.modoControl = 'automatico';
+        this.modoControl = 'cabeza';
         this.fuenteControl = null;
         this.neutroListo = false;
         this.muestrasPostura = [];
@@ -70,16 +73,19 @@ class KineticEngine {
     aplicarAjustes(ajustes) {
         if (!ajustes || typeof ajustes !== 'object') return;
         const modoAnterior = this.modoControl, amplitudAnterior = this.amplitudControl;
-        if (['automatico', 'cabeza', 'torso', 'brazo_izquierdo', 'brazo_derecho', 'manos', 'zona'].includes(ajustes.modo)) this.modoControl = ajustes.modo;
+        if (['automatico', 'cabeza', 'torso', 'brazo_izquierdo', 'brazo_derecho', 'manos', 'zona', 'zona_izquierda', 'zona_derecha'].includes(ajustes.modo)) {
+            this.modoControl = ajustes.modo.startsWith('zona') ? 'zona' : ['automatico', 'brazo_izquierdo', 'brazo_derecho'].includes(ajustes.modo) ? 'manos' : ajustes.modo === 'torso' ? 'cabeza' : ajustes.modo;
+        }
         if (typeof ajustes.temblor === 'boolean') this.zonaMuerta = ajustes.temblor ? 0.07 : 0.045;
         this.zonaAtraccion = this.zonaMuerta + 0.02;
         if (Number.isFinite(ajustes.velocidad)) this.sensibilidad = Math.max(0.3, Math.min(2, ajustes.velocidad));
         if ([0.55, 1].includes(ajustes.amplitud)) this.amplitudControl = ajustes.amplitud;
-        if (this.activa && (modoAnterior !== this.modoControl || amplitudAnterior !== this.amplitudControl)) {
+        if (this.activa && (modoAnterior !== this.modoControl || (this.modoControl === 'cabeza' && amplitudAnterior !== this.amplitudControl))) {
             this.fuenteControl = null;
             this.deteccion = null;
             this.calibrar();
-        }
+            this.solicitarModelo();
+        } else if (amplitudAnterior !== this.amplitudControl) this.cancelarFijacion(true);
     }
 
     guardarAjustes() {
@@ -125,7 +131,9 @@ class KineticEngine {
         const modelo = this.modoControl + ':' + this.fuenteControl;
         if (this.modeloEnviado === modelo) return;
         this.modeloEnviado = modelo;
-        chrome.runtime.sendMessage({ accion: 'camara_modo', modo: this.modoControl, fuente: this.fuenteControl }).catch(() => {});
+        chrome.runtime.sendMessage({ accion: 'camara_modo', modo: this.modoControl, fuente: this.fuenteControl }).then(respuesta => {
+            if (respuesta?.ok === false && this.modeloEnviado === modelo) this.modeloEnviado = null;
+        }).catch(() => { if (this.modeloEnviado === modelo) this.modeloEnviado = null; });
     }
 
     mostrarError(texto) {
@@ -147,7 +155,7 @@ class KineticEngine {
         this.canvasEl.width = this.ancho;
         this.canvasEl.height = this.alto;
         this.canvasEl.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
-        this.canvasEl.setAttribute('aria-label', 'Cámara con calibración automática desde una postura cómoda. Controles por voz: Computadora, recalibrar; pausar cursor; clic derecho.');
+        this.canvasEl.setAttribute('aria-label', 'Cámara: cabeza y torso calibran postura; extremidades usan centro fijo y gestos suaves. Controles por voz: Computadora, pausar cursor; clic derecho.');
         this.ctx = this.canvasEl.getContext('2d', { willReadFrequently: true });
         this.hudCanvasEl = document.createElement('canvas');
         this.hudCanvasEl.width = this.ancho;
@@ -177,6 +185,7 @@ class KineticEngine {
         ++this.generacion;
         this.vistaPendiente = null;
         this.numeroFotograma = 0; this.grisesRecibidos = false;
+        this.grisesAnteriores = null;
         this.deteccion = null;
         this.fuenteControl = null;
         this.neutroListo = false;
@@ -203,11 +212,26 @@ class KineticEngine {
               { x: (1 - punto.x) * this.ancho, y: punto.y * this.alto, fuente } : null;
         const rostro = datos.rostro || [], cuerpo = datos.cuerpo || [], manos = datos.manos || [];
         const candidatos = [];
-        const visible = indice => cuerpo[indice] && cuerpo[indice].visibility >= 0.65 && (cuerpo[indice].presence ?? 1) >= 0.65;
+        const confianza = this.modoControl === 'manos' ? 0.5 : 0.65;
+        const visible = indice => cuerpo[indice] && cuerpo[indice].visibility >= confianza &&
+            (cuerpo[indice].presence ?? 1) >= confianza && convertir(cuerpo[indice], '');
         if ((this.modoControl === 'manos' || this.modoControl === 'automatico') && manos[0]) {
-            const palma = [0, 5, 9, 13, 17].map(indice => manos[indice]).filter(Boolean);
-            candidatos.push(convertir({ x: palma.reduce((suma, punto) => suma + punto.x, 0) / palma.length,
-                y: palma.reduce((suma, punto) => suma + punto.y, 0) / palma.length }, 'mano:' + (datos.mano || 'visible')));
+            const mano = convertir(manos[0], 'mano:' + (datos.mano || 'visible'));
+            if (mano) mano.gesto = this.inclinacionMano(manos);
+            candidatos.push(mano);
+        }
+        if (this.modoControl === 'manos' || this.modoControl === 'automatico') {
+            if (!candidatos.some(Boolean) && this.fuenteControl?.startsWith('mano:')) {
+                const cercana = [15, 16].filter(visible).map(indice => convertir(cuerpo[indice], this.fuenteControl))
+                    .sort((a, b) => Math.hypot(a.x - this.puntoActual.x, a.y - this.puntoActual.y) - Math.hypot(b.x - this.puntoActual.x, b.y - this.puntoActual.y))[0];
+                if (cercana && Math.hypot(cercana.x - this.puntoActual.x, cercana.y - this.puntoActual.y) <= this.ancho * 0.2) candidatos.push(cercana);
+                else return null; // Una pérdida de mano no elige otro codo incidental.
+            }
+            for (const [lado, indices] of [['izquierdo', [15, 13]], ['derecho', [16, 14]]]) {
+                const fuente = 'brazo_' + lado;
+                const indice = indices.find(indice => this.fuenteControl === fuente + ':' + indice && visible(indice)) ?? indices.find(visible);
+                if (indice != null) candidatos.push(convertir(cuerpo[indice], fuente + ':' + indice));
+            }
         }
         if ((this.modoControl === 'automatico' || this.modoControl === 'cabeza') && rostro[1] && rostro[33] && rostro[263]) {
             const nariz = rostro[1], izquierdo = rostro[33], derecho = rostro[263];
@@ -222,56 +246,131 @@ class KineticEngine {
         }
 
         if (this.modoControl === 'brazo_izquierdo' || this.modoControl === 'brazo_derecho') {
-            const indices = this.modoControl === 'brazo_izquierdo' ? [15, 13, 11] : [16, 14, 12];
+            const indices = this.modoControl === 'brazo_izquierdo' ? [15, 13] : [16, 14];
             const actual = indices.find(indice => this.fuenteControl === this.modoControl + ':' + indice && visible(indice));
             const indice = actual ?? indices.find(visible);
             if (indice != null) return convertir(cuerpo[indice], this.modoControl + ':' + indice);
             return null; // No inventar la posición de una mano ausente u oculta.
         }
-        if (this.modoControl === 'automatico' && visible(0)) candidatos.push(convertir(cuerpo[0], 'cabeza corporal'));
-        if ((this.modoControl === 'automatico' || this.modoControl === 'torso') && visible(11) && visible(12)) {
+        if ((this.modoControl === 'automatico' || this.modoControl === 'cabeza') && visible(0)) candidatos.push(convertir(cuerpo[0], 'cabeza corporal'));
+        if ((this.modoControl === 'torso' || this.modoControl === 'cabeza') && visible(11) && visible(12)) {
             candidatos.push(convertir({ x: (cuerpo[11].x + cuerpo[12].x) / 2, y: (cuerpo[11].y + cuerpo[12].y) / 2 }, 'torso'));
         }
-        // Mantener la parte elegida evita que una mano incidental cambie la postura neutral.
+        // Una mano persistente puede sustituir el codo sin obligar a levantar el brazo.
+        if (['automatico', 'manos'].includes(this.modoControl) && !this.fuenteControl?.startsWith('mano:') && candidatos[0]?.fuente.startsWith('mano:')) return candidatos[0];
         return candidatos.find(punto => punto?.fuente === this.fuenteControl) || candidatos.find(Boolean) || null;
+    }
+
+    inclinacionMano(manos) {
+        const valido = indice => manos[indice] && Number.isFinite(manos[indice].z) &&
+            manos[indice].x >= 0 && manos[indice].x <= 1 && manos[indice].y >= 0 && manos[indice].y <= 1;
+        if (!valido(0)) return null;
+        const vector = (a, b) => [b.x - a.x, (b.y - a.y) * this.alto / this.ancho, b.z - a.z];
+        const dedos = [[5, 8], [9, 12], [13, 16], [17, 20]];
+        const extendidos = dedos.filter(([base, punta]) => valido(base) && valido(punta) &&
+            Math.hypot(...vector(manos[0], manos[base])) > 0.0001 &&
+            Math.hypot(...vector(manos[0], manos[punta])) > Math.hypot(...vector(manos[0], manos[base])) * 1.25)
+            .map(([base, punta]) => vector(manos[base], manos[punta]));
+        const apuntando = extendidos.length === 1 || (extendidos.length === 2 &&
+            extendidos[0].reduce((suma, valor, indice) => suma + valor * extendidos[1][indice], 0) >
+            0.85 * Math.hypot(...extendidos[0]) * Math.hypot(...extendidos[1]));
+        let direccion;
+        if (apuntando) direccion = extendidos.reduce((suma, dedo) => suma.map((valor, indice) => valor + dedo[indice]), [0, 0, 0]);
+        else {
+            if (![5, 17].every(valido)) return null;
+            const a = vector(manos[0], manos[5]), b = vector(manos[0], manos[17]);
+            // Nudillos y muñeca conservan el plano de la palma tanto abierta como en puño.
+            direccion = [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+            if (direccion[2] < 0) direccion = direccion.map(valor => -valor);
+        }
+        const longitud = Math.hypot(...direccion);
+        if (longitud < 0.0001 || !Number.isFinite(longitud)) return null;
+        return { x: this.puntoBase.x - direccion[0] / longitud * 32,
+            y: this.puntoBase.y + direccion[1] / longitud * 24, ...(apuntando ? { apuntando: true } : {}) };
+    }
+
+    controlarGesto(punto, tiempo, angulo = 0, inclinacion = null) {
+        let referencia = this.muestraGesto;
+        if (!referencia || tiempo - referencia.tiempo > 200) {
+            referencia = this.muestraGesto = { ...punto, tiempo, inclinacion: inclinacion?.apuntando ? null : inclinacion, control: { ...this.puntoBase } };
+        }
+        if (tiempo <= referencia.tiempo) return referencia.control;
+        referencia.tiempo = tiempo;
+        const giro = (referencia.giro || 0) + angulo;
+        referencia.giro = Math.atan2(Math.sin(giro), Math.cos(giro));
+        referencia.inclinacion ??= inclinacion?.apuntando ? null : inclinacion;
+        // Joystick relativo: conservar el reposo inicial mientras se mantiene una dirección.
+        let dx = (punto.x - referencia.x) * 6, dy = (punto.y - referencia.y) * 6;
+        if (Math.hypot(dx, dy * this.ancho / this.alto) < 1.8) {
+            const origen = inclinacion?.apuntando ? this.puntoBase : referencia.inclinacion;
+            dx = inclinacion && origen ? inclinacion.x - origen.x : referencia.giro * 144;
+            dy = inclinacion && origen ? inclinacion.y - origen.y : 0;
+        }
+        referencia.control = { x: this.puntoBase.x + Math.max(-32, Math.min(32, dx)),
+            y: this.puntoBase.y + Math.max(-24, Math.min(24, dy)) };
+        return referencia.control;
     }
 
     controlarZona(tiempo) {
         const grises = this.leerGrises();
         if (!this.plantilla) {
-            // Buscar textura automáticamente cerca del punto: sirve para muñones o ropa,
-            // sin colocar exactamente un detalle bajo la cruz central.
+            const anterior = this.grisesAnteriores;
+            if (!anterior) {
+                this.grisesAnteriores = new Float32Array(grises);
+                this.dibujarHUD('Mueve ligeramente la extremidad visible · buscando textura', 0); return;
+            }
+            let luz = 0;
+            for (let indice = 0; indice < grises.length; indice++) luz += grises[indice] - anterior[indice];
+            luz /= grises.length;
+            let sumaX = 0, sumaY = 0, movidos = 0;
+            for (let y = 0; y < this.alto; y += 2) for (let x = 0; x < this.ancho; x += 2) {
+                const indice = y * this.ancho + x;
+                if (Math.abs(grises[indice] - anterior[indice] - luz) > 12) { sumaX += x; sumaY += y; movidos++; }
+            }
             let mejor = null;
             const margen = this.radioPlantilla + 1;
-            for (let y = Math.max(margen, this.origenControl.y - 24); y < Math.min(this.alto - margen, this.origenControl.y + 25); y += 4) {
-                for (let x = Math.max(margen, this.origenControl.x - 24); x < Math.min(this.ancho - margen, this.origenControl.x + 25); x += 4) {
-                    const parche = this.extraerParche(grises, x, y);
-                    if (!mejor || parche.contraste > mejor.parche.contraste) mejor = { x, y, parche };
+            // Movimiento local propone textura; una variación de luz o imagen completa no adquiere control.
+            if (movidos >= 12 && movidos < grises.length * 0.35 / 4) {
+                const centroX = Math.round(sumaX / movidos), centroY = Math.round(sumaY / movidos);
+                for (let y = Math.max(margen, centroY - 24); y < Math.min(this.alto - margen, centroY + 25); y += 4) {
+                    for (let x = Math.max(margen, centroX - 24); x < Math.min(this.ancho - margen, centroX + 25); x += 4) {
+                        const indice = y * this.ancho + x;
+                        const movimiento = Math.abs(grises[indice] - anterior[indice] - luz);
+                        if (movimiento <= 12) continue;
+                        const parche = this.extraerParche(grises, x, y);
+                        const puntuacion = parche.detalle * movimiento;
+                        if (parche.contraste >= 6 && parche.detalle >= 1 && (!mejor || puntuacion > mejor.puntuacion)) mejor = { x, y, parche, puntuacion };
+                    }
                 }
             }
-            if (!mejor || mejor.parche.contraste < 6) { this.dibujarHUD('Zona libre · acerca una parte visible o mejora la luz', 0); return; }
+            anterior.set(grises);
+            if (!mejor) { this.dibujarHUD('Mueve ligeramente la extremidad visible · buscando textura', 0); return; }
             this.plantilla = mejor.parche;
-            this.origenControl = { x: mejor.x, y: mejor.y };
-            this.puntoActual = { ...this.origenControl };
+            this.puntoActual = { x: mejor.x, y: mejor.y };
+            this.muestraGesto = null;
             this.puntoSuave = { ...this.puntoBase };
-            this.neutroListo = true;
             this.fuenteControl = 'zona libre';
-            this.fiableDesde = tiempo;
         }
         const punto = this.seguirPunto(grises);
         if (!punto) {
-            this.fiableDesde = null;
-            this.neutroListo = false;
-            this.plantilla = null;
+            this.perdidaDesde ??= tiempo;
+            this.fiableDesde = null; this.muestraGesto = null; this.puntoGesto = null;
+            this.ultimoMovimiento = null; this.puntoSuave = { ...this.puntoBase };
+            if (tiempo - this.perdidaDesde >= 1200) {
+                this.plantilla = null; this.grisesAnteriores = null;
+            }
             this.cancelarFijacion(true);
             this.actualizarHover(null);
-            this.dibujarHUD('Zona perdida · readquiriendo sin clic', 0);
+            this.dibujarHUD('Textura no visible · cursor detenido', 0);
             return;
         }
+        this.perdidaDesde = null;
         this.puntoActual = { x: punto.x, y: punto.y };
         // Actualizar textura lentamente permite pequeñas rotaciones e iluminación variable.
         const nueva = this.extraerParche(grises, punto.x, punto.y);
-        this.plantilla.valores = this.plantilla.valores.map((valor, indice) => valor * 0.95 + nueva.valores[indice] * 0.05);
+        this.plantilla.valores = punto.angulo ? nueva.valores : this.plantilla.valores.map((valor, indice) => valor * 0.95 + nueva.valores[indice] * 0.05);
+        this.neutroListo = true;
+        this.puntoGesto = this.controlarGesto(this.puntoActual, this.deteccion?.tiempo ?? tiempo, punto.angulo);
         this.fiableDesde ??= tiempo;
     }
 
@@ -300,20 +399,28 @@ class KineticEngine {
         const media = valores.reduce((suma, valor) => suma + valor, 0) / valores.length;
         const centrados = valores.map(valor => valor - media);
         const contraste = Math.sqrt(centrados.reduce((suma, valor) => suma + valor * valor, 0) / valores.length);
-        return { valores: centrados, contraste };
+        let horizontal = 0, vertical = 0, cruzado = 0;
+        for (let fila = -this.radioPlantilla; fila <= this.radioPlantilla; fila += 2) {
+            for (let columna = -this.radioPlantilla; columna <= this.radioPlantilla; columna += 2) {
+                const indice = (y + fila) * this.ancho + x + columna;
+                const dx = (grises[indice + 1] - grises[indice - 1]) / 2;
+                const dy = (grises[indice + this.ancho] - grises[indice - this.ancho]) / 2;
+                horizontal += dx * dx; vertical += dy * dy; cruzado += dx * dy;
+            }
+        }
+        const detalle = Math.sqrt(Math.max(0, (horizontal + vertical - Math.hypot(horizontal - vertical, 2 * cruzado)) / (2 * valores.length)));
+        return { valores: centrados.map(valor => valor / (contraste || 1)), contraste, detalle };
     }
 
     calibrar(punto = this.puntoActual) {
         if (!this.activa) return false;
         if (!Number.isFinite(punto.x) || !Number.isFinite(punto.y)) return false;
-        // Sólo la textura necesita margen de píxeles enteros, nunca el rostro/cuerpo.
-        const margen = this.modoControl === 'zona' ? this.radioPlantilla + 1 : 0;
-        this.origenControl = this.modoControl === 'zona' ? {
-            x: Math.round(Math.max(margen, Math.min(this.ancho - margen - 1, punto.x))),
-            y: Math.round(Math.max(margen, Math.min(this.alto - margen - 1, punto.y))) } : { x: punto.x, y: punto.y };
+        this.origenControl = this.modoControl === 'cabeza' ? { x: punto.x, y: punto.y } : { ...this.puntoBase };
         this.puntoSuave = { ...this.puntoBase };
         this.plantilla = null;
-        this.neutroListo = false;
+        this.neutroListo = this.modoControl !== 'cabeza';
+        this.muestraGesto = null; this.puntoGesto = null;
+        this.grisesAnteriores = null;
         this.fiableDesde = null;
         this.muestrasPostura = [];
         this.ultimaPostura = null;
@@ -327,6 +434,7 @@ class KineticEngine {
     }
 
     aprenderPostura(punto, tiempo) {
+        if (this.modoControl !== 'cabeza') return false;
         if (tiempo === this.ultimaPostura) return false; // Una inferencia repetida no prueba estabilidad.
         if (this.ultimaPostura != null && tiempo - this.ultimaPostura > 500) this.muestrasPostura = [];
         this.ultimaPostura = tiempo;
@@ -352,48 +460,69 @@ class KineticEngine {
         return true;
     }
 
+    cambiarReferencia(punto) {
+        const dx = punto.x - this.puntoActual.x, dy = punto.y - this.puntoActual.y;
+        this.origenControl.x += dx; this.origenControl.y += dy;
+        this.historialMovimiento = this.historialMovimiento.map(muestra => ({ x: muestra.x + dx, y: muestra.y + dy }));
+        this.puntoActual = { x: punto.x, y: punto.y };
+        this.cancelarFijacion(true);
+    }
+
     seguirPunto(grises) {
         // Zona libre: seguir una textura visible, sin asumir anatomía ni exigir manos.
-        // ponytail: correlación local; oclusiones largas exigen elegir otra zona.
+        // shortcut: textura local sin clasificar anatomía, una oclusión larga exige nueva adquisición.
         let mejor = { error: Infinity, x: this.puntoActual.x, y: this.puntoActual.y };
         const errores = [];
         const margen = this.radioPlantilla + 1;
-        const medir = (x, y) => {
+        const energia = this.plantilla.valores.reduce((suma, valor) => suma + valor * valor, 0);
+        const valores = new Float32Array(this.plantilla.valores.length);
+        const medir = (x, y, angulo = 0) => {
             if (x < margen || y < margen || x >= this.ancho - margen || y >= this.alto - margen) return;
             let suma = 0, cuadrados = 0;
             const cantidad = this.plantilla.valores.length;
+            let indice = 0;
+            const coseno = Math.cos(angulo), seno = Math.sin(angulo);
             for (let fila = -this.radioPlantilla; fila <= this.radioPlantilla; fila += 2) {
                 for (let columna = -this.radioPlantilla; columna <= this.radioPlantilla; columna += 2) {
-                    const valor = grises[(y + fila) * this.ancho + x + columna];
+                    const px = angulo ? Math.round(x + columna * coseno - fila * seno) : x + columna;
+                    const py = angulo ? Math.round(y + columna * seno + fila * coseno) : y + fila;
+                    if (px < 0 || px >= this.ancho || py < 0 || py >= this.alto) return;
+                    const valor = grises[py * this.ancho + px];
+                    valores[indice++] = valor;
                     suma += valor; cuadrados += valor * valor;
                 }
             }
             const media = suma / cantidad;
             if (cuadrados / cantidad - media * media < 36) return;
-            let error = 0;
-            let indice = 0;
-            for (let fila = -this.radioPlantilla; fila <= this.radioPlantilla; fila += 2) {
-                for (let columna = -this.radioPlantilla; columna <= this.radioPlantilla; columna += 2) {
-                    error += Math.abs(grises[(y + fila) * this.ancho + x + columna] - media - this.plantilla.valores[indice++]);
-                }
-            }
-            error /= cantidad;
+            let correlacion = 0;
+            for (let indice = 0; indice < cantidad; indice++) correlacion += (valores[indice] - media) * this.plantilla.valores[indice];
+            const error = 1 - correlacion / Math.sqrt(energia * (cuadrados - cantidad * media * media));
             errores.push({ error, x, y });
-            if (error < mejor.error) mejor = { error, x, y };
+            if (error < mejor.error) mejor = { error, x, y, angulo };
         };
         const centroX = Math.round(this.puntoActual.x), centroY = Math.round(this.puntoActual.y);
-        for (let y = centroY - 8; y <= centroY + 8; y++) {
-            for (let x = centroX - 8; x <= centroX + 8; x++) medir(x, y);
+        for (let y = centroY - 12; y <= centroY + 12; y++) {
+            for (let x = centroX - 12; x <= centroX + 12; x++) medir(x, y);
+        }
+        const traslacion = mejor;
+        if (traslacion.error <= 0.4) {
+            for (const angulo of [-0.24, -0.12, 0.12, 0.24]) {
+                for (let y = traslacion.y - 2; y <= traslacion.y + 2; y++) {
+                    for (let x = traslacion.x - 2; x <= traslacion.x + 2; x++) medir(x, y, angulo);
+                }
+            }
+            if (traslacion.error - mejor.error < 0.02) mejor = traslacion;
         }
         const ambiguo = errores.some(candidato => Math.hypot(candidato.x - mejor.x, candidato.y - mejor.y) > 3 &&
-            candidato.error <= mejor.error * 1.15 + 0.5);
-        return mejor.error <= 18 && !ambiguo ? mejor : null;
+            candidato.error <= mejor.error * 1.15 + 0.005);
+        return mejor.error <= 0.15 && !ambiguo ? mejor : null;
     }
 
     filtrarMovimiento(punto, tiempo) {
         if (tiempo !== this.ultimoMovimiento) {
             if (this.ultimoMovimiento == null || tiempo - this.ultimoMovimiento > 500) {
-                this.historialMovimiento = [{ ...this.origenControl }, { ...this.origenControl }];
+                const centro = this.modoControl === 'cabeza' ? this.origenControl : this.puntoBase;
+                this.historialMovimiento = [{ ...centro }, { ...centro }];
             }
             this.ultimoMovimiento = tiempo;
             this.historialMovimiento.push(punto);
@@ -415,8 +544,9 @@ class KineticEngine {
 
     normalizarControl(punto) {
         // Centro fijo. Igual fracción de imagen produce la misma respuesta en ambos ejes.
-        return { x: this.puntoBase.x + (punto.x - this.origenControl.x) / this.amplitudControl,
-            y: this.puntoBase.y + (punto.y - this.origenControl.y) * this.ancho / this.alto / this.amplitudControl };
+        const origen = this.modoControl === 'cabeza' ? this.origenControl : this.puntoBase;
+        return { x: this.puntoBase.x + (punto.x - origen.x) / this.amplitudControl,
+            y: this.puntoBase.y + (punto.y - origen.y) * this.ancho / this.alto / this.amplitudControl };
     }
 
     actualizarControl(punto, tiempo, intervalo) {
@@ -435,6 +565,7 @@ class KineticEngine {
         if (this.enZonaSegura) {
             this.reposoBorde = null;
             this.inicioArmado = null;
+            this.atraerCursor(intervalo);
             const objetivo = this.elementoBajoCursor();
             if (!this.armado || !objetivo) { this.cancelarFijacion(); return { progreso: 0, estado: 'Seguro · mueve para habilitar clic' }; }
             if (objetivo !== this.objetivoFijado) { this.objetivoFijado = objetivo; this.inicioFijacion = tiempo; }
@@ -462,11 +593,12 @@ class KineticEngine {
             this.posX = Math.max(1, Math.min(window.innerWidth - 1, this.posX + dx / distancia * paso));
             this.posY = Math.max(1, Math.min(window.innerHeight - 1, this.posY + dy / distancia * paso));
         }
+        if (velocidad * this.sensibilidad <= 180) this.atraerCursor(intervalo);
         // Una dirección mantenida mueve normalmente. Sólo recuperar postura si ya no
         // queda pantalla y la persona descansa allí; nunca centrar durante navegación.
         const enBorde = this.posX === 1 || this.posX === window.innerWidth - 1 || this.posY === 1 || this.posY === window.innerHeight - 1;
         const detenido = Math.hypot(this.posX - anterior.x, this.posY - anterior.y) < 0.01;
-        if (enBorde && detenido && distancia > this.zonaAtraccion) {
+        if (this.modoControl === 'cabeza' && enBorde && detenido && distancia > this.zonaAtraccion) {
             const reposo = this.reposoBorde;
             const tolerancia = this.zonaMuerta > 0.05 ? 0.045 : 0.025;
             if (!reposo || Math.hypot((punto.x - reposo.x) / this.ancho, (punto.y - reposo.y) / this.ancho) > tolerancia) {
@@ -479,15 +611,39 @@ class KineticEngine {
         return { progreso: 0, estado: distancia <= this.zonaAtraccion ? 'Atracción · precisión' : 'Moviendo' };
     }
 
-    elementoBajoCursor() {
-        let elemento = document.elementFromPoint(this.posX, this.posY);
+    elementoBajoCursor(x = this.posX, y = this.posY) {
+        let elemento = document.elementFromPoint(x, y);
         // Acceder a shadow roots abiertos. Los iframes ajenos siguen siendo otro documento.
         while (elemento?.shadowRoot?.elementFromPoint) {
-            const interno = elemento.shadowRoot.elementFromPoint(this.posX, this.posY);
+            const interno = elemento.shadowRoot.elementFromPoint(x, y);
             if (!interno || interno === elemento) break;
             elemento = interno;
         }
-        return elemento?.closest('button, a, input, textarea, select, summary, [role="button"], [contenteditable="true"]') || elemento;
+        return elemento?.closest('button, a, input, textarea, select, summary, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [contenteditable="true"]') || elemento;
+    }
+
+    atraerCursor(intervalo) {
+        const selector = 'button, a[href], input, textarea, select, summary, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [contenteditable="true"]';
+        // Sondeo local acotado: no recorrer todos los controles de una página por imagen.
+        let mejor = null;
+        for (const [dx, dy] of [[0, 0], [-28, 0], [28, 0], [0, -28], [0, 28], [-20, -20], [20, -20], [-20, 20], [20, 20]]) {
+            const objetivo = this.elementoBajoCursor(this.posX + dx, this.posY + dy);
+            if (!objetivo?.matches?.(selector) || objetivo.matches(':disabled') || objetivo.closest('[inert], [aria-disabled="true"]')) continue;
+            for (const rectangulo of objetivo.getClientRects()) {
+                if (rectangulo.width <= 0 || rectangulo.height <= 0) continue;
+                const margen = Math.min(4, rectangulo.width / 2, rectangulo.height / 2);
+                const x = Math.max(rectangulo.left + margen, Math.min(rectangulo.right - margen, this.posX));
+                const y = Math.max(rectangulo.top + margen, Math.min(rectangulo.bottom - margen, this.posY));
+                const distancia = Math.hypot(x - this.posX, y - this.posY);
+                if (distancia > 28 || this.elementoBajoCursor(x, y) !== objetivo) continue;
+                if (!mejor || distancia < mejor.distancia) mejor = { x, y, distancia };
+            }
+            if (dx === 0 && dy === 0 && mejor) break;
+        }
+        if (!mejor || mejor.distancia === 0) return;
+        const avance = Math.min(1, 180 * intervalo / 1000 / mejor.distancia);
+        this.posX += (mejor.x - this.posX) * avance;
+        this.posY += (mejor.y - this.posY) * avance;
     }
 
     actualizarHover(elemento) {
@@ -533,7 +689,7 @@ class KineticEngine {
         const menu = document.createElement('div');
         this.menu = menu;
         menu.id = 'adapta-pe-menu-contextual';
-        menu.setAttribute('role', 'menu'); menu.setAttribute('aria-label', 'Menú contextual Adapta PE');
+        menu.setAttribute('role', 'menu'); menu.setAttribute('aria-label', 'Menú contextual AdaptaPE');
         menu.style.cssText = `position:fixed;left:${Math.max(0, Math.min(this.posX, window.innerWidth - 230))}px;top:${Math.max(0, Math.min(this.posY, window.innerHeight - 240))}px;max-width:220px;max-height:90vh;overflow:auto;background:#222;color:white;border:2px solid white;border-radius:10px;padding:6px;z-index:2147483646;box-shadow:0 6px 20px #0008;`;
         const abrir = (url, destino) => {
             try { chrome.runtime.sendMessage({ accion: 'abrir_url', url, destino }, () => { void chrome.runtime.lastError; }); } catch (_) {}
@@ -566,13 +722,13 @@ class KineticEngine {
             return true;
         }
         if (!this.activa) return false;
-        if (accion === 'calibrar') return this.calibrar();
+        if (accion === 'calibrar') {
+            if (this.modoControl === 'cabeza') return this.calibrar();
+            this.cancelarFijacion(true); return true;
+        }
         if (accion.startsWith('control_')) {
-            this.modoControl = accion.slice(8);
-            this.fuenteControl = null;
-            this.deteccion = null;
+            this.aplicarAjustes({ modo: accion.slice(8) });
             this.errorVision = null;
-            this.calibrar();
             this.guardarAjustes();
             return true;
         }
@@ -586,12 +742,15 @@ class KineticEngine {
         if (accion === 'movimiento_reducido' || accion === 'movimiento_normal') {
             this.amplitudControl = accion === 'movimiento_reducido' ? 0.55 : 1;
             this.guardarAjustes();
-            return this.calibrar();
+            if (this.modoControl === 'cabeza') return this.calibrar();
+            this.cancelarFijacion(true); return true;
         }
         if (accion === 'preparar_derecho') { this.tipoClick = 'derecho'; this.cancelarFijacion(true); }
         else if (accion === 'pausar' || accion === 'reanudar') {
             this.pausada = accion === 'pausar';
-            if (!this.pausada) this.calibrar();
+            if (!this.pausada && this.modoControl === 'cabeza') this.calibrar();
+            this.muestraGesto = null; this.puntoGesto = null;
+            if (this.modoControl !== 'cabeza') { this.ultimoMovimiento = null; this.puntoSuave = { ...this.puntoBase }; }
             this.cancelarFijacion(true);
         }
         else if (accion === 'lento' || accion === 'rapido') {
@@ -622,27 +781,38 @@ class KineticEngine {
         this.burbuja.style.borderColor = this.enZonaSegura ? '#2ecc71' : '#e30613';
         const contexto = this.hudCtx;
         contexto.clearRect(0, 0, this.ancho, this.alto);
+        if (this.modoControl === 'zona' && this.plantilla) {
+            contexto.strokeStyle = '#00ffff';
+            contexto.strokeRect(this.puntoActual.x - this.radioPlantilla, this.puntoActual.y - this.radioPlantilla, this.radioPlantilla * 2, this.radioPlantilla * 2);
+        }
+        const centro = this.modoControl === 'cabeza' ? this.origenControl : this.puntoBase;
         contexto.strokeStyle = '#ffffff88'; contexto.lineWidth = 1;
         contexto.beginPath();
-        contexto.moveTo(this.puntoBase.x - 10, this.puntoBase.y); contexto.lineTo(this.puntoBase.x + 10, this.puntoBase.y);
-        contexto.moveTo(this.puntoBase.x, this.puntoBase.y - 10); contexto.lineTo(this.puntoBase.x, this.puntoBase.y + 10);
+        contexto.moveTo(centro.x - 10, centro.y); contexto.lineTo(centro.x + 10, centro.y);
+        contexto.moveTo(centro.x, centro.y - 10); contexto.lineTo(centro.x, centro.y + 10);
         contexto.stroke();
         for (const [radio, color] of [[this.zonaAtraccion, '#ffa500'], [this.zonaMuerta, '#2ecc71']]) {
             contexto.strokeStyle = color; contexto.beginPath();
-            contexto.arc(this.puntoBase.x, this.puntoBase.y, radio * this.ancho, 0, Math.PI * 2); contexto.stroke();
+            contexto.ellipse(centro.x, centro.y, radio * this.ancho * this.amplitudControl, radio * this.alto * this.amplitudControl, 0, 0, Math.PI * 2); contexto.stroke();
         }
         contexto.fillStyle = this.fiableDesde == null ? '#999' : '#3498db';
-        contexto.beginPath(); contexto.arc(this.puntoSuave.x, this.puntoSuave.y, 3, 0, Math.PI * 2); contexto.fill();
+        contexto.beginPath(); contexto.arc(this.puntoActual.x, this.puntoActual.y, 3, 0, Math.PI * 2); contexto.fill();
+        if (this.puntoGesto) {
+            contexto.strokeStyle = '#00ffff'; contexto.beginPath();
+            contexto.moveTo(centro.x, centro.y); contexto.lineTo(this.puntoGesto.x, this.puntoGesto.y); contexto.stroke();
+        }
         this.dibujarCursor(progreso);
     }
 
     bucleRender(tiempo) {
         if (!this.activa) return;
         try {
+            this.solicitarModelo();
             // Una imagen central nueva por paso; no repetir inferencias para completar dwell.
             const imagen = this.numeroFotograma;
             if (this.deteccion && tiempo - this.deteccion.tiempo > 500) {
-                this.perdidaDesde ??= tiempo; this.fiableDesde = null;
+                this.perdidaDesde ??= tiempo; this.fiableDesde = null; this.muestraGesto = null; this.puntoGesto = null;
+                if (this.modoControl !== 'cabeza') { this.ultimoMovimiento = null; this.puntoSuave = { ...this.puntoBase }; }
                 this.cancelarFijacion(true); this.actualizarHover(null);
                 this.dibujarHUD('Esperando cámara central · sin clic', 0); return;
             }
@@ -650,23 +820,27 @@ class KineticEngine {
                 (this.ultimoTiempo != null && tiempo - this.ultimoTiempo < 1000 / 30 - 1)) return;
             const salto = this.ultimoTiempo == null ? 0 : tiempo - this.ultimoTiempo;
             const intervalo = Math.min(50, salto || 1000 / 30);
-            if (salto > 200) { this.cancelarFijacion(true); this.fiableDesde = null; }
+            if (salto > 200) {
+                this.cancelarFijacion(true); this.fiableDesde = null; this.muestraGesto = null;
+                if (this.modoControl !== 'cabeza') { this.ultimoMovimiento = null; this.puntoSuave = { ...this.puntoBase }; }
+            }
             this.ultimoTiempo = tiempo;
             this.ultimoVideo = imagen;
-            if (this.modoControl === 'zona') {
+            if (this.modoControl.startsWith('zona')) {
                 this.controlarZona(tiempo);
             } else {
-                this.solicitarModelo();
-                const punto = this.deteccion && tiempo - this.deteccion.tiempo < 500 ? this.elegirPunto(this.deteccion) : null;
+                let punto = this.deteccion && tiempo - this.deteccion.tiempo < 500 ? this.elegirPunto(this.deteccion) : null;
                 if (!punto) {
                     this.perdidaDesde ??= tiempo;
                     this.fuenteCandidata = null;
-                    this.muestrasPostura = [];
+                    if (tiempo - this.perdidaDesde >= 500) this.muestrasPostura = [];
                     this.reposoBorde = null;
                     this.fiableDesde = null;
+                    this.muestraGesto = null; this.puntoGesto = null;
+                    if (this.modoControl !== 'cabeza') { this.ultimoMovimiento = null; this.puntoSuave = { ...this.puntoBase }; }
                     this.cancelarFijacion(true);
                     this.actualizarHover(null);
-                    this.dibujarHUD(this.errorVision || (this.deteccion ? 'Seguimiento en espera · vuelve a tu postura cómoda' : 'Esperando cámara central…'), 0);
+                    this.dibujarHUD(this.errorVision || (this.deteccion ? 'Seguimiento en espera · muestra la parte elegida' : 'Esperando cámara central…'), 0);
                     return;
                 }
                 if (this.fuenteControl && punto.fuente !== this.fuenteControl) {
@@ -675,22 +849,37 @@ class KineticEngine {
                         this.inicioCandidata = tiempo;
                         this.ultimaCandidata = null;
                         this.confirmacionesCandidata = 0;
+                        this.desfaseCandidata = { x: punto.x - this.puntoActual.x, y: punto.y - this.puntoActual.y };
                     }
                     if (this.ultimaCandidata !== this.deteccion.tiempo) {
                         this.ultimaCandidata = this.deteccion.tiempo;
                         this.confirmacionesCandidata++;
                     }
-                    if (tiempo - this.inicioCandidata < 1200 || this.confirmacionesCandidata < 3) {
-                        this.fiableDesde = null;
+                    if (tiempo - this.inicioCandidata < (this.modoControl === 'automatico' ? 1200 : 150) || this.confirmacionesCandidata < 3) {
                         this.cancelarFijacion(true);
-                        this.dibujarHUD('Confirmando ' + punto.fuente + ' · sin clic', 0);
-                        return;
+                        const anterior = this.modoControl === 'manos' ? this.elegirPunto({ ...this.deteccion, manos: [] }) : null;
+                        if (!this.neutroListo || anterior?.fuente !== this.fuenteControl) {
+                            this.fiableDesde = null;
+                            this.dibujarHUD('Confirmando seguimiento · sin clic', 0); return;
+                        }
+                        punto = anterior;
                     }
                 } else this.fuenteCandidata = null;
                 if (punto.fuente !== this.fuenteControl) {
+                    if (this.modoControl === 'cabeza') {
+                        if (this.neutroListo) this.cambiarReferencia({ x: this.puntoActual.x + this.desfaseCandidata.x,
+                            y: this.puntoActual.y + this.desfaseCandidata.y });
+                        else this.calibrar(punto);
+                    } else {
+                        this.neutroListo = true; this.muestraGesto = null;
+                        this.ultimoMovimiento = null; this.puntoSuave = { ...this.puntoBase };
+                        this.cancelarFijacion(true);
+                    }
                     this.fuenteControl = punto.fuente;
-                    this.calibrar(punto);
-                } else if (this.perdidaDesde != null && tiempo - this.perdidaDesde >= 1200) this.calibrar(punto);
+                    this.fuenteCandidata = null;
+                } else if (this.perdidaDesde != null && tiempo - this.perdidaDesde >= 1200) {
+                    if (this.modoControl === 'cabeza') this.calibrar(punto);
+                }
                 this.perdidaDesde = null;
                 this.puntoActual = { x: punto.x, y: punto.y };
                 if (!this.neutroListo) {
@@ -700,19 +889,25 @@ class KineticEngine {
                     }
                 }
                 this.fiableDesde ??= tiempo;
+                if (this.modoControl === 'manos') {
+                    this.puntoGesto = this.controlarGesto(this.puntoActual, this.deteccion.tiempo, 0, punto.gesto);
+                } else this.puntoGesto = null;
             }
             if (!this.neutroListo || this.fiableDesde == null) return;
-            if (this.pausada || tiempo - this.fiableDesde < 250) {
+            if (this.pausada) {
                 this.cancelarFijacion(true);
-                this.dibujarHUD(this.pausada ? 'Cursor pausado · di «reanudar cursor»' : 'Estabilizando seguimiento', 0);
+                this.dibujarHUD('Cursor pausado · di «reanudar cursor»', 0);
                 return;
             }
-            const puntoControl = this.modoControl === 'zona' ? this.puntoActual : this.filtrarMovimiento(this.puntoActual, this.deteccion.tiempo);
+            if (tiempo - this.fiableDesde < 250) this.cancelarFijacion(true); // Estabilizar clic sin bloquear movimiento.
+            const puntoControl = this.filtrarMovimiento(this.puntoGesto || this.puntoActual, this.deteccion.tiempo);
             const control = this.actualizarControl(puntoControl, tiempo, intervalo);
             this.actualizarHover(this.elementoBajoCursor());
-            this.dibujarHUD((this.fuenteControl || 'Zona libre') + ' · ' + control.estado, control.progreso);
+            this.dibujarHUD((this.fuenteControl || 'Zona libre') + (this.puntoGesto ? ' · gesto' : '') + ' · ' + control.estado, control.progreso);
         } catch (_) {
             this.fiableDesde = null;
+            this.muestraGesto = null; this.puntoGesto = null;
+            if (this.modoControl !== 'cabeza') { this.ultimoMovimiento = null; this.puntoSuave = { ...this.puntoBase }; }
             this.cancelarFijacion(true);
             this.dibujarHUD('Esperando una imagen válida de la cámara', 0);
         } finally { this.programarFotograma(); }

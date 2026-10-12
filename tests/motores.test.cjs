@@ -18,7 +18,7 @@ function entorno() {
         window: { innerWidth: 1600, innerHeight: 900, scrollBy: dato => desplazamientos.push(dato), scrollTo: dato => desplazamientos.push(dato),
             getComputedStyle: () => ({ visibility: 'visible', display: 'block' }) },
         location: { hostname: 'example.org' }, navigator: {}, cancelAnimationFrame() {},
-        chrome: { runtime: { sendMessage: (dato, respuesta) => { mensajes.push(dato); respuesta?.({ ok: true }); } },
+        chrome: { runtime: { sendMessage: (dato, respuesta) => { mensajes.push(dato); respuesta?.({ ok: true }); return Promise.resolve({ ok: true }); } },
             storage: { local: { set: async () => {} } } },
         setTimeout: (accion, espera) => { const id = ++contador; temporizadores.set(id, { accion, tiempo: reloj + espera }); return id; },
         clearTimeout: id => temporizadores.delete(id)
@@ -41,8 +41,60 @@ function entorno() {
 }
 
 const entornoVoz = entorno();
+comprobar('Filtros conservan Docs fuera de la raíz y se retiran en ambas variantes', () => {
+    for (const archivo of [path.join(raiz, 'classes/FiltrosDaltonismo.js'), path.join(lite, 'clases/FiltrosDaltonismo.js')]) {
+        const prueba = entorno(), nodos = new Map();
+        prueba.contexto.window.top = prueba.contexto.window;
+        const documento = prueba.contexto.document;
+        documento.getElementById = id => nodos.get(id);
+        documento.createElement = () => ({ remove() { nodos.delete(this.id); } });
+        documento.head.appendChild = nodo => nodos.set(nodo.id, nodo);
+        let limpiezasRaiz = 0;
+        documento.documentElement.style = { removeProperty() { limpiezasRaiz++; } };
+        documento.documentElement.insertAdjacentHTML = () => nodos.set('adapta-pe-filtros-svg', {
+            remove() { nodos.delete('adapta-pe-filtros-svg'); }
+        });
+        prueba.cargar(archivo);
+        const filtros = new prueba.contexto.FiltrosDaltonismo();
+        for (const [url, superficie] of [
+            ['https://docs.google.com/document/d/prueba/edit', 'body'],
+            ['https://docs.google.com/spreadsheets/d/prueba/edit', 'html'],
+            ['https://example.org/document/d/prueba/edit', 'html'],
+            ['https://docs.google.com.example.org/document/d/prueba/edit', 'html']
+        ]) {
+            prueba.contexto.location = new URL(url);
+            filtros.aplicar('deuteranomalia');
+            assert.ok(nodos.get(filtros.idStyle).textContent.trim().startsWith(superficie + ', :fullscreen:not(iframe[data-adapta-pe-filtro-interno]), ::backdrop'));
+            filtros.aplicar('ninguno');
+            assert.equal(nodos.size, 0, 'Quitar filtro elimina SVG y regla CSS');
+        }
+        const marco = new prueba.contexto.FiltrosDaltonismo(true), limpiezasAntes = limpiezasRaiz;
+        marco.aplicar('protanopia');
+        assert.ok(nodos.get(marco.idStyle).textContent.trim().startsWith(':fullscreen:not(iframe[data-adapta-pe-filtro-interno]), ::backdrop'));
+        marco.aplicar('ninguno');
+        assert.equal(limpiezasRaiz, limpiezasAntes, 'El marco conserva el filtro propio de su raíz');
+        assert.equal(nodos.size, 0);
+        prueba.contexto.window.top = {};
+        const externo = new prueba.contexto.FiltrosDaltonismo();
+        externo.aplicar('protanopia'); externo.aplicar('ninguno');
+        assert.equal(limpiezasRaiz, limpiezasAntes, 'El marco externo también conserva estilos de la web');
+    }
+});
 const voz = new entornoVoz.contexto.Voz();
 function orden(texto) { entornoVoz.mensajes.length = 0; voz.ejecutarComando(texto); return entornoVoz.mensajes[0]; }
+comprobar('Voz elige y anima mascotas sin interceptar búsquedas ni dictado', () => {
+    assert.equal(orden('mascota Tinku').nombre, 'tinku');
+    assert.equal(orden('elige la mascota Cuchu').nombre, 'cuchu');
+    assert.equal(orden('cambia a mascota Yati').nombre, 'yati');
+    for (const variante of ['Y Atti', 'Ya ti', 'Y-Ati', 'Yaty', 'Yate']) assert.equal(orden('mascota ' + variante).nombre, 'yati');
+    for (const variante of ['Tin cu', 'Tinko']) assert.equal(orden('elige mascota ' + variante).nombre, 'tinku');
+    for (const variante of ['Cu chu', 'Kuchu', 'Cucho']) assert.equal(orden('mascota ' + variante).nombre, 'cuchu');
+    assert.equal(orden('busca mascota Y Atti').accion, 'buscar_inteligente');
+    for (const [comando, estado] of [['saluda mascota', 'wave'], ['duerme mascota', 'sleep'], ['despierta mascota', 'wake']]) assert.equal(orden(comando).estado, estado);
+    assert.equal(orden('oculta la mascota').nombre, 'ninguna');
+    assert.equal(orden('busca mascota Tinku').accion, 'buscar_inteligente');
+    assert.equal(orden('mascota inexistente'), undefined);
+});
 comprobar('Sinónimos y alias completos abren portadas y conservan el destino', () => {
     for (const inicio of ['abre', 'abrir', 'ejecuta', 'ejecutar', 'entra a', 'ingresa en', 've a', 'visita', 'inicia']) {
         assert.equal(orden(inicio + ' Netflix').sitio, 'netflix');
@@ -160,15 +212,18 @@ comprobar('Voz recupera intermedios estables, ignora repeticiones y admite wake 
 
 comprobar('Detección prioriza cabeza/torso y usa brazo visible sin exigir dedos', () => {
     const motor = new entornoVoz.contexto.Cinetico();
+    assert.equal(motor.modoControl, 'cabeza');
+    motor.modoControl = 'automatico';
     const cuerpo = Array.from({ length: 33 }, () => ({ x: 0.5, y: 0.5, visibility: 0, presence: 0 }));
-    for (const indice of [0, 11, 12, 13]) cuerpo[indice] = { x: 0.4, y: 0.4, visibility: 0.99, presence: 0.99 };
+    for (const indice of [0, 11, 12]) cuerpo[indice] = { x: 0.4, y: 0.4, visibility: 0.99, presence: 0.99 };
     assert.equal(motor.elegirPunto({ cuerpo }).fuente, 'cabeza corporal');
     motor.modoControl = 'torso'; assert.equal(motor.elegirPunto({ cuerpo }).fuente, 'torso');
+    cuerpo[13] = { x: 0.4, y: 0.4, visibility: 0.99, presence: 0.99 };
     motor.modoControl = 'brazo_izquierdo'; assert.equal(motor.elegirPunto({ cuerpo }).fuente, 'brazo_izquierdo:13');
     motor.fuenteControl = 'brazo_izquierdo:13'; cuerpo[15] = { x: 0.5, y: 0.6, visibility: 0.99, presence: 0.99 };
     assert.equal(motor.elegirPunto({ cuerpo }).fuente, 'brazo_izquierdo:13');
     cuerpo[15].visibility = 0;
-    cuerpo[13].visibility = 0; assert.equal(motor.elegirPunto({ cuerpo }).fuente, 'brazo_izquierdo:11');
+    cuerpo[13].visibility = 0; assert.equal(motor.elegirPunto({ cuerpo }), null, 'Hombro aislado no controla un brazo');
     cuerpo[11].visibility = 0; assert.equal(motor.elegirPunto({ cuerpo }), null);
     motor.modoControl = 'manos'; assert.equal(motor.elegirPunto({ manos: [{ x: 0.3, y: 0.4 }] }).fuente, 'mano:visible');
     assert.equal(motor.elegirPunto({ manos: [{ x: NaN, y: 0.4 }] }), null);
@@ -180,15 +235,60 @@ comprobar('Detección prioriza cabeza/torso y usa brazo visible sin exigir dedos
     assert.ok(motor.elegirPunto({ rostro }).x < centro.x); // Espejo y giro relativo a ojos.
 });
 
-comprobar('Rostro bajo sigue visible y una mano incidental no cambia la referencia', () => {
+comprobar('Extremidades usan codo sin dedos, priorizan mano y excluyen cabeza/torso', () => {
+    const motor = new entornoVoz.contexto.Cinetico();
+    const rostro = [];
+    rostro[1] = { x: 0.5, y: 0.5 }; rostro[33] = { x: 0.4, y: 0.4 }; rostro[263] = { x: 0.6, y: 0.4 };
+    const cuerpo = [];
+    cuerpo[13] = { x: 0.3, y: 0.6, visibility: 0.9, presence: 0.9 };
+    const manos = [{ x: 0.4, y: 0.5 }];
+    assert.equal(motor.elegirPunto({ rostro, cuerpo, manos }).fuente, 'cabeza');
+    motor.modoControl = 'automatico';
+    assert.equal(motor.elegirPunto({ rostro, cuerpo, manos }).fuente, 'mano:visible');
+    assert.equal(motor.elegirPunto({ rostro, cuerpo }).fuente, 'brazo_izquierdo:13');
+    motor.modoControl = 'manos'; motor.fuenteControl = 'brazo_izquierdo:13';
+    assert.equal(motor.elegirPunto({ rostro, cuerpo, manos }).fuente, 'mano:visible');
+    cuerpo[13].x = 2;
+    assert.equal(motor.elegirPunto({ rostro, cuerpo }), null);
+    cuerpo[0] = cuerpo[11] = cuerpo[12] = { x: 0.5, y: 0.5, visibility: 0.99 };
+    assert.equal(motor.elegirPunto({ rostro, cuerpo }), null);
+});
+
+comprobar('Rostro bajo sigue visible y automático propone mano sin tocar la calibración', () => {
     const motor = new entornoVoz.contexto.Cinetico();
     const rostro = [];
     rostro[1] = { x: 0.5, y: 0.95 }; rostro[33] = { x: 0.4, y: 0.85 }; rostro[263] = { x: 0.6, y: 0.85 };
     assert.equal(motor.elegirPunto({ rostro })?.fuente, 'cabeza');
     motor.fuenteControl = 'cabeza';
-    assert.equal(motor.elegirPunto({ rostro, manos: [{ x: 0.3, y: 0.4 }] })?.fuente, 'cabeza');
+    motor.modoControl = 'automatico';
+    const origen = JSON.stringify(motor.origenControl);
+    assert.equal(motor.elegirPunto({ rostro, manos: [{ x: 0.3, y: 0.4 }] })?.fuente, 'mano:visible');
+    assert.equal(JSON.stringify(motor.origenControl), origen);
     motor.modoControl = 'manos';
     assert.equal(motor.elegirPunto({ rostro, manos: [{ x: 0.3, y: 0.4 }] })?.fuente, 'mano:visible');
+});
+
+comprobar('Palma abierta y puño usan la misma muñeca; Pose mantiene esa fuente al perder dedos', () => {
+    const motor = new entornoVoz.contexto.Cinetico(); motor.modoControl = 'manos';
+    const manos = Array.from({ length: 21 }, () => ({ x: 0.4, y: 0.4 }));
+    const abierta = motor.elegirPunto({ manos, mano: 'Left' });
+    for (let indice = 1; indice < manos.length; indice++) manos[indice] = { x: 0.6, y: 0.6 };
+    assert.equal(JSON.stringify(motor.elegirPunto({ manos, mano: 'Left' })), JSON.stringify(abierta));
+    motor.fuenteControl = abierta.fuente; motor.puntoActual = abierta;
+    const cuerpo = [];
+    cuerpo[15] = { x: 0.41, y: 0.4, visibility: 0.99, presence: 0.99 };
+    assert.equal(motor.elegirPunto({ cuerpo }).fuente, abierta.fuente);
+    cuerpo[15].visibility = 0;
+    assert.equal(motor.elegirPunto({ cuerpo }), null, 'No inventar una muñeca que ambos modelos pierden');
+});
+
+comprobar('Automático nunca elige torso ni hombros al inclinarse', () => {
+    const motor = new entornoVoz.contexto.Cinetico(); motor.modoControl = 'automatico';
+    const cuerpo = [];
+    cuerpo[11] = { x: 0.4, y: 0.6, visibility: 0.99 };
+    cuerpo[12] = { x: 0.6, y: 0.7, visibility: 0.99 };
+    assert.equal(motor.elegirPunto({ cuerpo }), null);
+    motor.modoControl = 'torso'; assert.equal(motor.elegirPunto({ cuerpo }).fuente, 'torso');
 });
 
 comprobar('Calibración usa imágenes distintas y una postura estable, con temblor y sin recorte vertical', () => {
@@ -233,6 +333,24 @@ function camaraSimulada() {
     assert.equal(motor.neutroListo, true);
     return { motor, fotograma, clics };
 }
+
+comprobar('Sólo cabeza aprende postura; extremidades conservan centro fijo al ajustar, reanudar y llegar al borde', () => {
+    for (const modo of ['manos', 'zona']) {
+        const prueba = entorno(); const motor = new prueba.contexto.Cinetico(); motor.activa = true;
+        motor.aplicarAjustes({ modo });
+        assert.equal(motor.neutroListo, true);
+        for (let tiempo = 0; tiempo <= 2000; tiempo += 100) motor.aprenderPostura({ x: 25, y: 100 }, tiempo);
+        const plantilla = {}; motor.plantilla = plantilla;
+        for (const accion of ['calibrar', 'movimiento_reducido', 'pausar', 'reanudar']) assert.equal(motor.ejecutarAccion(accion), true);
+        motor.aplicarAjustes({ amplitud: 1 });
+        assert.equal(motor.plantilla, plantilla, 'Los ajustes no pierden textura ni exigen adquirirla otra vez');
+        assert.equal(motor.neutroListo, true); assert.equal(motor.origenControl.x, 80); assert.equal(motor.origenControl.y, 60);
+        motor.elementoBajoCursor = () => null; motor.posX = 1599; motor.puntoActual = { x: 110, y: 60 };
+        for (let tiempo = 2100; tiempo <= 5000; tiempo += 100) motor.actualizarControl(motor.puntoActual, tiempo, 50);
+        assert.equal(motor.origenControl.x, 80); assert.equal(motor.neutroListo, true);
+        assert.equal(prueba.mensajes.filter(dato => dato.accion === 'hablar').length, 0);
+    }
+});
 
 comprobar('Pérdida breve conserva referencia; pérdida larga y descanso aceptan una postura más baja sin clic', () => {
     const { motor, fotograma, clics } = camaraSimulada();
@@ -305,11 +423,11 @@ comprobar('Preferencias cinéticas sobreviven al cambio de página y no guardan 
     const motor = new prueba.contexto.Cinetico(); motor.activa = true;
     motor.ejecutarAccion('control_torso'); motor.ejecutarAccion('temblor'); motor.ejecutarAccion('movimiento_reducido'); motor.ejecutarAccion('lento');
     const siguiente = new prueba.contexto.Cinetico(); siguiente.aplicarAjustes(guardado.ajustesCineticos);
-    assert.equal(siguiente.modoControl, 'torso'); assert.equal(siguiente.zonaMuerta, 0.07);
+    assert.equal(siguiente.modoControl, 'cabeza'); assert.equal(siguiente.zonaMuerta, 0.07);
     assert.equal(siguiente.amplitudControl, 0.55); assert.equal(siguiente.sensibilidad, 0.8);
     assert.deepEqual(Object.keys(guardado.ajustesCineticos).sort(), ['amplitud', 'modo', 'temblor', 'velocidad']);
     siguiente.aplicarAjustes({ modo: 'invalido', velocidad: Infinity, amplitud: -3, temblor: 'si' });
-    assert.equal(siguiente.modoControl, 'torso'); assert.equal(siguiente.sensibilidad, 0.8); assert.equal(siguiente.amplitudControl, 0.55);
+    assert.equal(siguiente.modoControl, 'cabeza'); assert.equal(siguiente.sensibilidad, 0.8); assert.equal(siguiente.amplitudControl, 0.55);
     siguiente.evaluarEstado = () => {}; siguiente.bloqueada = true;
     siguiente.ejecutarAccion('activar'); assert.equal(siguiente.permitida, true); assert.equal(siguiente.bloqueada, false);
     siguiente.ejecutarAccion('desactivar'); assert.equal(siguiente.permitida, false); assert.equal(guardado.ojos, false);
@@ -324,7 +442,7 @@ comprobar('Abrir popup no suspende sensores; visibilidad real controla ambas var
     }
     const manifiesto = JSON.parse(fs.readFileSync(path.join(raiz, 'manifest.json'), 'utf8'));
     assert.match(manifiesto.content_security_policy.extension_pages, /wasm-unsafe-eval/);
-    assert.equal(manifiesto.web_accessible_resources, undefined);
+    assert.ok(manifiesto.web_accessible_resources.every(regla => regla.resources.every(recurso => recurso.startsWith('mascotas/'))), 'Sólo sprites y motor de mascota son públicos; visión permanece privada');
     assert.ok(manifiesto.permissions.includes('scripting'));
     assert.ok(fs.statSync(path.join(raiz, 'vision/modelos/rostro.task')).size > 1000000);
 });
@@ -350,6 +468,307 @@ comprobar('Seguimiento conserva postura y tolera cambios uniformes de iluminaci�
     for (let indice = 0; indice < repetitiva.length; indice++) repetitiva[indice] = 80 + (indice % 4) * 20;
     motor.plantilla = motor.extraerParche(repetitiva, 80, 60);
     assert.equal(motor.seguirPunto(repetitiva), null);
+    motor.plantilla = motor.extraerParche(imagen(), 80, 60); motor.puntoActual = { x: 80, y: 60 };
+    const punto = motor.seguirPunto(imagen(5, -3).map(valor => valor * 0.6 + 40));
+    assert.ok(punto); assert.equal(punto.x, 85); assert.equal(punto.y, 57);
+});
+
+function imagenExtremidad(dx = 0, dy = 0, luz = 0) {
+    const grises = new Float32Array(19200).fill(180 + luz), textura = imagen(dx, dy, luz);
+    for (let y = 30; y < 110; y++) for (let x = 64; x < 96; x++) grises[y * 160 + x] = 100 + (x * y) % 90 + luz;
+    for (let y = 78 + dy; y < 102 + dy; y++) for (let x = 16 + dx; x < 46 + dx; x++) grises[y * 160 + x] = textura[y * 160 + x];
+    return grises;
+}
+comprobar('Textura móvil fuera del centro se adquiere sin torso, tolera pérdida breve y desarma clic', () => {
+    const prueba = entorno(); const motor = new prueba.contexto.Cinetico();
+    motor.activa = true; motor.modoControl = 'zona'; motor.grisesRecibidos = true;
+    motor.dibujarHUD = motor.actualizarHover = () => {};
+    const fotograma = (tiempo, grises, marca = tiempo) => { motor.grises.set(grises); motor.deteccion = { tiempo: marca }; motor.controlarZona(tiempo); };
+    fotograma(0, imagenExtremidad()); assert.equal(motor.plantilla, null);
+    fotograma(50, imagenExtremidad(2)); assert.ok(motor.plantilla);
+    assert.ok(motor.puntoActual.x < 52 && motor.puntoActual.y > 74, 'Sigue extremidad baja, no torso fijo');
+    const origen = { ...motor.origenControl };
+    for (let indice = 0; indice < 10; indice++) fotograma(50 + indice * 10, imagenExtremidad(2), 50);
+    assert.equal(motor.neutroListo, true, 'La textura no requiere aprender postura ni quietud');
+    fotograma(150, imagenExtremidad(3)); fotograma(250, imagenExtremidad(4));
+    assert.equal(motor.neutroListo, true); assert.equal(motor.origenControl.x, origen.x);
+    motor.armado = true; const plantilla = motor.plantilla;
+    fotograma(300, new Float32Array(19200).fill(100));
+    assert.equal(motor.plantilla, plantilla); assert.equal(motor.armado, false); assert.equal(motor.fiableDesde, null);
+    fotograma(400, imagenExtremidad(4));
+    assert.equal(motor.neutroListo, true); assert.equal(motor.origenControl.x, origen.x);
+    assert.equal(prueba.mensajes.filter(dato => dato.accion === 'hablar').length, 0, 'No hay calibración de textura');
+    fotograma(500, new Float32Array(19200).fill(100)); fotograma(1800, new Float32Array(19200).fill(100));
+    assert.equal(motor.plantilla, null); assert.equal(motor.neutroListo, true);
+    assert.equal(motor.origenControl.x, 80); assert.equal(motor.origenControl.y, 60);
+    motor.calibrar(); fotograma(1900, imagenExtremidad()); fotograma(2000, imagenExtremidad(0, 0, 25));
+    assert.equal(motor.plantilla, null, 'Cambiar la luz no adquiere textura');
+});
+comprobar('Preferencias anteriores se reducen a tres modos sin perder los otros ajustes', () => {
+    for (const [anterior, nuevo] of [['torso', 'cabeza'], ['automatico', 'manos'], ['brazo_izquierdo', 'manos'], ['brazo_derecho', 'manos'], ['zona_izquierda', 'zona'], ['zona_derecha', 'zona']]) {
+        const prueba = entorno(); const motor = new prueba.contexto.Cinetico();
+        motor.activa = true; motor.dibujarHUD = motor.programarFotograma = () => {};
+        motor.aplicarAjustes({ modo: anterior, velocidad: 0.8, amplitud: 0.55, temblor: true });
+        assert.equal(motor.modoControl, nuevo); assert.equal(motor.sensibilidad, 0.8); assert.equal(motor.amplitudControl, 0.55); assert.equal(motor.zonaMuerta, 0.07);
+        motor.bucleRender(0); assert.equal(prueba.mensajes.at(-1).modo, nuevo);
+    }
+});
+comprobar('Joystick de mano baja mantiene dirección, vuelve al reposo y se detiene al perder seguimiento', () => {
+    const prueba = entorno(); const motor = new prueba.contexto.Cinetico(); let clics = 0;
+    motor.activa = true; motor.aplicarAjustes({ modo: 'manos' });
+    motor.solicitarModelo = motor.programarFotograma = motor.actualizarHover = motor.dibujarHUD = () => {};
+    motor.elementoBajoCursor = () => null; motor.hacerClick = () => clics++;
+    const fotograma = (tiempo, x) => {
+        motor.recibirFotograma({ modo: 'manos', edad: 0, manos: x == null ? [] : [{ x: 1 - x / 160, y: 0.85 }], mano: 'Left' });
+        motor.deteccion.tiempo = tiempo; motor.bucleRender(tiempo);
+    };
+    const inicio = motor.posX;
+    fotograma(0, 30); assert.equal(motor.neutroListo, true);
+    for (let tiempo = 50; tiempo <= 500; tiempo += 50) fotograma(tiempo, 30 + tiempo / 50);
+    assert.ok(motor.posX > inicio + 10, 'Un gesto de sólo diez píxeles mueve a la derecha: ' + (motor.posX - inicio));
+    assert.equal(motor.origenControl.x, 80); assert.equal(motor.origenControl.y, 60);
+    const desplazado = motor.posX;
+    for (let tiempo = 550; tiempo <= 800; tiempo += 50) fotograma(tiempo, 40);
+    assert.ok(motor.posX > desplazado + 50, 'Mantener el joystick desplazado sigue moviendo');
+    for (let tiempo = 850; tiempo <= 1500; tiempo += 50) fotograma(tiempo, 30);
+    assert.equal(motor.enZonaSegura, true, 'Volver al reposo inicial detiene el cursor');
+    const reposo = motor.posX;
+    fotograma(1550, null); fotograma(1600, 90);
+    assert.equal(motor.posX, reposo, 'Recuperar una mano en otra posición no inventa un gesto');
+    for (let tiempo = 1650; tiempo <= 3000; tiempo += 50) fotograma(tiempo, null);
+    fotograma(3050, 25); assert.equal(motor.posX, reposo); assert.equal(motor.origenControl.x, 80);
+    for (let tiempo = 3100; tiempo <= 3400; tiempo += 50) fotograma(tiempo, 25 - (tiempo - 3050) / 50);
+    assert.ok(motor.posX < reposo, 'Gesto nuevo tras pérdida larga funciona sin recalibrar');
+    assert.equal(clics, 0); assert.equal(prueba.mensajes.filter(dato => dato.accion === 'hablar').length, 0);
+});
+comprobar('Joystick responde igual en cuatro direcciones y acumula movimientos lentos sin depender de FPS', () => {
+    for (const modo of ['manos', 'zona']) {
+        for (const intervalo of [30, 50, 100]) {
+            const avances = [];
+            for (const [dx, dy] of [[4, 0], [-4, 0], [0, 3], [0, -3]]) {
+                const prueba = entorno(); const motor = new prueba.contexto.Cinetico();
+                motor.modoControl = modo; motor.elementoBajoCursor = () => null; motor.atraerCursor = () => {};
+                const inicio = { x: motor.posX, y: motor.posY };
+                for (let tiempo = 0; tiempo <= 1200; tiempo += intervalo) {
+                    const avance = Math.min(1, tiempo / 400);
+                    const punto = motor.controlarGesto({ x: 25 + dx * avance, y: 90 + dy * avance }, tiempo);
+                    motor.actualizarControl(motor.filtrarMovimiento(punto, tiempo), tiempo, intervalo);
+                }
+                const avance = dx ? (motor.posX - inicio.x) * Math.sign(dx) : (motor.posY - inicio.y) * Math.sign(dy);
+                assert.ok(avance > 200, modo + ': desplazamiento lento y mantenido funciona a ' + intervalo + ' ms');
+                avances.push(avance);
+                const anterior = { ...motor.muestraGesto.control };
+                const punto = motor.controlarGesto({ x: 100, y: 20 }, 1200);
+                assert.deepEqual({ ...punto }, anterior, 'Una imagen repetida conserva el control anterior');
+                const recuperado = motor.controlarGesto({ x: 100, y: 20 }, 1600);
+                assert.equal(recuperado.x, 80); assert.equal(recuperado.y, 60, 'Una interrupción no mueve ni extrapola');
+            }
+            assert.ok(Math.max(...avances) - Math.min(...avances) < 1, 'Respuesta simétrica con diferencia menor a un píxel');
+        }
+    }
+});
+comprobar('Mano abierta y puño bajan por desplazamiento aunque el reposo esté inclinado', () => {
+    for (const abierta of [true, false]) {
+        const prueba = entorno(); const motor = new prueba.contexto.Cinetico(); motor.activa = true;
+        motor.aplicarAjustes({ modo: 'manos' });
+        motor.solicitarModelo = motor.programarFotograma = motor.actualizarHover = motor.dibujarHUD = () => {};
+        motor.elementoBajoCursor = () => null; motor.atraerCursor = () => {};
+        const fotograma = (tiempo, desplazamiento) => {
+            const manos = Array.from({ length: 21 }, () => ({ x: 0.4, y: 0.7 + desplazamiento, z: 0 }));
+            manos[5] = { x: 0.35, y: 0.45 + desplazamiento, z: 0.04 };
+            manos[17] = { x: 0.45, y: 0.45 + desplazamiento, z: -0.04 };
+            if (abierta) for (const indice of [8, 12, 16, 20]) manos[indice].y = 0.25 + desplazamiento;
+            motor.numeroFotograma++; motor.deteccion = { tiempo, manos, mano: 'Left' }; motor.bucleRender(tiempo);
+        };
+        const inicio = { x: motor.posX, y: motor.posY };
+        for (let tiempo = 0; tiempo <= 200; tiempo += 50) fotograma(tiempo, 0);
+        assert.equal(motor.posX, inicio.x); assert.equal(motor.posY, inicio.y, 'Reposo cómodo no exige palma frontal');
+        for (let tiempo = 250; tiempo <= 600; tiempo += 50) fotograma(tiempo, Math.min(0.04, (tiempo - 200) / 10000));
+        const bajando = motor.posY;
+        for (let tiempo = 650; tiempo <= 900; tiempo += 50) fotograma(tiempo, 0.04);
+        assert.ok(motor.posY > bajando + 50, 'Mantener la mano abajo mantiene la dirección');
+        assert.equal(motor.posX, inicio.x, 'La inclinación lateral no secuestra el movimiento hacia abajo');
+        for (let tiempo = 950; tiempo <= 1800; tiempo += 50) fotograma(tiempo, 0);
+        assert.equal(motor.enZonaSegura, true);
+        assert.ok(Math.abs(motor.muestraGesto.y - 84) < 0.001, 'El reposo permanece en la primera posición, sin recentrar durante el gesto');
+        assert.equal(prueba.mensajes.filter(dato => dato.accion === 'hablar').length, 0);
+    }
+});
+comprobar('Pasar de codo a mano conserva centro fijo y no reinicia calibración', () => {
+    const { motor, fotograma, clics } = camaraSimulada(); motor.modoControl = 'manos'; motor.fuenteControl = 'brazo_izquierdo:13';
+    fotograma(1400, 78, 'brazo_izquierdo:13');
+    for (const [tiempo, y] of [[1500, 110], [1600, 114], [1700, 118]]) fotograma(tiempo, y, 'mano:Left');
+    assert.equal(motor.fuenteControl, 'mano:Left'); assert.equal(motor.neutroListo, true);
+    assert.equal(motor.origenControl.x, 80); assert.equal(motor.origenControl.y, 60);
+    assert.equal(motor.puntoActual.y, 118);
+    assert.equal(clics.length, 0);
+});
+comprobar('Codo relajado sigue moviendo mientras confirma mano, sin perder el gesto ni repetir anuncios', () => {
+    const prueba = entorno(); const motor = new prueba.contexto.Cinetico();
+    motor.activa = true; motor.modoControl = 'manos';
+    motor.solicitarModelo = motor.programarFotograma = motor.actualizarHover = motor.dibujarHUD = () => {};
+    motor.elementoBajoCursor = () => null;
+    const fotograma = (tiempo, x, mano = null) => {
+        const cuerpo = []; cuerpo[13] = { x: 1 - x / 160, y: 0.85, visibility: 0.55, presence: 0.55 };
+        motor.numeroFotograma++; motor.deteccion = { tiempo, cuerpo, manos: mano == null ? [] : [{ x: 1 - mano / 160, y: 0.85 }], mano: 'Left' };
+        motor.bucleRender(tiempo);
+    };
+    for (const tiempo of [0, 100, 200]) fotograma(tiempo, 25);
+    assert.equal(motor.neutroListo, true); assert.equal(motor.fuenteControl, 'brazo_izquierdo:13');
+    fotograma(300, 30); fotograma(400, 40);
+    for (const [tiempo, mano] of [[500, 100], [550, 110]]) {
+        const antes = motor.posX; fotograma(tiempo, tiempo === 500 ? 42 : 44, mano);
+        assert.ok(motor.posX > antes, 'Codo visible no se congela mientras confirma');
+        assert.equal(motor.fuenteControl, 'brazo_izquierdo:13');
+    }
+    fotograma(650, 50, 120);
+    assert.equal(motor.fuenteControl, 'mano:Left'); assert.equal(motor.origenControl.x, 80);
+    assert.equal(motor.puntoActual.x - motor.origenControl.x, 40); assert.equal(motor.neutroListo, true);
+    assert.equal(prueba.mensajes.filter(dato => dato.accion === 'hablar').length, 0);
+});
+comprobar('Inclinación de palma y puño dirige cuatro sentidos sin trasladar muñeca ni calibrar', () => {
+    const motor = new entornoVoz.contexto.Cinetico(); motor.modoControl = 'manos';
+    const mano = (a, b) => {
+        const puntos = Array.from({ length: 21 }, () => ({ x: 0.5, y: 0.75, z: 0 }));
+        puntos[5] = { x: 0.45, y: 0.5, z: a }; puntos[17] = { x: 0.55, y: 0.5, z: b };
+        return puntos;
+    };
+    const frontal = motor.elegirPunto({ manos: mano(0, 0) });
+    assert.equal(frontal.gesto.x, 80); assert.equal(frontal.gesto.y, 60);
+    for (const [a, b, eje, signo] of [[0.04, -0.04, 'x', -1], [-0.04, 0.04, 'x', 1], [-0.08, -0.08, 'y', -1], [0.08, 0.08, 'y', 1]]) {
+        const puntos = mano(a, b), abierta = motor.elegirPunto({ manos: puntos });
+        assert.ok((abierta.gesto[eje] - motor.puntoBase[eje]) * signo > 8);
+        assert.equal(abierta.x, frontal.x); assert.equal(abierta.y, frontal.y);
+        for (const indice of [8, 12, 16, 20]) puntos[indice] = { x: 0.49, y: 0.7, z: 0 };
+        const cerrada = motor.elegirPunto({ manos: puntos });
+        assert.equal(JSON.stringify(cerrada.gesto), JSON.stringify(abierta.gesto));
+        assert.equal(motor.muestrasPostura.length, 0);
+    }
+    const indice = mano(0, 0); indice[8] = { x: 0.9, y: 0.5, z: -0.05 };
+    assert.ok(motor.elegirPunto({ manos: indice }).gesto.x < 55, 'Índice único extendido apunta sin mover muñeca');
+    indice[5].z = NaN; assert.equal(motor.elegirPunto({ manos: indice }).gesto, null, 'Orientación inválida conserva respaldo por movimiento');
+});
+comprobar('Dedos disponibles señalan cuatro direcciones desde el inicio sin exigir una mano completa', () => {
+    for (const [base, punta] of [[5, 8], [9, 12], [13, 16], [17, 20]]) {
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+            const prueba = entorno(); const motor = new prueba.contexto.Cinetico(); motor.activa = true;
+            motor.aplicarAjustes({ modo: 'manos' });
+            motor.programarFotograma = motor.actualizarHover = motor.dibujarHUD = () => {};
+            motor.elementoBajoCursor = () => null; motor.atraerCursor = () => {};
+            const puntos = [];
+            puntos[0] = { x: 0.5 - dx * 0.1, y: 0.5 - dy * 0.1, z: 0 };
+            puntos[base] = { x: 0.5, y: 0.5, z: 0 };
+            puntos[punta] = { x: 0.5 + dx * 0.25, y: 0.5 + dy * 0.25, z: 0 };
+            const inicio = { x: motor.posX, y: motor.posY };
+            for (let tiempo = 0; tiempo <= 600; tiempo += 50) {
+                motor.numeroFotograma++; motor.deteccion = { tiempo, manos: puntos }; motor.bucleRender(tiempo);
+            }
+            assert.ok(dx ? (motor.posX - inicio.x) * -dx > 100 : (motor.posY - inicio.y) * dy > 100);
+            assert.equal(motor.muestraGesto.x, (1 - puntos[0].x) * 160, 'Señalar no traslada la muñeca');
+            const gesto = motor.inclinacionMano(puntos);
+            const movimiento = motor.controlarGesto({ x: motor.muestraGesto.x + 3, y: motor.muestraGesto.y }, 650, 0, gesto);
+            assert.equal(movimiento.x, 98, 'Desplazamiento del joystick tiene prioridad sobre el dedo');
+            puntos[punta] = { ...puntos[base] };
+            for (let tiempo = 700; tiempo <= 1300; tiempo += 50) {
+                motor.numeroFotograma++; motor.deteccion = { tiempo, manos: puntos }; motor.bucleRender(tiempo);
+            }
+            assert.equal(motor.enZonaSegura, true, 'Doblar el dedo deja de señalar sin calibrar');
+            puntos[punta].z = NaN; assert.equal(motor.inclinacionMano(puntos), null, 'Puntos inválidos no crean dirección');
+        }
+    }
+    const motor = new entornoVoz.contexto.Cinetico();
+    const puntos = [];
+    puntos[0] = { x: 0.4, y: 0.5, z: 0 };
+    puntos[5] = { x: 0.5, y: 0.5, z: 0 }; puntos[8] = { x: 0.8, y: 0.5, z: 0 };
+    puntos[9] = { x: 0.5, y: 0.53, z: 0 }; puntos[12] = { x: 0.8, y: 0.53, z: 0 };
+    assert.ok(motor.inclinacionMano(puntos).x < 55, 'Dos dedos alineados también señalan');
+    puntos[12] = { x: 0.5, y: 0.9, z: 0 };
+    assert.equal(motor.inclinacionMano(puntos), null, 'Dedos divergentes no compiten por el cursor');
+});
+comprobar('Joystick local de textura mantiene cuatro direcciones y descansa al volver a su origen', () => {
+    const motor = new entornoVoz.contexto.Cinetico(); motor.modoControl = 'zona';
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        motor.muestraGesto = null;
+        motor.controlarGesto({ x: 25, y: 100 }, 0);
+        const gesto = motor.controlarGesto({ x: 25 + dx, y: 100 + dy }, 50);
+        assert.equal(Math.sign(gesto.x - 80), dx); assert.equal(Math.sign(gesto.y - 60), dy);
+        const sostenido = motor.controlarGesto({ x: 25 + dx, y: 100 + dy }, 100);
+        assert.equal(sostenido.x, gesto.x); assert.equal(sostenido.y, gesto.y);
+        const reposo = motor.controlarGesto({ x: 25, y: 100 }, 150);
+        assert.equal(reposo.x, 80); assert.equal(reposo.y, 60);
+        assert.equal(motor.controlarGesto({ x: 80, y: 60 }, 150).x, 80, 'Imagen repetida no inventa movimiento');
+    }
+    for (const angulo of [-0.12, 0.12]) {
+        motor.muestraGesto = null; motor.controlarGesto({ x: 25, y: 100 }, 0);
+        assert.equal(Math.sign(motor.controlarGesto({ x: 25, y: 100 }, 50, angulo).x - 80), Math.sign(angulo));
+    }
+    const imagenGiratoria = angulo => {
+        const grises = new Float32Array(19200), c = Math.cos(angulo), s = Math.sin(angulo);
+        for (let y = 0; y < 120; y++) for (let x = 0; x < 160; x++) {
+            const u = (x - 80) * c + (y - 60) * s, v = -(x - 80) * s + (y - 60) * c;
+            grises[y * 160 + x] = 120 + 35 * Math.sin(u * 0.37) + 30 * Math.sin(v * 0.51) + 15 * Math.cos(u * 0.13 + v * 0.27);
+        }
+        return grises;
+    };
+    motor.puntoActual = { x: 80, y: 60 };
+    motor.plantilla = motor.extraerParche(imagenGiratoria(0), 80, 60);
+    for (const angulo of [-0.24, 0.24]) {
+        const seguido = motor.seguirPunto(imagenGiratoria(angulo));
+        assert.ok(seguido, 'El giro pequeño no corta la textura');
+        assert.equal(seguido.angulo, angulo);
+        assert.ok(Math.hypot(seguido.x - 80, seguido.y - 60) <= 2);
+    }
+    motor.activa = true; motor.grisesRecibidos = true; motor.muestraGesto = null;
+    motor.dibujarHUD = motor.actualizarHover = () => {};
+    const fotograma = (tiempo, angulo) => {
+        motor.grises.set(imagenGiratoria(angulo)); motor.deteccion = { tiempo }; motor.controlarZona(tiempo);
+    };
+    fotograma(0, 0); fotograma(50, 0.24);
+    assert.ok(motor.puntoGesto.x > 80, 'Giro de textura dirige aunque su centro no se traslade');
+    fotograma(100, 0.24);
+    assert.ok(motor.puntoGesto.x > 80, 'Mantener el giro conserva la dirección del joystick');
+    fotograma(150, 0);
+    assert.ok(Math.abs(motor.puntoGesto.x - 80) < 0.001, 'Volver al ángulo de reposo detiene el gesto');
+    motor.muestraGesto = null; motor.controlarGesto({ x: 80, y: 60 }, 200);
+    for (let tiempo = 250; tiempo <= 350; tiempo += 50) motor.controlarGesto({ x: 80, y: 60 }, tiempo, 0.24);
+    for (let tiempo = 400; tiempo <= 500; tiempo += 50) motor.controlarGesto({ x: 80, y: 60 }, tiempo, -0.24);
+    assert.ok(Math.abs(motor.muestraGesto.control.x - 80) < 0.001, 'Saturar la velocidad no pierde el ángulo para regresar');
+    assert.equal(motor.origenControl.x, 80); assert.equal(motor.origenControl.y, 60);
+});
+comprobar('Orientación sostenida mueve con muñeca quieta; palma frontal descansa sin mover el brazo', () => {
+    const prueba = entorno(); const motor = new prueba.contexto.Cinetico(); motor.activa = true;
+    motor.aplicarAjustes({ modo: 'manos' });
+    motor.solicitarModelo = motor.programarFotograma = motor.actualizarHover = motor.dibujarHUD = () => {};
+    motor.elementoBajoCursor = () => null;
+    const fotograma = (tiempo, inclinado) => {
+        const manos = Array.from({ length: 21 }, () => ({ x: 0.4, y: 0.85, z: 0 }));
+        manos[5] = { x: 0.35, y: 0.6, z: inclinado ? -0.04 : 0 };
+        manos[17] = { x: 0.45, y: 0.6, z: inclinado ? 0.04 : 0 };
+        motor.numeroFotograma++; motor.deteccion = { tiempo, manos, mano: 'Left' }; motor.bucleRender(tiempo);
+    };
+    const inicio = motor.posX;
+    fotograma(0, false);
+    for (let tiempo = 50; tiempo <= 600; tiempo += 50) fotograma(tiempo, true);
+    assert.ok(motor.posX > inicio + 100, 'Inclinar dirige sin desplazamiento de muñeca');
+    const fuente = motor.fuenteControl;
+    for (let tiempo = 650; tiempo <= 1500; tiempo += 50) fotograma(tiempo, false);
+    assert.equal(motor.enZonaSegura, true); assert.equal(motor.fuenteControl, fuente);
+    const reposo = motor.posX;
+    for (let tiempo = 1550; tiempo <= 2000; tiempo += 50) fotograma(tiempo, false);
+    assert.equal(motor.posX, reposo); assert.equal(motor.origenControl.x, 80);
+    assert.equal(prueba.mensajes.filter(dato => dato.accion === 'hablar').length, 0);
+});
+comprobar('Vista conserva zona segura central y muestra mano baja por separado', () => {
+    const motor = new entornoVoz.contexto.Cinetico(); const elipses = [], puntos = [], lineas = [];
+    motor.modoControl = 'manos'; motor.origenControl = { x: 30, y: 102 }; motor.puntoActual = { x: 45, y: 102 };
+    motor.puntoGesto = { x: 83, y: 60 }; motor.amplitudControl = 0.55;
+    motor.hud = {}; motor.burbuja = { style: {} };
+    motor.hudCtx = { clearRect() {}, beginPath() {}, moveTo() {}, lineTo: (...valores) => lineas.push(valores), stroke() {}, fill() {}, ellipse: (...valores) => elipses.push(valores), arc: (...valores) => puntos.push(valores) };
+    motor.dibujarHUD('Seguimiento', 0);
+    assert.equal(elipses[0][0], 80); assert.equal(elipses[0][1], 60);
+    assert.equal(puntos[0][0], 45); assert.equal(puntos[0][1], 102);
+    assert.deepEqual(lineas.at(-1), [83, 60], 'Línea y zona segura usan la misma escala de entrada');
+    assert.equal(motor.puntoBase.x, 80); assert.equal(motor.puntoBase.y, 60);
 });
 
 function simularDwell(fps) {
@@ -415,7 +834,141 @@ comprobar('Centro fijo y respuesta simétrica aunque la postura se calibre fuera
     for (const distancia of desplazamientos) assert.ok(Math.abs(distancia - desplazamientos[0]) < 0.001);
 });
 
+comprobar('Atracción local evita controles deshabilitados/ocultos y no arma clic por acercarse', () => {
+    const prueba = entorno();
+    const motor = new prueba.contexto.Cinetico();
+    const fondo = { closest: () => null };
+    const boton = { disabled: false, matches: selector => selector === ':disabled' ? boton.disabled : true, getAttribute: () => null, closest: selector => selector === '[inert], [aria-disabled="true"]' ? null : boton,
+        getClientRects: () => [{ left: 110, right: 150, top: 80, bottom: 120, width: 40, height: 40 }] };
+    let oculto = false;
+    prueba.contexto.document.elementFromPoint = (x, y) => !oculto && x >= 110 && x <= 150 && y >= 80 && y <= 120 ? boton : fondo;
+    motor.posX = 100; motor.posY = 100;
+    motor.actualizarControl({ x: 80, y: 60 }, 0, 33);
+    assert.ok(motor.posX > 100 && motor.posX < 114);
+    assert.equal(motor.armado, false);
+    for (let paso = 0; paso < 8; paso++) motor.atraerCursor(33);
+    assert.equal(motor.elementoBajoCursor(), boton);
+    assert.equal(motor.posX, 114);
+    motor.posX = 100; boton.disabled = true; motor.atraerCursor(33); assert.equal(motor.posX, 100);
+    boton.disabled = false; oculto = true; motor.atraerCursor(33); assert.equal(motor.posX, 100);
+    oculto = false; motor.posX = 20; motor.atraerCursor(33); assert.equal(motor.posX, 20);
+});
+
 async function principal() {
+    const pruebaMarco = entorno(), contextoMarco = pruebaMarco.contexto, eventosMarco = new Map();
+    let cambiosMarco, resolverPreferencia, marcasMarco = 0;
+    const hijoMarco = { contentWindow: { postMessage() {} }, toggleAttribute() { marcasMarco++; }, removeAttribute() {} };
+    contextoMarco.document.querySelectorAll = () => [hijoMarco];
+    contextoMarco.document.addEventListener = (tipo, accion) => eventosMarco.set(tipo, accion);
+    contextoMarco.document.removeEventListener = tipo => eventosMarco.delete(tipo);
+    contextoMarco.document.dispatchEvent = evento => eventosMarco.get(evento.type)?.(evento);
+    contextoMarco.window.top = {}; contextoMarco.window.parent = { postMessage() {} };
+    contextoMarco.window.origin = 'https://example.org'; contextoMarco.location.ancestorOrigins = ['https://example.org'];
+    contextoMarco.window.addEventListener = (tipo, accion) => eventosMarco.set(tipo, accion);
+    contextoMarco.window.removeEventListener = tipo => eventosMarco.delete(tipo);
+    contextoMarco.MutationObserver = class { observe() {} disconnect() {} };
+    contextoMarco.FiltrosDaltonismo = class {
+        constructor(soloPantallaCompleta) { this.soloPantallaCompleta = soloPantallaCompleta; this.filtroActual = 'ninguno'; }
+        aplicar(tipo) { this.filtroActual = tipo; }
+        limpiar() { this.filtroActual = 'ninguno'; }
+    };
+    contextoMarco.chrome.runtime.id = 'prueba'; contextoMarco.chrome.runtime.getManifest = () => ({});
+    contextoMarco.chrome.storage.onChanged = { addListener: accion => { cambiosMarco = accion; }, removeListener() { cambiosMarco = null; } };
+    contextoMarco.chrome.storage.local.get = () => new Promise(resolver => { resolverPreferencia = resolver; });
+    pruebaMarco.cargar(path.join(raiz, 'filtros_frames.js'));
+    const controladorMarco = contextoMarco.adaptaPEFiltrosMarco;
+    assert.equal(controladorMarco.filtros.soloPantallaCompleta, true);
+    cambiosMarco({daltonismo:{newValue:'protanopia'}}, 'local');
+    resolverPreferencia({daltonismo:'deuteranopia'}); await Promise.resolve();
+    assert.equal(controladorMarco.filtros.filtroActual, 'protanopia', 'Una lectura inicial tardía no revierte la preferencia');
+    pruebaMarco.cargar(path.join(raiz, 'filtros_frames.js'));
+    assert.equal(contextoMarco.adaptaPEFiltrosMarco, controladorMarco, 'Reinyección idempotente');
+    eventosMarco.get('message')({source:{}, data:{tipo:'adapta-pe-filtro-pantalla',activa:true}});
+    eventosMarco.get('message')({source:hijoMarco.contentWindow, data:{tipo:'adapta-pe-filtro-pantalla',activa:'sí'}});
+    assert.equal(marcasMarco, 0, 'No se aceptan fuentes ajenas ni valores sin validar');
+    eventosMarco.get('message')({source:hijoMarco.contentWindow, data:{tipo:'adapta-pe-filtro-pantalla',activa:true}});
+    assert.equal(marcasMarco, 1);
+    controladorMarco.destruir();
+    assert.equal(eventosMarco.size, 0); assert.equal(cambiosMarco, null); assert.equal(controladorMarco.vigente(), false);
+    comprobaciones++; console.log('✓ Marcos: prioridad validada, lectura inicial sin carrera, reinyección y limpieza');
+    const pruebaModo = entorno(); const motorModo = new pruebaModo.contexto.Cinetico(); motorModo.activa = true;
+    const pendientesModo = [];
+    pruebaModo.contexto.chrome.runtime.sendMessage = datos => new Promise((resolver, rechazar) => pendientesModo.push({ datos, resolver, rechazar }));
+    motorModo.aplicarAjustes({ modo: 'manos' });
+    assert.equal(pendientesModo[0].datos.modo, 'manos', 'El cambio se envía sin esperar otra imagen');
+    pendientesModo[0].resolver({ ok: false }); await Promise.resolve();
+    assert.equal(motorModo.modeloEnviado, null, 'Cambio durante transición de prioridad vuelve a intentarse');
+    motorModo.solicitarModelo();
+    motorModo.aplicarAjustes({ modo: 'zona' });
+    pendientesModo[1].rechazar(new Error('Puerto cerrado')); await Promise.resolve(); await Promise.resolve();
+    assert.equal(motorModo.modeloEnviado, 'zona:null', 'Un rechazo viejo no borra el modo nuevo');
+    pendientesModo[2].resolver({ ok: true }); await Promise.resolve();
+    motorModo.solicitarModelo(); assert.equal(pendientesModo.length, 3, 'Confirmación evita mensajes duplicados');
+    motorModo.aplicarAjustes({ modo: 'cabeza' });
+    pendientesModo[3].rechazar(new Error('Puerto cerrado')); await Promise.resolve(); await Promise.resolve();
+    assert.equal(motorModo.modeloEnviado, null);
+    motorModo.solicitarModelo(); pendientesModo[4].resolver({ ok: true }); await Promise.resolve();
+    comprobaciones++; console.log('✓ Cambio de modo inmediato con reintento y sin perder el modo más reciente');
+    const llamadas = [], salidas = [];
+    let cerrar = 0, tiempoDeteccion = 0;
+    const modelos = { rostro: [], manos: [], cuerpo: [], etiqueta: 'Left', segundaMano: null };
+    const clase = nombre => ({ createFromOptions: async () => ({ detectForVideo: () => {
+        llamadas.push(nombre);
+        return nombre === 'rostro' ? { faceLandmarks: [modelos.rostro] } : nombre === 'cuerpo' ? { landmarks: [modelos.cuerpo] } : { landmarks: modelos.segundaMano ? [modelos.segundaMano, modelos.manos] : [modelos.manos], handedness: [[{ categoryName: modelos.etiqueta }], [{ categoryName: modelos.etiqueta }]] };
+    } }) });
+    const trabajador = vm.createContext({ self: {}, postMessage: dato => salidas.push(dato), importScripts() {
+        trabajador.self.exports = { FilesetResolver: { forVisionTasks: async () => ({}) }, FaceLandmarker: clase('rostro'), PoseLandmarker: clase('cuerpo'), HandLandmarker: clase('manos') };
+    } });
+    vm.runInContext(fs.readFileSync(path.join(raiz, 'vision/trabajador.js'), 'utf8'), trabajador);
+    await trabajador.self.onmessage({ data: { tipo: 'iniciar' } });
+    const detectar = async (modo, fuente = null) => {
+        llamadas.length = 0;
+        await trabajador.self.onmessage({ data: { tipo: 'imagen', modo, fuente, tiempo: tiempoDeteccion += 100, imagen: { close: () => cerrar++ } } });
+    };
+    modelos.rostro = []; modelos.cuerpo = [{}];
+    await detectar('cabeza');
+    comprobar('Cabeza/torso busca respaldo corporal sólo si falta rostro o ya controla cuerpo', () => {
+        assert.deepEqual(llamadas, ['rostro', 'cuerpo']); assert.equal(salidas.at(-1).cuerpo.length, 1);
+    });
+    modelos.rostro = [{}]; await detectar('cabeza', 'torso');
+    assert.deepEqual(llamadas, ['rostro', 'cuerpo']);
+    modelos.rostro = [{}]; modelos.cuerpo = [{}];
+    await detectar('automatico');
+    comprobar('Worker automático busca brazos aunque haya rostro al iniciar', () => {
+        assert.deepEqual(llamadas, ['rostro', 'manos', 'cuerpo']); assert.equal(salidas.at(-1).cuerpo.length, 1);
+    });
+    await detectar('automatico', 'cabeza');
+    comprobar('Cabeza en automático sigue buscando manos sin exigir cambio manual', () => assert.deepEqual(llamadas, ['rostro', 'manos']));
+    await detectar('manos');
+    comprobar('Worker de extremidades busca cuerpo si no detecta mano y excluye rostro', () => assert.deepEqual(llamadas, ['manos', 'cuerpo']));
+    modelos.manos = [{}];
+    await detectar('manos', 'brazo_izquierdo:13');
+    comprobar('Worker conserva brazo aun apareciendo mano y libera imágenes', () => {
+        assert.deepEqual(llamadas, ['manos', 'cuerpo']); assert.equal(cerrar, tiempoDeteccion / 100);
+    });
+    await detectar('cabeza');
+    assert.deepEqual(llamadas, ['rostro']);
+    modelos.manos = [{ x: 0.4, y: 0.4 }];
+    await detectar('manos');
+    const identidad = salidas.at(-1).mano;
+    modelos.etiqueta = 'Right'; modelos.manos = [{ x: 0.41, y: 0.4 }];
+    await detectar('manos');
+    comprobar('Etiqueta izquierda/derecha cambiante no reinicia una misma mano cercana', () => assert.equal(salidas.at(-1).mano, identidad));
+    modelos.segundaMano = [{ x: 0.9, y: 0.4 }];
+    await detectar('manos');
+    comprobar('Dos manos y orden cambiante conservan la muñeca próxima, no el índice del modelo', () => assert.equal(salidas.at(-1).manos[0].x, 0.41));
+    modelos.segundaMano = null;
+    modelos.manos = [];
+    await detectar('automatico', 'mano:Left');
+    comprobar('Automático conserva respaldo de muñeca corporal aunque vea rostro', () => assert.deepEqual(llamadas, ['rostro', 'manos', 'cuerpo']));
+    modelos.cuerpo = [];
+    for (let paso = 0; paso < 14; paso++) {
+        modelos.cuerpo[15] = { x: 0.42 + paso * 0.01, y: 0.4, visibility: 0.99, presence: 0.99 };
+        await detectar('manos', 'mano:' + identidad);
+    }
+    modelos.manos = [{ x: 0.55, y: 0.4 }];
+    await detectar('manos', 'mano:' + identidad);
+    comprobar('Respaldo corporal conserva identidad al volver a abrir mano tras más de 1.200 ms', () => assert.equal(salidas.at(-1).mano, identidad));
     const pruebaLectura = entorno();
     pruebaLectura.contexto.document.addEventListener = () => {};
     pruebaLectura.contexto.document.removeEventListener = () => {};
@@ -442,6 +995,26 @@ async function principal() {
         assert.equal(tamano.resizeWidth, 320); assert.equal(tamano.resizeHeight, 180);
         assert.equal(transferida.tipo, 'imagen'); assert.equal(captura.ocupada, true);
     });
+    captura.modo = 'manos'; captura.ocupada = false; captura.video.currentTime = 2;
+    await captura.capturar(captura.generacion);
+    comprobar('Extremidades reciben mayor detalle real sin deformar ni ampliar una cámara pequeña', () => {
+        assert.equal(tamano.resizeWidth, 640); assert.equal(tamano.resizeHeight, 360);
+    });
+    captura.ocupada = false; captura.video.currentTime = 3; captura.video.videoWidth = 160; captura.video.videoHeight = 120;
+    await captura.capturar(captura.generacion);
+    assert.equal(tamano.resizeWidth, 160); assert.equal(tamano.resizeHeight, 120);
+    captura.contexto = { setTransform() {}, drawImage() {}, resetTransform() {}, getImageData: () => ({ data: new Uint8ClampedArray(19200 * 4).fill(120) }) };
+    captura.ocupada = false;
+    for (const modo of ['zona']) {
+        captura.cambiarModelo({ modo }); captura.video.currentTime++;
+        await captura.capturar(captura.generacion);
+        const salida = pruebaCaptura.mensajes.at(-1);
+        assert.equal(salida.accion, 'camara_fotograma'); assert.equal(salida.datos.modo, modo);
+        assert.equal(salida.datos.grises.length, 19200); assert.equal(salida.datos.grises[0], 120);
+        assert.equal(captura.ocupada, false, 'Textura no inicia otra inferencia');
+    }
+    captura.ocupada = true;
+    captura.video.currentTime = 1;
     let vistaPendiente, siguienteVista, cancelada = false, vistas = 0;
     const temporizar = pruebaCaptura.contexto.setTimeout;
     const cancelar = pruebaCaptura.contexto.clearTimeout;
@@ -483,14 +1056,20 @@ async function principal() {
     });
 
     comprobar('Archivos compartidos idénticos y Lite sin cámara/TalkBack', () => {
-        for (const [completa, ligera] of [['sitios.js', 'sitios.js'], ['classes/VoiceAssistant.js', 'clases/VoiceAssistant.js'], ['background.js', 'background.js'], ['classes/FiltrosDaltonismo.js', 'clases/FiltrosDaltonismo.js'], ['voz/escucha.js','voz/escucha.js'], ['voz/permisos.js','voz/permisos.js'], ['voz/popup.js','voz/popup.js']]) {
-            assert.equal(fs.readFileSync(path.join(raiz, completa), 'utf8'), fs.readFileSync(path.join(lite, ligera), 'utf8'));
+        for (const [completa, ligera] of [['sitios.js', 'sitios.js'], ['classes/VoiceAssistant.js', 'clases/VoiceAssistant.js'], ['background.js', 'background.js'], ['classes/FiltrosDaltonismo.js', 'clases/FiltrosDaltonismo.js'], ['filtros_frames.js','filtros_frames.js'], ['voz/escucha.js','voz/escucha.js'], ['voz/permisos.js','voz/permisos.js'], ['voz/popup.js','voz/popup.js'], ['mascotas/Mascota.js','mascotas/Mascota.js'], ['mascotas/motor.js','mascotas/motor.js'], ['mascotas/popup.js','mascotas/popup.js']]) {
+            const contenidoBase = fs.readFileSync(path.join(raiz, completa), 'utf8');
+            const contenidoLite = fs.readFileSync(path.join(lite, ligera), 'utf8');
+            assert.equal(contenidoBase, contenidoLite);
         }
         for (const carpeta of [raiz, lite]) {
             const manifiesto = JSON.parse(fs.readFileSync(path.join(carpeta, 'manifest.json'), 'utf8'));
             assert.equal(manifiesto.manifest_version, 3);
-            for (const archivo of manifiesto.content_scripts[0].js) assert.ok(fs.existsSync(path.join(carpeta, archivo)));
+            assert.equal(manifiesto.name, carpeta === raiz ? 'AdaptaPE' : 'AdaptaPE Lite');
+            for (const regla of manifiesto.content_scripts) for (const archivo of regla.js) assert.ok(fs.existsSync(path.join(carpeta, archivo)));
             assert.equal(manifiesto.content_scripts[0].js[0], 'sitios.js');
+            assert.equal(manifiesto.content_scripts[1].all_frames, true);
+            assert.equal(manifiesto.content_scripts[1].match_origin_as_fallback, true);
+            assert.equal(manifiesto.content_scripts[1].js.length, 2);
         }
         assert.doesNotMatch(fs.readFileSync(path.join(lite, 'manifest.json'), 'utf8'), /KineticEngine|TalkBack/);
         assert.doesNotMatch(fs.readFileSync(path.join(lite, 'content_script.js'), 'utf8'), /kineticEngine|talkBack/);
@@ -513,6 +1092,15 @@ async function principal() {
     entornoFondo.contexto.importScripts = () => {}; // Catálogo ya cargado en este contexto.
     entornoFondo.cargar(path.join(raiz, 'background.js'));
     const enviar = peticion => new Promise(respuesta => assert.equal(manejador(peticion, { tab: { id: 10, windowId: 1 } }, respuesta), true));
+    const enviarModo = documento => new Promise(responder => manejador({ accion: 'camara_modo', modo: 'manos', fuente: null },
+        { tab: { id: 10 }, documentId: documento }, responder));
+    vm.runInContext('pestanaConControl = null', entornoFondo.contexto);
+    assert.equal((await enviarModo('actual')).ok, false);
+    assert.equal((await new Promise(responder => manejador({ accion: 'camara_modo', modo: 'manos' }, {}, responder))).ok, false);
+    vm.runInContext("pestanaConControl = { id: 10, documentId: 'actual' }", entornoFondo.contexto);
+    assert.equal((await enviarModo('anterior')).ok, false);
+    assert.equal((await enviarModo('actual')).ok, true);
+    comprobaciones++; console.log('✓ Cámara confirma el modo sólo al documento prioritario actual');
     for (const sitio of ['youtube', 'google', 'github', 'twitch']) {
         assert.equal((await enviar({ accion: 'buscar_inteligente', sitio, query: '', destino: 'actual' })).ok, true);
         assert.doesNotMatch(aperturas.at(-1).url, /search|results/);
@@ -525,6 +1113,29 @@ async function principal() {
     await enviar({ accion: 'cerrar_ventana' }); assert.equal(aperturas.at(-1).cerrarVentana, 1);
     await enviar({ accion: 'cambiar_pestana', direccion: -1 }); assert.equal(aperturas.at(-1).id, 20);
     comprobaciones++; console.log('✓ Service worker: portadas, búsqueda, validación, ventanas y pestañas');
+    const notificaciones = [], guardadosMascota = [], locuciones = [];
+    chrome.storage.local = { set: async datos => guardadosMascota.push(datos) };
+    chrome.tabs.sendMessage = async (id, datos, opciones) => notificaciones.push({ id, datos, opciones });
+    chrome.tts = { stop() {}, speak: (texto, opciones) => locuciones.push(opciones) };
+    for (const nombre of ['tinku', 'cuchu', 'yati', 'ninguna']) assert.equal((await enviar({ accion: 'mascota', nombre })).ok, true);
+    assert.equal(guardadosMascota.length, 4);
+    assert.equal((await enviar({ accion: 'mascota', nombre: '../vision' })).ok, false);
+    await enviar({ accion: 'hablar', texto: 'Lectura', origen: 'lectura' });
+    assert.equal(notificaciones.at(-1).datos.estado, 'read');
+    await enviar({ accion: 'hablar', texto: 'Respuesta' });
+    assert.equal(notificaciones.at(-1).datos.estado, 'talk');
+    const cantidad = notificaciones.length;
+    locuciones[0].onEvent({ type: 'end' });
+    assert.equal(notificaciones.length, cantidad, 'Una lectura anterior no interrumpe la reacción nueva');
+    locuciones[1].onEvent({ type: 'end' });
+    assert.equal(notificaciones.at(-1).datos.hablando, false);
+    await enviar({ accion: 'hablar', texto: 'Lectura', origen: 'lectura' });
+    await enviar({ accion: 'callar' });
+    assert.equal(notificaciones.at(-1).datos.estado, 'idle');
+    chrome.tts.speak = () => { throw new Error('Voz no disponible'); };
+    assert.equal((await enviar({ accion: 'hablar', texto: 'Respuesta' })).ok, false);
+    assert.equal(notificaciones.at(-1).datos.hablando, false, 'Un fallo TTS no deja a la mascota hablando');
+    comprobaciones++; console.log('✓ Mascotas: selección validada y reacciones TTS sin finales antiguos');
     console.log(`${comprobaciones} grupos de regresiones correctos.`);
 }
 principal().catch(error => { console.error(error); process.exitCode = 1; });

@@ -1,183 +1,127 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@500;800;900&display=swap');
-
-    :root {
-      --rojo: #E30613;
-      --bg: #e4e8ec;
-      --card: #ffffff;
-      --text: #2d3436;
-      --muted: #b2bec3;
-    }
-
-    body {
-      width: 360px;
-      padding: 15px;
-      font-family: 'Nunito', sans-serif;
-      background: var(--bg);
-      margin: 0;
-      color: var(--text);
-    }
-
-    .container {
-      background: var(--card);
-      border-radius: 24px;
-      padding: 25px;
-      box-shadow: 0 12px 35px rgba(0,0,0,0.1);
-    }
-
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      border-bottom: 2px dashed #f1f2f6;
-      padding-bottom: 18px;
-      margin-bottom: 15px;
-    }
-
-    .header img {
-      width: 70px;
-      height: 70px;
-      border-radius: 20px;
-      box-shadow: 0 8px 15px rgba(227, 6, 19, 0.25);
-      object-fit: cover;
-      margin-bottom: 10px;
-      transition: transform 0.3s ease;
-    }
-    .header img:hover { transform: scale(1.05); }
-
-    .header h3 { margin: 0; color: var(--rojo); font-size: 26px; font-weight: 900; letter-spacing: -1px; }
-    .header p { margin: 0; font-size: 11px; color: var(--muted); font-weight: 800; letter-spacing: 1.5px; }
-
-    .opcion { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #f8f9fa; flex-wrap: wrap; }
-    .opcion-info { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 800; color: #2d3436; }
-
-    /* Toggle Switch Moderno */
-    .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #dfe6e9; transition: .4s; border-radius: 30px; }
-    .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s cubic-bezier(0.68, -0.55, 0.265, 1.55); border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-    input:checked + .slider { background-color: var(--rojo); }
-    input:checked + .slider:before { transform: translateX(22px); }
-
-    /* Dropdown */
-    .select-box { margin-top: 10px; padding-bottom: 15px; border-bottom: 1px solid #f8f9fa; }
-    select { width: 100%; padding: 12px; border-radius: 14px; border: 2px solid #f1f2f6; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800; color: var(--text); background: var(--card); cursor: pointer; outline: none; transition: 0.3s; }
-    select:focus { border-color: var(--rojo); }
-    optgroup { font-weight: 900; color: var(--rojo); }
-
-    /* Cajas de Ayuda */
-    .hint-box { display: none; width: 100%; background: #fff0f1; border-left: 4px solid var(--rojo); padding: 10px 12px; margin-top: 12px; border-radius: 0 10px 10px 0; font-size: 12px; color: #d63031; box-sizing: border-box; line-height: 1.4; animation: fadeIn 0.3s ease-in-out; }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* --- SECCIÓN LICENCIA CC --- */
-    .footer {
-      margin-top: 20px;
-      padding-top: 15px;
-      border-top: 2px dashed #f1f2f6;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .footer img { border-radius: 4px; transition: opacity 0.2s; }
-    .footer img:hover { opacity: 0.8; }
-
-    .footer p {
-      margin: 0;
-      font-size: 10px;
-      color: #636e72;
-      line-height: 1.5;
-      font-weight: 600;
-    }
-
-    .footer a.link {
-      color: var(--rojo);
-      text-decoration: none;
-      font-weight: 800;
-      transition: color 0.2s;
-    }
-    .footer a.link:hover { text-decoration: underline; color: #b7000c; }
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ayudas de AdaptaPE</title>
+  <link rel="stylesheet" href="interfaz.css">
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <img src="AdaptaPE.png" alt="Adapta PE Logo" onerror="this.src='https://via.placeholder.com/70/E30613/fff?text=PE'">
-      <h3>Adapta PE</h3>
-      <p>EXTENSIÓN V12.0 (HANDS-FREE)</p>
-    </div>
+  <main class="container">
+    <header class="header">
+      <img src="AdaptaPE.png" alt="" width="48" height="48">
+      <div><h1>AdaptaPE</h1><p>Base v13.0</p></div>
+    </header>
+    <p class="introduccion">Elige las ayudas que quieres usar.</p>
+    <p id="estadoPanel" class="estado-panel" role="status">Cargando tus ajustes…</p>
 
-    <!-- Opciones del Sistema -->
-    <div class="opcion">
-      <div class="opcion-info">🗣️ Lector TalkBack</div>
-      <label class="switch"><input type="checkbox" id="checkTalkBack" aria-label="Activar Lector TalkBack"><span class="slider"></span></label>
-    </div>
-
-    <div class="opcion" style="flex-direction: column; align-items: flex-start;">
-      <div style="display:flex; justify-content:space-between; width:100%;">
-        <div class="opcion-info">🤖 Asistente de Voz Activo</div>
-        <label class="switch"><input type="checkbox" id="checkVoz" aria-label="Activar Asistente de Voz"><span class="slider"></span></label>
+    <section class="opcion" aria-labelledby="tituloLectura">
+      <div class="fila">
+        <label class="opcion-info" for="checkTalkBack">
+          <svg class="icono" aria-hidden="true"><use href="iconos.svg#lectura"/></svg>
+          <span><strong id="tituloLectura">Lectura en voz alta</strong><span class="estado-modulo" id="estadoLectura">Desactivado</span></span>
+        </label>
+        <label class="switch"><input type="checkbox" id="checkTalkBack" aria-labelledby="tituloLectura" aria-describedby="ayudaLectura estadoLectura"><span class="slider" aria-hidden="true"></span></label>
       </div>
+      <p id="ayudaLectura" class="descripcion">Escucha el elemento que señalas.</p>
+    </section>
+
+    <section class="opcion" aria-labelledby="tituloVoz">
+      <div class="fila">
+        <label class="opcion-info" for="checkVoz">
+          <svg class="icono" aria-hidden="true"><use href="iconos.svg#voz"/></svg>
+          <span><strong id="tituloVoz">Control por voz</strong><span class="estado-modulo" id="estadoVoz">Desactivado</span></span>
+        </label>
+        <label class="switch"><input type="checkbox" id="checkVoz" aria-labelledby="tituloVoz" aria-describedby="ayudaVoz estadoVoz"><span class="slider" aria-hidden="true"></span></label>
+      </div>
+      <p id="ayudaVoz" class="descripcion">Di «Computadora» y espera el sonido.</p>
       <div class="hint-box" id="hintVoz">
-        <strong>Comandos:</strong> Di "Computadora", espera el beep, y di: "Abre YouTube", "Busca gatitos", "Bajar", o "Cerrar pestaña".
+        <details><summary>Órdenes y micrófono</summary><p>Después del sonido, di «Abre YouTube», «Busca gatos», «Bajar» o «Cerrar pestaña».</p></details>
       </div>
-    </div>
+    </section>
 
-    <div class="select-box">
-      <div class="opcion-info" style="margin-bottom: 12px;">👁️ Filtro de Daltonismo</div>
-      <select id="selectDaltonismo" aria-label="Seleccionar filtro de daltonismo">
-        <option value="ninguno">Visión Normal (Sin Filtros)</option>
-
-        <optgroup label="🔴🟢 Rojo-Verde">
-          <option value="deuteranomalia">Deuteranomalía (Verdes se ven rojizos)</option>
-          <option value="protanomalia">Protanomalía (Rojos se ven verdes y opacos)</option>
-          <option value="deuteranopia">Deuteranopía (Confusión total rojo/verde por falta de conos verdes)</option>
-          <option value="protanopia">Protanopía (Confusión total rojo/verde por falta de conos rojos)</option>
+    <section class="select-box" aria-labelledby="tituloFiltros">
+      <label class="opcion-info" for="selectDaltonismo">
+        <svg class="icono" aria-hidden="true"><use href="iconos.svg#color"/></svg>
+        <strong id="tituloFiltros">Filtros de color</strong>
+      </label>
+      <p id="ayudaFiltro" class="descripcion">Elige tu filtro de daltonismo.</p>
+      <select id="selectDaltonismo" aria-describedby="ayudaFiltro estadoDaltonismo">
+        <option value="ninguno">Sin filtro</option>
+        <optgroup label="Rojo y verde">
+          <option value="deuteranomalia">Deuteranomalía</option>
+          <option value="protanomalia">Protanomalía</option>
+          <option value="deuteranopia">Deuteranopía</option>
+          <option value="protanopia">Protanopía</option>
         </optgroup>
-
-        <optgroup label="🔵🟡 Azul-Amarillo">
-          <option value="tritanomalia">Tritanomalía (Dificultad entre azul/verde y amarillo/rojo)</option>
-          <option value="tritanopia">Tritanopía (Sin conos azules. Dificultad azul/verde, amarillo/rosa)</option>
+        <optgroup label="Azul y amarillo">
+          <option value="tritanomalia">Tritanomalía</option>
+          <option value="tritanopia">Tritanopía</option>
         </optgroup>
-
-        <optgroup label="⚫⚪ Daltonismo Completo">
-          <option value="acromatopsia">Acromatopsia (Solo tonos de gris, blanco y negro)</option>
+        <optgroup label="Escala de grises">
+          <option value="acromatopsia">Acromatopsia</option>
         </optgroup>
       </select>
-    </div>
-
-    <div class="opcion" style="border:none; padding-bottom: 0;">
-      <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
-        <div class="opcion-info">🎯 Mouse Cinético (Cámara)</div>
-        <label class="switch"><input type="checkbox" id="checkOjos" aria-label="Activar Mouse Cinético"><span class="slider"></span></label>
+      <div class="filtro-feedback">
+        <p id="estadoDaltonismo" role="status">Sin filtro activo</p>
+        <button id="quitarDaltonismo" type="button" hidden>Quitar filtro</button>
       </div>
-      <div class="hint-box" id="hintGestos">
-        <strong>Puntero Inteligente:</strong> Alinea un detalle del rostro o mano con la cruz y mantén la postura 0,7 s. Mueve el cursor y vuelve a la zona verde durante 1 s para un clic. Di «clic derecho» o usa el botón de la cámara para el siguiente clic derecho; «recalibrar» ajusta el centro.
+    </section>
+
+    <section class="opcion" aria-labelledby="tituloCursor">
+      <div class="fila">
+        <label class="opcion-info" for="checkOjos">
+          <svg class="icono" aria-hidden="true"><use href="iconos.svg#cursor"/></svg>
+          <span><strong id="tituloCursor">Cursor con cámara</strong><span class="estado-modulo" id="estadoCursor">Desactivado</span></span>
+        </label>
+        <label class="switch"><input type="checkbox" id="checkOjos" aria-labelledby="tituloCursor" aria-describedby="ayudaCursor estadoCursor"><span class="slider" aria-hidden="true"></span></label>
       </div>
-    </div>
+      <p id="ayudaCursor" class="descripcion">Usa tu cabeza o una extremidad.</p>
+      <div class="hint-box" id="hintGestos" hidden>
+        <label for="adapta-pe-modo-control">¿Qué quieres usar para moverlo?</label>
+        <select id="adapta-pe-modo-control" aria-describedby="ayudaModo">
+          <option value="cabeza">Cabeza / torso (predeterminado)</option>
+          <option value="manos">Brazos, manos o puños</option>
+          <option value="zona">Muñón / mano parcial</option>
+        </select>
+        <p id="ayudaModo">Sólo cabeza / torso necesita calibrar tu postura.</p>
+        <details><summary>Cómo mover y hacer clic</summary>
+          <p>Sin calibración: la primera posición detectada de tu extremidad es el reposo del joystick. El centro de la vista permanece fijo.</p>
+          <p>Desplaza un poco la extremidad en cualquier dirección y mantenla ahí para mover el cursor. Vuelve al reposo para detenerlo.</p>
+          <p>En reposo puedes inclinar la palma o el puño, o señalar con uno o dos dedos alineados; dóblalos para dejar de señalar. Con muñón / mano parcial, mueve un poco para iniciar el seguimiento. También puedes girar y volver al ángulo inicial para detenerte. La línea celeste muestra la dirección.</p>
+          <p>Para hacer clic, vuelve al reposo y espera un segundo tras mover o di «Computadora, da clic».</p>
+        </details>
+      </div>
+    </section>
 
-    <!-- FOOTER Y LICENCIA -->
-    <div class="footer">
-      <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" title="Ver Licencia Creative Commons">
-        <img src="https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png" alt="CC BY-NC-SA 4.0">
-      </a>
-      <p>
-        <a href="https://thealejo-dev.cc" target="_blank" class="link">Adapta PE</a> © 2026 by
-        <a href="https://github.com/TheAlejo160" target="_blank" class="link">Rodrigo Alejandro Apcho Aliaga</a>.<br>
-        Licenciado bajo <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" class="link">CC BY-NC-SA 4.0 Internacional</a>.
-      </p>
-    </div>
+    <section class="select-box" aria-labelledby="tituloMascota">
+      <label class="opcion-info" for="selectMascota">
+        <svg class="icono" aria-hidden="true"><use href="iconos.svg#mascota"/></svg>
+        <strong id="tituloMascota">Tu mascota</strong>
+      </label>
+      <p class="descripcion">Te acompaña con la voz y la lectura.</p>
+      <select id="selectMascota" aria-describedby="estadoMascota ayudaMascota" disabled>
+        <option value="ninguna">Sin mascota</option>
+        <option value="tinku">Tinku · gallito de las rocas</option>
+        <option value="cuchu">Cuchu · cuy</option>
+        <option value="yati">Yati · llama</option>
+      </select>
+      <p id="estadoMascota" class="estado-modulo" role="status">Cargando mascota…</p>
+      <details><summary>Cómo usar tu mascota</summary>
+        <p id="ayudaMascota">Sigue el cursor, incluido el de cámara. Arrastra su nombre o enfócalo y usa las flechas para moverla. Guarda su ubicación entre páginas.</p>
+        <p>Di «Computadora, mascota Tinku», «mascota Cuchu» o «mascota Yati». También: «saluda mascota», «duerme mascota», «despierta mascota» y «oculta mascota».</p>
+      </details>
+    </section>
 
-  </div>
+    <footer class="footer">
+      <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer" title="Ver licencia Creative Commons"><img src="https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png" alt="Creative Commons BY-NC-SA 4.0" width="88" height="31"></a>
+      <p><a href="https://thealejo-dev.cc" target="_blank" rel="noopener noreferrer">AdaptaPE</a> © 2026<br>
+        <a href="https://github.com/TheAlejo160" target="_blank" rel="noopener noreferrer">Rodrigo Alejandro Apcho Aliaga</a><br>
+        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">Licencia CC BY-NC-SA 4.0 Internacional</a></p>
+    </footer>
+  </main>
   <script src="popup.js"></script>
-<script src="voz/popup.js"></script>
+  <script src="voz/popup.js"></script>
+  <script src="mascotas/popup.js"></script>
 </body>
 </html>

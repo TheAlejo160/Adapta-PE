@@ -12,7 +12,7 @@ async function configurarVoz(activa) {
     if (actual !== solicitud) return;
     if (permiso.state !== 'granted') {
         vozCentral.setEstado(false);
-        vozCentral.mostrarEstado('Permite el micrófono de Adapta PE para usar voz en todo Chrome.');
+        vozCentral.mostrarEstado('Permite el micrófono de AdaptaPE para usar voz en todo Chrome.');
         await chrome.runtime.sendMessage({ accion: 'voz_necesita_permiso' });
         return;
     }

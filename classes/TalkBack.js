@@ -61,7 +61,7 @@ class TalkBack {
 
         if (texto && texto.trim() !== "") {
             this.temporizador = setTimeout(() => {
-                if (this.activo && finalEl === this.elementoActual) this.enviar({ accion: "hablar", texto: texto.trim() });
+                if (this.activo && finalEl === this.elementoActual) this.enviar({ accion: "hablar", texto: texto.trim(), origen: 'lectura' });
             }, 300);
         }
     }
