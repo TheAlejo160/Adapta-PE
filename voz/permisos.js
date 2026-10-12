@@ -1,28 +1,42 @@
 const botonPermiso = document.getElementById('adapta-pe-permitir-microfono');
 const estadoPermiso = document.getElementById('adapta-pe-permiso-estado');
 const permisoCamara = new URLSearchParams(location.search).get('dispositivo') === 'camara';
+const dispositivo = permisoCamara ? 'Camara' : 'Micro'; // Sufijo de las claves permisos.*Micro / *Camara.
 if (permisoCamara) {
-    document.title = 'Permiso de cámara — Adapta PE';
-    document.querySelector('h1').textContent = 'Mouse cinético en tus páginas y ventanas';
-    document.querySelector('h1 + p').textContent = 'Permite una vez la cámara de Adapta PE. La imagen se procesa en tu equipo y el cursor controla únicamente la pestaña de la ventana enfocada. Al conceder el permiso volverás a la página anterior.';
-    botonPermiso.textContent = 'Permitir cámara';
-    estadoPermiso.textContent = 'Puedes apagar la cámara diciendo Computadora, desactivar cursor.';
-    if (!chrome.runtime.getManifest().content_scripts.some(regla => regla.js.some(archivo => archivo.endsWith('/KineticEngine.js')))) botonPermiso.disabled = true;
+    ponerTexto(document.querySelector('title'), 'permisos.tituloCamara');
+    ponerTexto(document.querySelector('h1'), 'permisos.encabezadoCamara');
+    document.getElementById('adapta-pe-icono-permiso').setAttribute('href', '../iconos.svg#camara');
+    ponerTexto(document.getElementById('adapta-pe-instruccion-permiso'), 'permisos.instruccionCamara');
+    ponerTexto(document.getElementById('adapta-pe-privacidad-permiso'), 'permisos.privacidadCamara');
+    ponerTexto(botonPermiso, 'permisos.botonCamara');
+    ponerTexto(estadoPermiso, 'permisos.estadoCamara');
+    if (!chrome.runtime.getManifest().content_scripts.some(regla => regla.js.some(archivo => archivo.endsWith('/KineticEngine.js')))) {
+        botonPermiso.disabled = true;
+        ponerTexto(estadoPermiso, 'permisos.soloBase');
+    }
 }
 botonPermiso.focus();
 botonPermiso.addEventListener('click', async () => {
     botonPermiso.disabled = true;
+    const claveBoton = botonPermiso.dataset.i18n;
+    ponerTexto(botonPermiso, 'permisos.esperando');
+    botonPermiso.setAttribute('aria-busy', 'true');
+    ponerTexto(estadoPermiso, 'permisos.elige' + dispositivo);
     try {
         const flujo = await navigator.mediaDevices.getUserMedia({ audio: !permisoCamara, video: permisoCamara });
         flujo.getTracks().forEach(pista => pista.stop());
         const respuesta = await chrome.runtime.sendMessage({ accion: 'voz_reiniciar' });
         if (!respuesta?.ok) throw new Error('No se pudo activar la voz.');
         if (permisoCamara) {
-            estadoPermiso.textContent = 'Cámara autorizada. Volviendo a tu página…';
+            ponerTexto(estadoPermiso, 'permisos.camaraLista');
             await chrome.runtime.sendMessage({ accion: 'camara_permiso_listo' }); return;
         }
-        estadoPermiso.textContent = respuesta.activa ? 'Permiso concedido. Puedes cerrar esta pestaña y usar Computadora desde Nueva pestaña o cualquier ventana.' : 'Permiso concedido. Activa Voz en el popup para empezar a escuchar.';
-    } catch (_) {
-        estadoPermiso.textContent = 'No se concedió ' + (permisoCamara ? 'la cámara' : 'el micrófono') + '. Revisa su permiso en los ajustes de Chrome y vuelve a intentar.';
-    } finally { botonPermiso.disabled = false; }
+        ponerTexto(estadoPermiso, respuesta.activa ? 'permisos.microActivo' : 'permisos.microInactivo');
+    } catch (error) {
+        ponerTexto(estadoPermiso, (error.name === 'NotAllowedError' ? 'permisos.denegado' : 'permisos.fallo') + dispositivo);
+    } finally {
+        botonPermiso.disabled = false;
+        ponerTexto(botonPermiso, claveBoton);
+        botonPermiso.removeAttribute('aria-busy');
+    }
 });

@@ -3,6 +3,7 @@
 (async () => {
     const salida = document.getElementById('resultado');
     const informe = [];
+    const motor = new KineticEngine();
     const parametros = new URLSearchParams(location.search);
     const trabajador = new Worker('../vision/trabajador.js');
     let pendiente;
@@ -16,15 +17,22 @@
     try {
         await pedir({ tipo: 'iniciar' });
         let tiempo = 1000;
-        for (const [nombre, modo, esperado] of [['rostro', 'cabeza', 478], ['cuerpo', 'torso', 33], ['manos', 'manos', 21]]) {
+        for (const [nombre, modo, esperado] of [['rostro', 'cabeza', 478], ['cuerpo', 'torso', 33], ['manos', 'manos', 21], ['puno', 'manos', 21], ['manos', 'manos', 21]]) {
             if (!parametros.has(nombre)) throw new Error('Falta imagen de prueba: ' + nombre);
             const respuesta = await fetch(parametros.get(nombre));
             if (!respuesta.ok) throw new Error('No se pudo leer la imagen: ' + nombre);
-            const imagen = await createImageBitmap(await respuesta.blob(), { resizeWidth: 320, resizeHeight: 240 });
-            const datos = await pedir({ tipo: 'imagen', imagen, modo, tiempo: tiempo += 1000 }, [imagen]);
+            const archivo = await respuesta.blob();
+            let datos;
+            for (let intento = 0; intento < 5; intento++) {
+                const imagen = await createImageBitmap(archivo);
+                datos = await pedir({ tipo: 'imagen', imagen, modo, tiempo: tiempo += 1000 }, [imagen]);
+                if ((modo === 'manos' ? datos.manos : nombre === 'rostro' ? datos.rostro : datos.cuerpo).length === esperado) break;
+            }
             const puntos = nombre === 'rostro' ? datos.rostro : nombre === 'cuerpo' ? datos.cuerpo : datos.manos;
             if (puntos.length !== esperado) throw new Error(nombre + ': ' + puntos.length + ' puntos; se esperaban ' + esperado);
-            informe.push(nombre + ': ' + puntos.length + ' puntos reales');
+            if (nombre === 'puno' && !motor.inclinacionMano(puntos)?.puno) throw new Error('Puño real no reconocido');
+            if (nombre === 'manos' && motor.inclinacionMano(puntos)?.puno) throw new Error('Mano abierta confundida con puño');
+            informe.push(nombre + ': ' + puntos.length + ' puntos reales' + (nombre === 'puno' ? ', puño reconocido' : ''));
         }
         const escena = document.createElement('canvas');
         escena.width = 640; escena.height = 480;
@@ -37,11 +45,11 @@
         // VIDEO necesita readquirir regiones tras un salto abrupto de encuadre.
         for (let intento = 0; intento < 5; intento++) {
             const imagenMixta = await createImageBitmap(escena);
-            mixta = await pedir({ tipo: 'imagen', imagen: imagenMixta, modo: 'automatico', tiempo: tiempo += 1000 }, [imagenMixta]);
+            mixta = await pedir({ tipo: 'imagen', imagen: imagenMixta, modo: 'automatico', fuente: 'cabeza', tiempo: tiempo += 1000 }, [imagenMixta]);
             if (mixta.rostro.length && mixta.manos.length) break;
         }
         if (!mixta.rostro.length || !mixta.manos.length) throw new Error('Escena mixta: rostro=' + mixta.rostro.length + ', manos=' + mixta.manos.length);
-        informe.push('rostro + manos simultáneos en automático');
+        informe.push('rostro + manos simultáneos en automático con cabeza ya elegida');
         window.adaptaResultadoVision = 'OK: ' + informe.join('; ');
     } catch (error) { window.adaptaResultadoVision = 'ERROR: ' + error.message; }
     finally { trabajador.terminate?.(); trabajador.close?.(); salida.textContent = window.adaptaResultadoVision; }

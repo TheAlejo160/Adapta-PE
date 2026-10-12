@@ -1,7 +1,7 @@
 // Única cámara de Completa. Vive con la voz en el origen de la extensión, no en cada sitio.
 const camaraCentral = {
     deseada: false, procesar: false, iniciando: false, generacion: 0, flujo: null,
-    trabajador: null, visionLista: false, ocupada: false, modo: 'automatico', fuente: null, permisoPendiente: false,
+    trabajador: null, visionLista: false, ocupada: false, modo: 'cabeza', fuente: null, permisoPendiente: false,
     configurar(datos) {
         this.procesar = Boolean(datos.procesar);
         this.cambiarModelo(datos);
@@ -11,9 +11,27 @@ const camaraCentral = {
         else if (!this.flujo && !this.iniciando && !this.permisoPendiente) this.iniciar();
     },
     cambiarModelo(datos) {
-        if (['automatico', 'cabeza', 'torso', 'brazo_izquierdo', 'brazo_derecho', 'manos', 'zona'].includes(datos.modo)) this.modo = datos.modo;
+        if (['automatico', 'cabeza', 'torso', 'brazo_izquierdo', 'brazo_derecho', 'manos', 'zona', 'zona_izquierda', 'zona_derecha'].includes(datos.modo)) {
+            if (datos.modo !== this.modo) this.carga = null; // Otro modelo tiene otro coste: volver a medir desde el detalle máximo.
+            this.modo = datos.modo;
+        }
         if (typeof datos.fuente === 'string' || datos.fuente === null) this.fuente = datos.fuente;
     },
+    medirCarga(duracion) {
+        // Carga adaptativa: equipos lentos reducen detalle y ceden CPU; equipos rápidos recuperan el máximo.
+        const carga = this.carga ||= { nivel: 0, media: null, muestras: 0, descartar: true, reposoHasta: 0 };
+        // La primera inferencia tras cambiar modelo o detalle incluye carga y calentamiento.
+        if (carga.descartar || !(duracion >= 0 && duracion < 1000)) { carga.descartar = false; return; }
+        carga.media = carga.media == null ? duracion : carga.media * 0.8 + duracion * 0.2;
+        const maximo = this.detalle() === 2 ? 2 : 1; // Cabeza no baja de 240×180: el rostro pequeño dejaría de detectarse.
+        if (++carga.muestras >= 5) {
+            const nivel = carga.media > 90 ? Math.min(maximo, carga.nivel + 1) : carga.media < 40 ? Math.max(0, carga.nivel - 1) : carga.nivel;
+            if (nivel !== carga.nivel) { this.carga = { nivel, media: null, muestras: 0, descartar: true, reposoHasta: 0 }; return; }
+        }
+        // Ciclo total <=180 ms con el tic de 50 ms: el cursor desarma el clic con saltos >200 ms.
+        carga.reposoHasta = carga.media > 90 ? performance.now() + Math.max(0, Math.min(carga.media * 0.5, 130 - carga.media)) : 0;
+    },
+    detalle() { return ['manos', 'automatico', 'brazo_izquierdo', 'brazo_derecho'].includes(this.modo) ? 2 : 1; },
     async iniciar() {
         const generacion = ++this.generacion;
         this.iniciando = true;
@@ -25,7 +43,7 @@ const camaraCentral = {
                 await chrome.runtime.sendMessage({ accion: 'camara_necesita_permiso' }); return;
             }
             const flujo = await navigator.mediaDevices.getUserMedia({ audio: false, video: {
-                width: { ideal: 320 }, height: { ideal: 240 }, frameRate: { ideal: 30, max: 30 }
+                width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 30, max: 30 }
             } });
             if (!this.deseada || generacion !== this.generacion) { flujo.getTracks().forEach(pista => pista.stop()); return; }
             this.flujo = flujo;
@@ -44,28 +62,29 @@ const camaraCentral = {
                 if (generacion !== this.generacion) return;
                 const datos = evento.data;
                 if (datos.tipo === 'listo') this.visionLista = true;
-                else if (datos.tipo === 'puntos') { this.ocupada = false; this.publicar(datos); }
-                else if (datos.tipo === 'error') { this.ocupada = false; this.informarError('Detección no disponible. Di control zona libre para usar textura.'); }
+                else if (datos.tipo === 'puntos') { this.ocupada = false; this.medirCarga(performance.now() - this.envio); this.publicar(datos); }
+                else if (datos.tipo === 'error') { this.ocupada = false; this.informarError('Detección no disponible. Di control zona libre para usar textura.', 'cinetico.error.deteccion'); }
             };
             this.trabajador.onerror = () => {
                 this.ocupada = false; this.visionLista = false;
-                this.informarError('No se pudo cargar la detección local. Di control zona libre para usar textura.');
+                this.informarError('No se pudo cargar la detección local. Di control zona libre para usar textura.', 'cinetico.error.carga');
             };
             this.trabajador.postMessage({ tipo: 'iniciar' });
             flujo.getVideoTracks().forEach(pista => pista.addEventListener('ended', () => {
-                if (generacion === this.generacion) { this.detener(); this.informarError('La cámara se desconectó. Comprueba la conexión y di activar cursor.'); }
+                if (generacion === this.generacion) { this.detener(); this.informarError('La cámara se desconectó. Comprueba la conexión y di activar cursor.', 'cinetico.error.desconectada'); }
             }));
             this.capturar(generacion);
         } catch (_) {
             if (generacion !== this.generacion) return;
-            this.detener(); this.informarError('No se pudo iniciar la cámara de Adapta PE. Revisa su permiso o disponibilidad.');
+            this.detener(); this.informarError('No se pudo iniciar la cámara de AdaptaPE. Revisa su permiso o disponibilidad.', 'cinetico.error.inicio');
         }
         finally { if (generacion === this.generacion) this.iniciando = false; }
     },
-    informarError(texto) {
+    // `clave` permite a la página mostrar el aviso en su idioma; `texto` queda como respaldo en español.
+    informarError(texto, clave) {
         if (texto === this.ultimoError) return;
         this.ultimoError = texto;
-        chrome.runtime.sendMessage({ accion: 'camara_error', texto }).catch(() => {});
+        chrome.runtime.sendMessage({ accion: 'camara_error', texto, clave }).catch(() => {});
     },
     async capturar(generacion) {
         if (generacion !== this.generacion || !this.flujo) return;
@@ -73,19 +92,22 @@ const camaraCentral = {
             if (!this.procesar || this.ocupada || this.video.readyState < 2 || this.video.currentTime === this.ultimoVideo) return;
             this.ultimoVideo = this.video.currentTime;
             const tiempo = performance.now();
-            if (this.modo === 'zona') {
+            if (this.modo.startsWith('zona')) {
                 const contexto = this.contexto;
                 contexto.setTransform(-1, 0, 0, 1, 160, 0); contexto.drawImage(this.video, 0, 0, 160, 120); contexto.resetTransform();
                 const pixeles = contexto.getImageData(0, 0, 160, 120).data;
                 const grises = Array.from({ length: 19200 }, (_, indice) => Math.round(pixeles[indice * 4] * 0.299 + pixeles[indice * 4 + 1] * 0.587 + pixeles[indice * 4 + 2] * 0.114));
-                this.publicar({ tipo: 'puntos', tiempo, modo: 'zona', grises });
-            } else if (this.visionLista) {
+                this.publicar({ tipo: 'puntos', tiempo, modo: this.modo, grises });
+            } else if (this.visionLista && !(performance.now() < this.carga?.reposoHasta)) {
                 this.ocupada = true;
-                const escala = Math.min(320 / this.video.videoWidth, 240 / this.video.videoHeight);
+                // Nunca supera 640×480 en extremidades ni 320×240 en cabeza; nunca amplía la cámara.
+                const detalle = this.detalle() * [1, 0.75, 0.5][this.carga?.nivel || 0];
+                const escala = Math.min(1, 320 * detalle / this.video.videoWidth, 240 * detalle / this.video.videoHeight);
                 const imagen = await createImageBitmap(this.video, { resizeWidth: Math.max(1, Math.round(this.video.videoWidth * escala)),
                     resizeHeight: Math.max(1, Math.round(this.video.videoHeight * escala)) });
                 if (generacion !== this.generacion) { imagen.close(); return; }
                 this.trabajador.postMessage({ tipo: 'imagen', imagen, tiempo, modo: this.modo, fuente: this.fuente }, [imagen]);
+                this.envio = performance.now();
             }
         } catch (_) { this.ocupada = false; }
         finally { if (generacion === this.generacion && this.flujo) this.temporizador = setTimeout(() => this.capturar(generacion), 50); }
@@ -128,6 +150,6 @@ const camaraCentral = {
 chrome.runtime.onMessage.addListener((datos, emisor, responder) => {
     if (emisor.id !== chrome.runtime.id || datos.destino !== 'voz_central') return;
     if (datos.accion === 'camara_configurar') { camaraCentral.configurar(datos); responder({ ok: true }); }
-    if (datos.accion === 'camara_modelo') camaraCentral.cambiarModelo(datos);
+    if (datos.accion === 'camara_modelo') { camaraCentral.cambiarModelo(datos); responder({ ok: true }); }
 });
 window.addEventListener('pagehide', () => camaraCentral.detener());

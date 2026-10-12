@@ -1,4 +1,208 @@
 (() => {
+// Textos del cursor cinético (HUD, menú, avisos). El español es la referencia y el respaldo sin textos.js.
+const textos = {
+    es: {
+        'cinetico.camara': 'Cámara: cabeza y torso calibran postura; extremidades usan centro fijo y gestos suaves. Pinza pulgar-índice o boca abierta: clic al soltar. Controles por voz: Computadora, pausar cursor; clic derecho.',
+        'cinetico.cargando': 'Cargando detección local…',
+        'cinetico.ayuda': 'Computadora: recalibrar · clic derecho · activar temblor',
+        'cinetico.buscandoTextura': 'Mueve ligeramente la extremidad visible · buscando textura',
+        'cinetico.texturaNoVisible': 'Textura no visible · cursor detenido',
+        'cinetico.listo': 'Cursor listo. Postura cómoda calibrada.',
+        'cinetico.seguroMueve': 'Seguro · mueve para habilitar clic',
+        'cinetico.seguroProgreso': 'Seguro · {tipo} {porcentaje}%',
+        'cinetico.clic': 'clic', 'cinetico.derecho': 'derecho',
+        'cinetico.recuperando': 'Recuperando postura cómoda · sin clic',
+        'cinetico.atraccion': 'Atracción · precisión', 'cinetico.moviendo': 'Moviendo',
+        'cinetico.menu': 'Menú contextual AdaptaPE',
+        'cinetico.menu.enlacePestana': 'Abrir enlace en pestaña', 'cinetico.menu.enlaceVentana': 'Abrir enlace en ventana',
+        'cinetico.menu.imagen': 'Abrir imagen', 'cinetico.menu.atras': 'Atrás', 'cinetico.menu.recargar': 'Recargar página', 'cinetico.menu.cerrar': 'Cerrar menú',
+        'cinetico.esperandoCamara': 'Esperando cámara central · sin clic',
+        'cinetico.enEspera': 'Seguimiento en espera · muestra la parte elegida',
+        'cinetico.esperandoInicio': 'Esperando cámara central…',
+        'cinetico.confirmando': 'Confirmando seguimiento · sin clic',
+        'cinetico.calibrando': 'Descansa en una postura cómoda · calibrando sin clic',
+        'cinetico.pausado': 'Cursor pausado · di «reanudar cursor»',
+        'cinetico.esperandoImagen': 'Esperando una imagen válida de la cámara',
+        'cinetico.senal': 'señal', 'cinetico.joystick': 'joystick', 'cinetico.puno': 'puño · reposo', 'cinetico.punoPreparar': 'puño · abre la mano para preparar reposo',
+        'cinetico.pinzaDerechoHecho': 'pinza · clic derecho hecho, suelta',
+        'cinetico.pinzaSuelta': 'pinza · suelta: clic · mantén: derecho', 'cinetico.pinzaSueltaDerecho': 'pinza · suelta: clic derecho',
+        'cinetico.boca': 'boca abierta · cierra: clic', 'cinetico.bocaDerecho': 'boca abierta · cierra: clic derecho',
+        'cinetico.fuente.zona': 'Zona libre', 'cinetico.fuente.mano': 'Mano', 'cinetico.fuente.brazo': 'Brazo',
+        'cinetico.fuente.cabeza': 'cabeza', 'cinetico.fuente.torso': 'torso', 'cinetico.fuente.cabeza_corporal': 'cabeza corporal',
+        'cinetico.error.deteccion': 'Detección no disponible. Di control zona libre para usar textura.',
+        'cinetico.error.carga': 'No se pudo cargar la detección local. Di control zona libre para usar textura.',
+        'cinetico.error.desconectada': 'La cámara se desconectó. Comprueba la conexión y di activar cursor.',
+        'cinetico.error.inicio': 'No se pudo iniciar la cámara de AdaptaPE. Revisa su permiso o disponibilidad.',
+    },
+    en: {
+        'cinetico.camara': 'Camera: head and torso calibrate posture; limbs use a fixed center and gentle gestures. Thumb-index pinch or open mouth: click on release. Voice controls: Computer, pause cursor; right click.',
+        'cinetico.cargando': 'Loading local detection…',
+        'cinetico.ayuda': 'Computer: recalibrate · right click · enable tremor',
+        'cinetico.buscandoTextura': 'Move the visible limb slightly · looking for texture',
+        'cinetico.texturaNoVisible': 'Texture not visible · cursor stopped',
+        'cinetico.listo': 'Cursor ready. Comfortable posture calibrated.',
+        'cinetico.seguroMueve': 'Safe · move to enable click',
+        'cinetico.seguroProgreso': 'Safe · {tipo} {porcentaje}%',
+        'cinetico.clic': 'click', 'cinetico.derecho': 'right',
+        'cinetico.recuperando': 'Restoring comfortable posture · no click',
+        'cinetico.atraccion': 'Attraction · precision', 'cinetico.moviendo': 'Moving',
+        'cinetico.menu': 'AdaptaPE context menu',
+        'cinetico.menu.enlacePestana': 'Open link in tab', 'cinetico.menu.enlaceVentana': 'Open link in window',
+        'cinetico.menu.imagen': 'Open image', 'cinetico.menu.atras': 'Back', 'cinetico.menu.recargar': 'Reload page', 'cinetico.menu.cerrar': 'Close menu',
+        'cinetico.esperandoCamara': 'Waiting for central camera · no click',
+        'cinetico.enEspera': 'Tracking on hold · show the chosen part',
+        'cinetico.esperandoInicio': 'Waiting for central camera…',
+        'cinetico.confirmando': 'Confirming tracking · no click',
+        'cinetico.calibrando': 'Rest in a comfortable posture · calibrating, no click',
+        'cinetico.pausado': 'Cursor paused · say “resume cursor”',
+        'cinetico.esperandoImagen': 'Waiting for a valid camera image',
+        'cinetico.senal': 'signal', 'cinetico.puno': 'fist · rest', 'cinetico.punoPreparar': 'fist · open your hand to prepare rest',
+        'cinetico.pinzaDerechoHecho': 'pinch · right click done, release',
+        'cinetico.pinzaSuelta': 'pinch · release: click · hold: right', 'cinetico.pinzaSueltaDerecho': 'pinch · release: right click',
+        'cinetico.boca': 'mouth open · close: click', 'cinetico.bocaDerecho': 'mouth open · close: right click',
+        'cinetico.fuente.zona': 'Free zone', 'cinetico.fuente.mano': 'Hand', 'cinetico.fuente.brazo': 'Arm',
+        'cinetico.fuente.cabeza': 'head', 'cinetico.fuente.torso': 'torso', 'cinetico.fuente.cabeza_corporal': 'body head',
+        'cinetico.error.deteccion': 'Detection unavailable. Say free zone control to use texture.',
+        'cinetico.error.carga': 'Local detection could not load. Say free zone control to use texture.',
+        'cinetico.error.desconectada': 'The camera disconnected. Check the connection and say activate cursor.',
+        'cinetico.error.inicio': 'AdaptaPE could not start the camera. Check its permission or availability.',
+    },
+    pt: {
+        'cinetico.camara': 'Câmera: cabeça e tronco calibram a postura; membros usam centro fixo e gestos suaves. Pinça polegar-indicador ou boca aberta: clique ao soltar. Controles por voz: Computador, pausar cursor; clique direito.',
+        'cinetico.cargando': 'Carregando detecção local…',
+        'cinetico.ayuda': 'Computador: recalibrar · clique direito · ativar tremor',
+        'cinetico.buscandoTextura': 'Mova levemente o membro visível · buscando textura',
+        'cinetico.texturaNoVisible': 'Textura não visível · cursor parado',
+        'cinetico.listo': 'Cursor pronto. Postura confortável calibrada.',
+        'cinetico.seguroMueve': 'Seguro · mova para habilitar o clique',
+        'cinetico.seguroProgreso': 'Seguro · {tipo} {porcentaje}%',
+        'cinetico.clic': 'clique', 'cinetico.derecho': 'direito',
+        'cinetico.recuperando': 'Recuperando postura confortável · sem clique',
+        'cinetico.atraccion': 'Atração · precisão', 'cinetico.moviendo': 'Movendo',
+        'cinetico.menu': 'Menu de contexto AdaptaPE',
+        'cinetico.menu.enlacePestana': 'Abrir link em aba', 'cinetico.menu.enlaceVentana': 'Abrir link em janela',
+        'cinetico.menu.imagen': 'Abrir imagem', 'cinetico.menu.atras': 'Voltar', 'cinetico.menu.recargar': 'Recarregar página', 'cinetico.menu.cerrar': 'Fechar menu',
+        'cinetico.esperandoCamara': 'Aguardando câmera central · sem clique',
+        'cinetico.enEspera': 'Rastreamento em espera · mostre a parte escolhida',
+        'cinetico.esperandoInicio': 'Aguardando câmera central…',
+        'cinetico.confirmando': 'Confirmando rastreamento · sem clique',
+        'cinetico.calibrando': 'Descanse em uma postura confortável · calibrando sem clique',
+        'cinetico.pausado': 'Cursor pausado · diga «retomar cursor»',
+        'cinetico.esperandoImagen': 'Aguardando uma imagem válida da câmera',
+        'cinetico.senal': 'sinal', 'cinetico.puno': 'punho · repouso', 'cinetico.punoPreparar': 'punho · abra a mão para preparar repouso',
+        'cinetico.pinzaDerechoHecho': 'pinça · clique direito feito, solte',
+        'cinetico.pinzaSuelta': 'pinça · solte: clique · mantenha: direito', 'cinetico.pinzaSueltaDerecho': 'pinça · solte: clique direito',
+        'cinetico.boca': 'boca aberta · feche: clique', 'cinetico.bocaDerecho': 'boca aberta · feche: clique direito',
+        'cinetico.fuente.zona': 'Zona livre', 'cinetico.fuente.mano': 'Mão', 'cinetico.fuente.brazo': 'Braço',
+        'cinetico.fuente.cabeza': 'cabeça', 'cinetico.fuente.torso': 'tronco', 'cinetico.fuente.cabeza_corporal': 'cabeça corporal',
+        'cinetico.error.deteccion': 'Detecção indisponível. Diga controle zona livre para usar textura.',
+        'cinetico.error.carga': 'Não foi possível carregar a detecção local. Diga controle zona livre para usar textura.',
+        'cinetico.error.desconectada': 'A câmera foi desconectada. Verifique a conexão e diga ativar cursor.',
+        'cinetico.error.inicio': 'Não foi possível iniciar a câmera do AdaptaPE. Verifique a permissão ou a disponibilidade.',
+    },
+    de: {
+        'cinetico.camara': 'Kamera: Kopf und Oberkörper kalibrieren die Haltung; Gliedmaßen nutzen eine feste Mitte und sanfte Gesten. Daumen-Zeigefinger-Griff oder offener Mund: Klick beim Loslassen. Sprachsteuerung: Computer, Cursor pausieren; Rechtsklick.',
+        'cinetico.cargando': 'Lokale Erkennung wird geladen…',
+        'cinetico.ayuda': 'Computer: neu kalibrieren · Rechtsklick · Zittern aktivieren',
+        'cinetico.buscandoTextura': 'Bewege die sichtbare Gliedmaße leicht · Textur wird gesucht',
+        'cinetico.texturaNoVisible': 'Textur nicht sichtbar · Cursor angehalten',
+        'cinetico.listo': 'Cursor bereit. Bequeme Haltung kalibriert.',
+        'cinetico.seguroMueve': 'Sicher · bewegen, um Klick zu aktivieren',
+        'cinetico.seguroProgreso': 'Sicher · {tipo} {porcentaje} %',
+        'cinetico.clic': 'Klick', 'cinetico.derecho': 'rechts',
+        'cinetico.recuperando': 'Bequeme Haltung wird wiederhergestellt · kein Klick',
+        'cinetico.atraccion': 'Anziehung · Präzision', 'cinetico.moviendo': 'Bewegung',
+        'cinetico.menu': 'AdaptaPE-Kontextmenü',
+        'cinetico.menu.enlacePestana': 'Link in Tab öffnen', 'cinetico.menu.enlaceVentana': 'Link in Fenster öffnen',
+        'cinetico.menu.imagen': 'Bild öffnen', 'cinetico.menu.atras': 'Zurück', 'cinetico.menu.recargar': 'Seite neu laden', 'cinetico.menu.cerrar': 'Menü schließen',
+        'cinetico.esperandoCamara': 'Warte auf zentrale Kamera · kein Klick',
+        'cinetico.enEspera': 'Verfolgung wartet · zeige den gewählten Körperteil',
+        'cinetico.esperandoInicio': 'Warte auf zentrale Kamera…',
+        'cinetico.confirmando': 'Verfolgung wird bestätigt · kein Klick',
+        'cinetico.calibrando': 'Ruhe in einer bequemen Haltung · Kalibrierung ohne Klick',
+        'cinetico.pausado': 'Cursor pausiert · sage „Cursor fortsetzen“',
+        'cinetico.esperandoImagen': 'Warte auf ein gültiges Kamerabild',
+        'cinetico.senal': 'Zeigen', 'cinetico.puno': 'Faust · Ruhe', 'cinetico.punoPreparar': 'Faust · Hand öffnen, um Ruhe vorzubereiten',
+        'cinetico.pinzaDerechoHecho': 'Griff · Rechtsklick erledigt, loslassen',
+        'cinetico.pinzaSuelta': 'Griff · loslassen: Klick · halten: rechts', 'cinetico.pinzaSueltaDerecho': 'Griff · loslassen: Rechtsklick',
+        'cinetico.boca': 'Mund offen · schließen: Klick', 'cinetico.bocaDerecho': 'Mund offen · schließen: Rechtsklick',
+        'cinetico.fuente.zona': 'Freie Zone', 'cinetico.fuente.mano': 'Hand', 'cinetico.fuente.brazo': 'Arm',
+        'cinetico.fuente.cabeza': 'Kopf', 'cinetico.fuente.torso': 'Oberkörper', 'cinetico.fuente.cabeza_corporal': 'Kopf (Körper)',
+        'cinetico.error.deteccion': 'Erkennung nicht verfügbar. Sage Steuerung freie Zone, um Textur zu nutzen.',
+        'cinetico.error.carga': 'Lokale Erkennung konnte nicht geladen werden. Sage Steuerung freie Zone, um Textur zu nutzen.',
+        'cinetico.error.desconectada': 'Die Kamera wurde getrennt. Prüfe die Verbindung und sage Cursor aktivieren.',
+        'cinetico.error.inicio': 'AdaptaPE konnte die Kamera nicht starten. Prüfe Berechtigung oder Verfügbarkeit.',
+    },
+    fr: {
+        'cinetico.camara': 'Caméra : la tête et le torse calibrent la posture ; les membres utilisent un centre fixe et des gestes doux. Pince pouce-index ou bouche ouverte : clic au relâchement. Commandes vocales : Ordinateur, pause curseur ; clic droit.',
+        'cinetico.cargando': 'Chargement de la détection locale…',
+        'cinetico.ayuda': 'Ordinateur : recalibrer · clic droit · activer tremblement',
+        'cinetico.buscandoTextura': 'Bougez légèrement le membre visible · recherche de texture',
+        'cinetico.texturaNoVisible': 'Texture non visible · curseur arrêté',
+        'cinetico.listo': 'Curseur prêt. Posture confortable calibrée.',
+        'cinetico.seguroMueve': 'Sûr · bougez pour activer le clic',
+        'cinetico.seguroProgreso': 'Sûr · {tipo} {porcentaje} %',
+        'cinetico.clic': 'clic', 'cinetico.derecho': 'droit',
+        'cinetico.recuperando': 'Retour à la posture confortable · sans clic',
+        'cinetico.atraccion': 'Attraction · précision', 'cinetico.moviendo': 'Déplacement',
+        'cinetico.menu': 'Menu contextuel AdaptaPE',
+        'cinetico.menu.enlacePestana': 'Ouvrir le lien dans un onglet', 'cinetico.menu.enlaceVentana': 'Ouvrir le lien dans une fenêtre',
+        'cinetico.menu.imagen': 'Ouvrir l’image', 'cinetico.menu.atras': 'Retour', 'cinetico.menu.recargar': 'Recharger la page', 'cinetico.menu.cerrar': 'Fermer le menu',
+        'cinetico.esperandoCamara': 'En attente de la caméra centrale · sans clic',
+        'cinetico.enEspera': 'Suivi en attente · montrez la partie choisie',
+        'cinetico.esperandoInicio': 'En attente de la caméra centrale…',
+        'cinetico.confirmando': 'Confirmation du suivi · sans clic',
+        'cinetico.calibrando': 'Reposez-vous dans une posture confortable · calibrage sans clic',
+        'cinetico.pausado': 'Curseur en pause · dites « reprendre le curseur »',
+        'cinetico.esperandoImagen': 'En attente d’une image valide de la caméra',
+        'cinetico.senal': 'signal', 'cinetico.puno': 'poing · repos', 'cinetico.punoPreparar': 'poing · ouvrez la main pour préparer le repos',
+        'cinetico.pinzaDerechoHecho': 'pince · clic droit fait, relâchez',
+        'cinetico.pinzaSuelta': 'pince · relâchez : clic · maintenez : droit', 'cinetico.pinzaSueltaDerecho': 'pince · relâchez : clic droit',
+        'cinetico.boca': 'bouche ouverte · fermez : clic', 'cinetico.bocaDerecho': 'bouche ouverte · fermez : clic droit',
+        'cinetico.fuente.zona': 'Zone libre', 'cinetico.fuente.mano': 'Main', 'cinetico.fuente.brazo': 'Bras',
+        'cinetico.fuente.cabeza': 'tête', 'cinetico.fuente.torso': 'torse', 'cinetico.fuente.cabeza_corporal': 'tête (corps)',
+        'cinetico.error.deteccion': 'Détection indisponible. Dites contrôle zone libre pour utiliser la texture.',
+        'cinetico.error.carga': 'Impossible de charger la détection locale. Dites contrôle zone libre pour utiliser la texture.',
+        'cinetico.error.desconectada': 'La caméra s’est déconnectée. Vérifiez la connexion et dites activer le curseur.',
+        'cinetico.error.inicio': 'AdaptaPE n’a pas pu démarrer la caméra. Vérifiez son autorisation ou sa disponibilité.',
+    },
+    it: {
+        'cinetico.camara': 'Fotocamera: testa e busto calibrano la postura; gli arti usano un centro fisso e gesti delicati. Pinza pollice-indice o bocca aperta: clic al rilascio. Comandi vocali: Computer, pausa cursore; clic destro.',
+        'cinetico.cargando': 'Caricamento del rilevamento locale…',
+        'cinetico.ayuda': 'Computer: ricalibra · clic destro · attiva tremore',
+        'cinetico.buscandoTextura': 'Muovi leggermente l’arto visibile · ricerca della texture',
+        'cinetico.texturaNoVisible': 'Texture non visibile · cursore fermo',
+        'cinetico.listo': 'Cursore pronto. Postura comoda calibrata.',
+        'cinetico.seguroMueve': 'Sicuro · muovi per abilitare il clic',
+        'cinetico.seguroProgreso': 'Sicuro · {tipo} {porcentaje}%',
+        'cinetico.clic': 'clic', 'cinetico.derecho': 'destro',
+        'cinetico.recuperando': 'Recupero della postura comoda · nessun clic',
+        'cinetico.atraccion': 'Attrazione · precisione', 'cinetico.moviendo': 'In movimento',
+        'cinetico.menu': 'Menu contestuale AdaptaPE',
+        'cinetico.menu.enlacePestana': 'Apri link in una scheda', 'cinetico.menu.enlaceVentana': 'Apri link in una finestra',
+        'cinetico.menu.imagen': 'Apri immagine', 'cinetico.menu.atras': 'Indietro', 'cinetico.menu.recargar': 'Ricarica pagina', 'cinetico.menu.cerrar': 'Chiudi menu',
+        'cinetico.esperandoCamara': 'In attesa della fotocamera centrale · nessun clic',
+        'cinetico.enEspera': 'Tracciamento in attesa · mostra la parte scelta',
+        'cinetico.esperandoInicio': 'In attesa della fotocamera centrale…',
+        'cinetico.confirmando': 'Conferma del tracciamento · nessun clic',
+        'cinetico.calibrando': 'Riposa in una postura comoda · calibrazione senza clic',
+        'cinetico.pausado': 'Cursore in pausa · di’ «riprendi cursore»',
+        'cinetico.esperandoImagen': 'In attesa di un’immagine valida dalla fotocamera',
+        'cinetico.senal': 'segnale', 'cinetico.puno': 'pugno · riposo', 'cinetico.punoPreparar': 'pugno · apri la mano per preparare il riposo',
+        'cinetico.pinzaDerechoHecho': 'pinza · clic destro fatto, rilascia',
+        'cinetico.pinzaSuelta': 'pinza · rilascia: clic · tieni: destro', 'cinetico.pinzaSueltaDerecho': 'pinza · rilascia: clic destro',
+        'cinetico.boca': 'bocca aperta · chiudi: clic', 'cinetico.bocaDerecho': 'bocca aperta · chiudi: clic destro',
+        'cinetico.fuente.zona': 'Zona libera', 'cinetico.fuente.mano': 'Mano', 'cinetico.fuente.brazo': 'Braccio',
+        'cinetico.fuente.cabeza': 'testa', 'cinetico.fuente.torso': 'busto', 'cinetico.fuente.cabeza_corporal': 'testa (corpo)',
+        'cinetico.error.deteccion': 'Rilevamento non disponibile. Di’ controllo zona libera per usare la texture.',
+        'cinetico.error.carga': 'Impossibile caricare il rilevamento locale. Di’ controllo zona libera per usare la texture.',
+        'cinetico.error.desconectada': 'La fotocamera si è disconnessa. Controlla la connessione e di’ attiva cursore.',
+        'cinetico.error.inicio': 'AdaptaPE non è riuscito ad avviare la fotocamera. Controlla il permesso o la disponibilità.',
+    },
+};
+globalThis.TextosAdapta?.definir(textos);
+const t = (clave, variables = {}) => globalThis.TextosAdapta ? globalThis.TextosAdapta.t(clave, variables) :
+    (textos.es[clave] ?? clave).replace(/\{(\w+)\}/g, (_, nombre) => variables[nombre] ?? '');
 class KineticEngine {
     constructor() {
         this.permitida = false;
@@ -13,6 +217,9 @@ class KineticEngine {
         this.ancho = 160;
         this.alto = 120;
         this.grises = new Float32Array(this.ancho * this.alto);
+        this.grisesAnteriores = null;
+        this.muestraGesto = null;
+        this.puntoGesto = null;
         this.puntoBase = { x: this.ancho / 2, y: this.alto / 2 };
         this.origenControl = { ...this.puntoBase };
         this.puntoActual = { ...this.origenControl };
@@ -20,7 +227,7 @@ class KineticEngine {
         this.plantilla = null;
         this.radioPlantilla = 12;
         this.zonaMuerta = 0.045;
-        this.modoControl = 'automatico';
+        this.modoControl = 'cabeza';
         this.fuenteControl = null;
         this.neutroListo = false;
         this.muestrasPostura = [];
@@ -47,6 +254,8 @@ class KineticEngine {
         this.numeroFotograma = 0;
         this.fiableDesde = null;
         this.elementoHover = null;
+        this.gestoClic = null; // Pinza o boca: sólo en memoria, nunca en storage.
+        this.estadoClic = null;
         this.bucleRender = this.bucleRender.bind(this);
     }
 
@@ -70,16 +279,19 @@ class KineticEngine {
     aplicarAjustes(ajustes) {
         if (!ajustes || typeof ajustes !== 'object') return;
         const modoAnterior = this.modoControl, amplitudAnterior = this.amplitudControl;
-        if (['automatico', 'cabeza', 'torso', 'brazo_izquierdo', 'brazo_derecho', 'manos', 'zona'].includes(ajustes.modo)) this.modoControl = ajustes.modo;
+        if (['automatico', 'cabeza', 'torso', 'brazo_izquierdo', 'brazo_derecho', 'manos', 'zona', 'zona_izquierda', 'zona_derecha'].includes(ajustes.modo)) {
+            this.modoControl = ajustes.modo.startsWith('zona') ? 'zona' : ['automatico', 'brazo_izquierdo', 'brazo_derecho'].includes(ajustes.modo) ? 'manos' : ajustes.modo === 'torso' ? 'cabeza' : ajustes.modo;
+        }
         if (typeof ajustes.temblor === 'boolean') this.zonaMuerta = ajustes.temblor ? 0.07 : 0.045;
         this.zonaAtraccion = this.zonaMuerta + 0.02;
         if (Number.isFinite(ajustes.velocidad)) this.sensibilidad = Math.max(0.3, Math.min(2, ajustes.velocidad));
         if ([0.55, 1].includes(ajustes.amplitud)) this.amplitudControl = ajustes.amplitud;
-        if (this.activa && (modoAnterior !== this.modoControl || amplitudAnterior !== this.amplitudControl)) {
+        if (this.activa && (modoAnterior !== this.modoControl || (this.modoControl === 'cabeza' && amplitudAnterior !== this.amplitudControl))) {
             this.fuenteControl = null;
             this.deteccion = null;
             this.calibrar();
-        }
+            this.solicitarModelo();
+        } else if (amplitudAnterior !== this.amplitudControl) this.cancelarFijacion(true);
     }
 
     guardarAjustes() {
@@ -125,10 +337,13 @@ class KineticEngine {
         const modelo = this.modoControl + ':' + this.fuenteControl;
         if (this.modeloEnviado === modelo) return;
         this.modeloEnviado = modelo;
-        chrome.runtime.sendMessage({ accion: 'camara_modo', modo: this.modoControl, fuente: this.fuenteControl }).catch(() => {});
+        chrome.runtime.sendMessage({ accion: 'camara_modo', modo: this.modoControl, fuente: this.fuenteControl }).then(respuesta => {
+            if (respuesta?.ok === false && this.modeloEnviado === modelo) this.modeloEnviado = null;
+        }).catch(() => { if (this.modeloEnviado === modelo) this.modeloEnviado = null; });
     }
 
-    mostrarError(texto) {
+    mostrarError(texto, clave) {
+        this.claveAviso = clave;
         this.aviso?.remove();
         this.aviso = document.createElement('div');
         this.aviso.id = 'adapta-pe-camara-aviso';
@@ -136,6 +351,15 @@ class KineticEngine {
         this.aviso.textContent = texto;
         this.aviso.style.cssText = 'position:fixed;right:20px;bottom:20px;max-width:300px;padding:14px;background:#8b1420;color:white;border-radius:12px;z-index:999999;font:14px sans-serif;';
         document.body.appendChild(this.aviso);
+    }
+
+    // Cambio de idioma en vivo: el HUD se redibuja con cada imagen; aquí sólo los textos fijos.
+    actualizarTextos() {
+        this.canvasEl?.setAttribute('aria-label', t('cinetico.camara'));
+        if (this.ayuda) this.ayuda.textContent = t('cinetico.ayuda');
+        if (this.hud && !this.numeroFotograma) this.hud.textContent = t('cinetico.cargando');
+        if (this.aviso?.isConnected && this.claveAviso) this.aviso.textContent = t(this.claveAviso);
+        this.menu?.remove();
     }
 
     crearInterfaz() {
@@ -147,7 +371,7 @@ class KineticEngine {
         this.canvasEl.width = this.ancho;
         this.canvasEl.height = this.alto;
         this.canvasEl.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
-        this.canvasEl.setAttribute('aria-label', 'Cámara con calibración automática desde una postura cómoda. Controles por voz: Computadora, recalibrar; pausar cursor; clic derecho.');
+        this.canvasEl.setAttribute('aria-label', t('cinetico.camara'));
         this.ctx = this.canvasEl.getContext('2d', { willReadFrequently: true });
         this.hudCanvasEl = document.createElement('canvas');
         this.hudCanvasEl.width = this.ancho;
@@ -159,10 +383,10 @@ class KineticEngine {
         this.hud.style.cssText = 'position:absolute;bottom:6px;left:4px;right:4px;background:rgba(0,0,0,.85);color:white;font:11px sans-serif;padding:5px;border-radius:6px;pointer-events:none;';
         this.hud.setAttribute('role', 'status');
         this.hud.setAttribute('aria-live', 'off'); // El progreso cambia por frame; anunciar sólo la calibración final.
-        this.hud.textContent = 'Cargando detección local…';
+        this.hud.textContent = t('cinetico.cargando');
         contenido.append(this.canvasEl, this.hudCanvasEl, this.hud);
-        const ayuda = document.createElement('div');
-        ayuda.textContent = 'Computadora: recalibrar · clic derecho · activar temblor';
+        const ayuda = this.ayuda = document.createElement('div');
+        ayuda.textContent = t('cinetico.ayuda');
         ayuda.style.cssText = 'position:absolute;top:4px;left:4px;right:4px;background:#111d;color:white;font:12px sans-serif;padding:5px;border-radius:6px;';
         contenido.appendChild(ayuda);
         this.punteroVirtual = document.createElement('div');
@@ -177,6 +401,7 @@ class KineticEngine {
         ++this.generacion;
         this.vistaPendiente = null;
         this.numeroFotograma = 0; this.grisesRecibidos = false;
+        this.grisesAnteriores = null;
         this.deteccion = null;
         this.fuenteControl = null;
         this.neutroListo = false;
@@ -186,7 +411,7 @@ class KineticEngine {
         this.reposoBorde = null;
         this.historialMovimiento = [];
         this.ultimoMovimiento = null;
-        this.fuenteCandidata = null;
+        this.fuenteCandidata = null; this.adquisicion = null;
         this.activa = false;
         this.iniciando = false;
         cancelAnimationFrame(this.animationId);
@@ -203,11 +428,39 @@ class KineticEngine {
               { x: (1 - punto.x) * this.ancho, y: punto.y * this.alto, fuente } : null;
         const rostro = datos.rostro || [], cuerpo = datos.cuerpo || [], manos = datos.manos || [];
         const candidatos = [];
-        const visible = indice => cuerpo[indice] && cuerpo[indice].visibility >= 0.65 && (cuerpo[indice].presence ?? 1) >= 0.65;
-        if ((this.modoControl === 'manos' || this.modoControl === 'automatico') && manos[0]) {
-            const palma = [0, 5, 9, 13, 17].map(indice => manos[indice]).filter(Boolean);
-            candidatos.push(convertir({ x: palma.reduce((suma, punto) => suma + punto.x, 0) / palma.length,
-                y: palma.reduce((suma, punto) => suma + punto.y, 0) / palma.length }, 'mano:' + (datos.mano || 'visible')));
+        const confianza = this.modoControl === 'manos' ? 0.5 : 0.65;
+        const visible = indice => cuerpo[indice] && cuerpo[indice].visibility >= confianza &&
+            (cuerpo[indice].presence ?? 1) >= confianza && convertir(cuerpo[indice], '');
+        // Histéresis: adquirir exige más confianza que conservar una mano ya seguida sin pérdida.
+        const minima = this.fuenteControl?.startsWith('mano:') && this.perdidaDesde == null ? 0.6 : 0.8;
+        if ((this.modoControl === 'manos' || this.modoControl === 'automatico') && manos[0] &&
+            !(datos.manoConfianza < minima) && this.esqueletoMano(manos)) {
+            const fuente = 'mano:' + (datos.mano || 'visible');
+            let mano = this.fuenteControl === fuente + ':palma' ? null : convertir(manos[0], fuente);
+            if (!mano) {
+                const nudillos = [5, 9, 13, 17].map(indice => convertir(manos[indice], fuente + ':palma')).filter(Boolean);
+                if (nudillos.length >= 2) mano = { x: nudillos.reduce((suma, punto) => suma + punto.x, 0) / nudillos.length,
+                    y: nudillos.reduce((suma, punto) => suma + punto.y, 0) / nudillos.length, fuente: fuente + ':palma' };
+            }
+            if (mano) {
+                mano.gesto = this.inclinacionMano(manos);
+                const pinza = this.medirPinza(manos);
+                mano.clic = mano.gesto?.puno && pinza !== 'suelto' ? null : pinza;
+            }
+            candidatos.push(mano);
+        }
+        if (this.modoControl === 'manos' || this.modoControl === 'automatico') {
+            if (!candidatos.some(Boolean) && this.fuenteControl?.startsWith('mano:')) {
+                const cercana = [15, 16].filter(visible).map(indice => convertir(cuerpo[indice], this.fuenteControl))
+                    .sort((a, b) => Math.hypot(a.x - this.puntoActual.x, a.y - this.puntoActual.y) - Math.hypot(b.x - this.puntoActual.x, b.y - this.puntoActual.y))[0];
+                if (cercana && Math.hypot(cercana.x - this.puntoActual.x, cercana.y - this.puntoActual.y) <= this.ancho * 0.2) candidatos.push(cercana);
+                else return null; // Una pérdida de mano no elige otro codo incidental.
+            }
+            for (const [lado, indices] of [['izquierdo', [15, 13]], ['derecho', [16, 14]]]) {
+                const fuente = 'brazo_' + lado;
+                const indice = indices.find(indice => this.fuenteControl === fuente + ':' + indice && visible(indice)) ?? indices.find(visible);
+                if (indice != null) candidatos.push(convertir(cuerpo[indice], fuente + ':' + indice));
+            }
         }
         if ((this.modoControl === 'automatico' || this.modoControl === 'cabeza') && rostro[1] && rostro[33] && rostro[263]) {
             const nariz = rostro[1], izquierdo = rostro[33], derecho = rostro[263];
@@ -216,62 +469,293 @@ class KineticEngine {
                 const centroX = (izquierdo.x + derecho.x) / 2, centroY = (izquierdo.y + derecho.y) / 2;
                 // Validar anatomía dentro de imagen; el control derivado puede salir del cuadro.
                 // Recortarlo o descartarlo obligaba a levantar un rostro perfectamente visible.
-                candidatos.push(convertir({ x: nariz.x + (nariz.x - centroX) / ancho * 0.12,
-                    y: nariz.y + (nariz.y - centroY) / ancho * 0.12 }, 'cabeza', true));
+                const cabeza = convertir({ x: nariz.x + (nariz.x - centroX) / ancho * 0.12,
+                    y: nariz.y + (nariz.y - centroY) / ancho * 0.12 }, 'cabeza', true);
+                // Apertura de boca (jawOpen 0..1): histéresis amplia para no confundir el habla con un clic.
+                if (cabeza && Number.isFinite(datos.boca)) cabeza.clic = datos.boca >= 0.5 ? 'activo' : datos.boca <= 0.2 ? 'suelto' : 'intermedio';
+                candidatos.push(cabeza);
             }
         }
 
         if (this.modoControl === 'brazo_izquierdo' || this.modoControl === 'brazo_derecho') {
-            const indices = this.modoControl === 'brazo_izquierdo' ? [15, 13, 11] : [16, 14, 12];
+            const indices = this.modoControl === 'brazo_izquierdo' ? [15, 13] : [16, 14];
             const actual = indices.find(indice => this.fuenteControl === this.modoControl + ':' + indice && visible(indice));
             const indice = actual ?? indices.find(visible);
             if (indice != null) return convertir(cuerpo[indice], this.modoControl + ':' + indice);
             return null; // No inventar la posición de una mano ausente u oculta.
         }
-        if (this.modoControl === 'automatico' && visible(0)) candidatos.push(convertir(cuerpo[0], 'cabeza corporal'));
-        if ((this.modoControl === 'automatico' || this.modoControl === 'torso') && visible(11) && visible(12)) {
+        if ((this.modoControl === 'automatico' || this.modoControl === 'cabeza') && visible(0)) candidatos.push(convertir(cuerpo[0], 'cabeza corporal'));
+        if ((this.modoControl === 'torso' || this.modoControl === 'cabeza') && visible(11) && visible(12)) {
             candidatos.push(convertir({ x: (cuerpo[11].x + cuerpo[12].x) / 2, y: (cuerpo[11].y + cuerpo[12].y) / 2 }, 'torso'));
         }
-        // Mantener la parte elegida evita que una mano incidental cambie la postura neutral.
+        // Una mano persistente puede sustituir el codo sin obligar a levantar el brazo.
+        if (['automatico', 'manos'].includes(this.modoControl) && !this.fuenteControl?.startsWith('mano:') && candidatos[0]?.fuente.startsWith('mano:')) return candidatos[0];
         return candidatos.find(punto => punto?.fuente === this.fuenteControl) || candidatos.find(Boolean) || null;
+    }
+
+    esqueletoMano(manos) {
+        // Esqueleto invisible: rechaza manos con proporciones imposibles (falsos positivos en rostro, ropa o fondo).
+        // MediaPipe entrega siempre 21 puntos; sin esqueleto completo no hay proporciones que juzgar.
+        if (manos.length < 21 || !Array.from(manos).every(punto => punto && Number.isFinite(punto.x) && Number.isFinite(punto.y))) return true;
+        const distancia = (a, b) => Math.hypot(manos[b].x - manos[a].x, (manos[b].y - manos[a].y) * this.alto / this.ancho,
+            (manos[b].z || 0) - (manos[a].z || 0));
+        const palma = [5, 9, 13, 17].reduce((suma, indice) => suma + distancia(0, indice), 0) / 4;
+        if (!(palma >= 0.025)) return false;
+        const anchoPalma = distancia(5, 17) / palma;
+        return anchoPalma >= 0.3 && anchoPalma <= 1.6 && [5, 9, 13, 17].every(base => {
+            const dedo = (distancia(base, base + 1) + distancia(base + 1, base + 2) + distancia(base + 2, base + 3)) / palma;
+            return dedo <= 2.5; // Reales <=1,3 palmas. Sin mínimo: un dedo que apunta a la cámara se acorta en la imagen.
+        });
+    }
+
+    inclinacionMano(manos) {
+        const valido = indice => manos[indice] && Number.isFinite(manos[indice].z) &&
+            manos[indice].x >= 0 && manos[indice].x <= 1 && manos[indice].y >= 0 && manos[indice].y <= 1;
+        const vector = (a, b) => [b.x - a.x, (b.y - a.y) * this.alto / this.ancho, b.z - a.z];
+        const dedos = [[5, 8], [9, 12], [13, 16], [17, 20]];
+        const completos = dedos.every(([base, punta]) => [0, base, base + 1, base + 2, punta].every(valido));
+        // Recta nudillo-punta / suma de falanges: <0.75 doblado, >=0.9 extendido.
+        const rectitud = completos && dedos.map(([base, punta]) => {
+            const segmentos = [base, base + 1, base + 2].map(indice => Math.hypot(...vector(manos[indice], manos[indice + 1])));
+            return segmentos.every(valor => valor > 0.0001) ?
+                Math.hypot(...vector(manos[base], manos[punta])) / segmentos.reduce((suma, valor) => suma + valor, 0) : NaN;
+        });
+        // El modelo suele estirar un dedo de un puño real: bastan tres doblados si ninguno queda extendido.
+        const puno = completos && rectitud.every(Number.isFinite) && rectitud.filter(valor => valor < 0.75).length >= 3 &&
+            rectitud.every(valor => valor < 0.9);
+        const extendidos = dedos.filter(([base, punta]) => {
+            if (!valido(base) || !valido(punta)) return false;
+            const longitud = Math.hypot(...vector(manos[base], manos[punta]));
+            if (longitud < 0.015) return false;
+            if ([base + 1, base + 2].every(valido)) {
+                const segmentos = [base, base + 1, base + 2].map(indice => Math.hypot(...vector(manos[indice], manos[indice + 1])));
+                // Dedos hacia abajo pueden estar extendidos aunque la punta se acerque a la muñeca.
+                return segmentos.every(valor => valor > 0.0001) && longitud >= segmentos.reduce((suma, valor) => suma + valor, 0) * 0.9;
+            }
+            return valido(0) && Math.hypot(...vector(manos[0], manos[base])) > 0.0001 &&
+                Math.hypot(...vector(manos[0], manos[punta])) > Math.hypot(...vector(manos[0], manos[base])) * 1.25;
+        })
+            .map(([base, punta]) => vector(manos[base], manos[punta]));
+        const apuntando = extendidos.length > 0 && extendidos.every(dedo =>
+            dedo[0] * extendidos[0][0] + dedo[1] * extendidos[0][1] >=
+            0.85 * Math.hypot(dedo[0], dedo[1]) * Math.hypot(extendidos[0][0], extendidos[0][1]));
+        let direccion;
+        if (apuntando) {
+            direccion = extendidos.reduce((suma, dedo) => suma.map((valor, indice) => valor + dedo[indice]), [0, 0, 0]);
+            if (Math.hypot(direccion[0], direccion[1]) < Math.hypot(...direccion) * 0.35) return null;
+            direccion[2] = 0;
+            if (Math.abs(direccion[0]) < Math.abs(direccion[1]) * 0.35) direccion[0] = 0;
+            if (Math.abs(direccion[1]) < Math.abs(direccion[0]) * 0.35) direccion[1] = 0;
+        }
+        else {
+            if (![0, 5, 17].every(valido)) return null;
+            const a = vector(manos[0], manos[5]), b = vector(manos[0], manos[17]);
+            // Nudillos y muñeca conservan el plano de la palma tanto abierta como en puño.
+            direccion = [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+            if (direccion[2] < 0) direccion = direccion.map(valor => -valor);
+        }
+        const longitud = Math.hypot(...direccion);
+        if (longitud < 0.0001 || !Number.isFinite(longitud)) return puno ? { ...this.puntoBase, puno: true, abierta: false } : null;
+        return { x: this.puntoBase.x - direccion[0] / longitud * 32,
+            y: this.puntoBase.y + direccion[1] / longitud * 24, abierta: extendidos.length > 0,
+            ...(apuntando ? { apuntando: true } : {}), ...(completos ? { puno } : {}) };
+    }
+
+    medirPinza(manos) {
+        // Pinza pulgar (4) - índice (8) normalizada por muñeca - nudillo medio (0-9). null: puntos no fiables o puño.
+        const valido = indice => manos[indice] && Number.isFinite(manos[indice].x) && Number.isFinite(manos[indice].y) &&
+            manos[indice].x >= 0 && manos[indice].x <= 1 && manos[indice].y >= 0 && manos[indice].y <= 1;
+        if (![0, 4, 5, 6, 8, 9].every(valido)) return null;
+        const distancia = (a, b) => Math.hypot(manos[b].x - manos[a].x, (manos[b].y - manos[a].y) * this.alto / this.ancho,
+            Number.isFinite(manos[a].z) && Number.isFinite(manos[b].z) ? manos[b].z - manos[a].z : 0);
+        const tamano = distancia(0, 9);
+        if (tamano < 0.03) return null; // Mano demasiado lejana para distinguir una pinza.
+        const pinza = distancia(4, 8) / tamano;
+        if (pinza >= 0.4) return 'suelto';
+        if (pinza > 0.25) return 'intermedio';
+        // En un puño el pulgar cubre la falange media y la punta del índice se recoge hacia la palma.
+        return distancia(4, 8) < distancia(4, 6) && distancia(0, 8) > distancia(0, 5) ? 'activo' : null;
+    }
+
+    procesarGestoClic(estado, inferencia, tiempo) {
+        // Pinza (manos) o boca abierta (cabeza): un clic por gesto, al soltar; exige ver el gesto suelto antes.
+        const manos = this.modoControl === 'manos';
+        const config = manos ? { inferencias: 2, confirmar: 80, derecho: 700, maximo: Infinity } :
+            { inferencias: 3, confirmar: 300, derecho: Infinity, maximo: 1500 };
+        const gesto = this.gestoClic ??= { suelto: false };
+        if (inferencia === gesto.ultima) return gesto.inicio != null; // Una imagen repetida no confirma ni suelta.
+        gesto.ultima = inferencia;
+        if (estado === 'suelto') {
+            const clic = gesto.confirmado && !gesto.derecho;
+            this.gestoClic = { suelto: true, ultima: inferencia };
+            if (clic) this.clicGesto(this.tipoClick, tiempo);
+            return false;
+        }
+        // Pulgar oculto, puño o puntos poco fiables: cancelar sin clic y exigir soltar.
+        if (estado !== 'activo' && estado !== 'intermedio') { this.gestoClic = { suelto: false, ultima: inferencia }; return false; }
+        if (estado === 'activo' && gesto.suelto) gesto.inicio ??= inferencia;
+        if (gesto.inicio == null) return false;
+        gesto.cuenta = (gesto.cuenta || 0) + 1;
+        const duracion = inferencia - gesto.inicio;
+        if (duracion >= config.maximo) { this.gestoClic = { suelto: false, ultima: inferencia }; return false; } // Bostezo: sin clic.
+        if (!gesto.confirmado && gesto.cuenta >= config.inferencias && duracion >= config.confirmar) gesto.confirmado = true;
+        if (gesto.confirmado && !gesto.derecho && duracion >= config.derecho) { gesto.derecho = true; this.clicGesto('derecho', tiempo); }
+        return true;
+    }
+
+    clicGesto(tipo, tiempo) {
+        if (this.pausada || !this.neutroListo || this.fiableDesde == null || tiempo - this.fiableDesde < 250) return;
+        const gesto = this.gestoClic, objetivo = this.elementoBajoCursor();
+        this.cancelarFijacion(true); this.gestoClic = gesto; // Desarmar permanencia sin olvidar que la pinza sigue cerrada.
+        if (this.muestraGesto) this.muestraGesto.puno = null;
+        this.tipoClick = 'izquierdo';
+        this.hacerClick(tipo, objetivo);
+    }
+
+    controlarGesto(punto, tiempo, angulo = 0, inclinacion = null) {
+        let referencia = this.muestraGesto;
+        if (!referencia || tiempo - referencia.tiempo > 500) {
+            referencia = this.muestraGesto = { ...punto, tiempo, inclinacion: inclinacion?.apuntando ? null : inclinacion,
+                candidata: inclinacion?.apuntando ? { ...inclinacion, tiempo } : null, control: { ...this.puntoBase },
+                puno: { abierta: Boolean(inclinacion?.abierta || inclinacion?.apuntando), detectado: Boolean(inclinacion?.puno),
+                    vista: inclinacion?.abierta || inclinacion?.apuntando ? tiempo : null } };
+        }
+        if (tiempo <= referencia.tiempo) return referencia.control;
+        referencia.tiempo = tiempo;
+        const puno = referencia.puno ??= { abierta: false };
+        puno.detectado = Boolean(inclinacion?.puno);
+        const reposoAnterior = Boolean(puno.activo);
+        const abierta = Boolean(inclinacion?.abierta || inclinacion?.apuntando);
+        if (abierta) puno.vista = tiempo;
+        // Las imágenes intermedias al cerrar la mano no borran la apertura previa durante 1,5 s.
+        puno.abierta = puno.vista != null && tiempo - puno.vista <= 1500;
+        if (inclinacion?.puno && (reposoAnterior || puno.abierta || puno.inicio != null)) {
+            puno.inicio ??= tiempo; puno.cuenta = (puno.cuenta || 0) + 1; puno.dudoso = null;
+            puno.activo = reposoAnterior || tiempo - puno.inicio >= 120 && puno.cuenta >= 3;
+            puno.salida = null;
+            if (puno.activo) puno.vista = null; // Cada clic exige volver a abrir la mano.
+        } else if (reposoAnterior && (abierta || puno.salida != null)) {
+            puno.salida ??= tiempo;
+            this.cancelarFijacion(true);
+            if (tiempo - puno.salida >= 80) { puno.activo = false; puno.inicio = null; puno.cuenta = 0; }
+        } else if (!abierta && (reposoAnterior || puno.inicio != null) && tiempo - (puno.dudoso ??= tiempo) < 400) {
+            // Imagen ambigua (punto fuera o dedo mal estimado): conservar el puño y su permanencia hasta 400 ms.
+        } else {
+            puno.inicio = null; puno.cuenta = 0; puno.activo = false; puno.dudoso = null;
+        }
+        if (reposoAnterior !== Boolean(puno.activo)) {
+            this.ultimoMovimiento = null; this.historialMovimiento = []; this.puntoSuave = { ...this.puntoBase };
+            this.cancelarFijacion(reposoAnterior);
+            referencia.senalActiva = false; referencia.candidata = null;
+            if (puno.activo) {
+                // Cerrar deliberadamente la mano permite dwell; llegar con un puño no arma clic.
+                this.armado = !this.pausada && this.fiableDesde != null && tiempo - this.fiableDesde >= 250;
+            } else {
+                referencia.x = punto.x; referencia.y = punto.y; referencia.joystick = false;
+                referencia.inclinacion = inclinacion?.apuntando ? null : inclinacion;
+            }
+        }
+        if (puno.activo) return referencia.control = { ...this.puntoBase };
+        const giro = (referencia.giro || 0) + angulo;
+        referencia.giro = Math.atan2(Math.sin(giro), Math.cos(giro));
+        referencia.inclinacion ??= inclinacion?.apuntando ? null : inclinacion;
+        const senalAnterior = Boolean(referencia.senalActiva);
+        if (inclinacion?.apuntando) {
+            const candidata = referencia.candidata;
+            const dx = inclinacion.x - this.puntoBase.x, dy = (inclinacion.y - this.puntoBase.y) * this.ancho / this.alto;
+            const cx = candidata ? candidata.x - this.puntoBase.x : 0, cy = candidata ? (candidata.y - this.puntoBase.y) * this.ancho / this.alto : 0;
+            if (!candidata || (!senalAnterior && dx * cx + dy * cy < 0.7 * Math.hypot(dx, dy) * Math.hypot(cx, cy))) {
+                referencia.candidata = { ...inclinacion, tiempo };
+            }
+            referencia.senalActiva = senalAnterior || tiempo - referencia.candidata.tiempo >= 50;
+        } else { referencia.candidata = null; referencia.senalActiva = false; }
+        if (senalAnterior !== referencia.senalActiva) {
+            this.ultimoMovimiento = null; this.historialMovimiento = []; this.puntoSuave = { ...this.puntoBase };
+            this.cancelarFijacion();
+        }
+        // Joystick relativo: conservar el reposo inicial mientras se mantiene una dirección.
+        let dx = (punto.x - referencia.x) * 6, dy = (punto.y - referencia.y) * 6;
+        const desplazamiento = Math.hypot(dx / this.ancho, dy / this.alto) / this.amplitudControl;
+        referencia.joystick = desplazamiento > (referencia.joystick ? this.zonaMuerta * 0.85 : this.zonaMuerta + 0.004);
+        if (referencia.senalActiva) {
+            dx = inclinacion.x - this.puntoBase.x; dy = inclinacion.y - this.puntoBase.y;
+        } else if (!referencia.joystick && !inclinacion?.apuntando) {
+            dx = 0; dy = 0;
+            const origen = referencia.inclinacion;
+            if (inclinacion && origen) { dx = inclinacion.x - origen.x; dy = inclinacion.y - origen.y; }
+            else if (referencia.giro) { dx = referencia.giro * 144; dy = 0; }
+        } else {
+            if (Math.abs(dx) < Math.abs(dy * this.ancho / this.alto) * 0.3) dx = 0;
+            if (Math.abs(dy * this.ancho / this.alto) < Math.abs(dx) * 0.3) dy = 0;
+        }
+        if (!referencia.senalActiva && !referencia.joystick && Math.hypot(dx / this.ancho, dy / this.alto) / this.amplitudControl <= this.zonaMuerta + 0.004) {
+            dx = 0; dy = 0;
+        }
+        referencia.control = { x: this.puntoBase.x + Math.max(-32, Math.min(32, dx)),
+            y: this.puntoBase.y + Math.max(-24, Math.min(24, dy)) };
+        return referencia.control;
     }
 
     controlarZona(tiempo) {
         const grises = this.leerGrises();
         if (!this.plantilla) {
-            // Buscar textura automáticamente cerca del punto: sirve para muñones o ropa,
-            // sin colocar exactamente un detalle bajo la cruz central.
+            const anterior = this.grisesAnteriores;
+            if (!anterior) {
+                this.grisesAnteriores = new Float32Array(grises);
+                this.dibujarHUD(t('cinetico.buscandoTextura'), 0); return;
+            }
+            let luz = 0;
+            for (let indice = 0; indice < grises.length; indice++) luz += grises[indice] - anterior[indice];
+            luz /= grises.length;
+            let sumaX = 0, sumaY = 0, movidos = 0;
+            for (let y = 0; y < this.alto; y += 2) for (let x = 0; x < this.ancho; x += 2) {
+                const indice = y * this.ancho + x;
+                if (Math.abs(grises[indice] - anterior[indice] - luz) > 12) { sumaX += x; sumaY += y; movidos++; }
+            }
             let mejor = null;
             const margen = this.radioPlantilla + 1;
-            for (let y = Math.max(margen, this.origenControl.y - 24); y < Math.min(this.alto - margen, this.origenControl.y + 25); y += 4) {
-                for (let x = Math.max(margen, this.origenControl.x - 24); x < Math.min(this.ancho - margen, this.origenControl.x + 25); x += 4) {
-                    const parche = this.extraerParche(grises, x, y);
-                    if (!mejor || parche.contraste > mejor.parche.contraste) mejor = { x, y, parche };
+            // Movimiento local propone textura; una variación de luz o imagen completa no adquiere control.
+            if (movidos >= 12 && movidos < grises.length * 0.35 / 4) {
+                const centroX = Math.round(sumaX / movidos), centroY = Math.round(sumaY / movidos);
+                for (let y = Math.max(margen, centroY - 24); y < Math.min(this.alto - margen, centroY + 25); y += 4) {
+                    for (let x = Math.max(margen, centroX - 24); x < Math.min(this.ancho - margen, centroX + 25); x += 4) {
+                        const indice = y * this.ancho + x;
+                        const movimiento = Math.abs(grises[indice] - anterior[indice] - luz);
+                        if (movimiento <= 12) continue;
+                        const parche = this.extraerParche(grises, x, y);
+                        const puntuacion = parche.detalle * movimiento;
+                        if (parche.contraste >= 6 && parche.detalle >= 1 && (!mejor || puntuacion > mejor.puntuacion)) mejor = { x, y, parche, puntuacion };
+                    }
                 }
             }
-            if (!mejor || mejor.parche.contraste < 6) { this.dibujarHUD('Zona libre · acerca una parte visible o mejora la luz', 0); return; }
+            anterior.set(grises);
+            if (!mejor) { this.dibujarHUD(t('cinetico.buscandoTextura'), 0); return; }
             this.plantilla = mejor.parche;
-            this.origenControl = { x: mejor.x, y: mejor.y };
-            this.puntoActual = { ...this.origenControl };
+            this.puntoActual = { x: mejor.x, y: mejor.y };
+            this.muestraGesto = null;
             this.puntoSuave = { ...this.puntoBase };
-            this.neutroListo = true;
             this.fuenteControl = 'zona libre';
-            this.fiableDesde = tiempo;
         }
         const punto = this.seguirPunto(grises);
         if (!punto) {
-            this.fiableDesde = null;
-            this.neutroListo = false;
-            this.plantilla = null;
+            this.perdidaDesde ??= tiempo;
+            this.fiableDesde = null; this.muestraGesto = null; this.puntoGesto = null;
+            this.ultimoMovimiento = null; this.puntoSuave = { ...this.puntoBase };
+            if (tiempo - this.perdidaDesde >= 1200) {
+                this.plantilla = null; this.grisesAnteriores = null;
+            }
             this.cancelarFijacion(true);
             this.actualizarHover(null);
-            this.dibujarHUD('Zona perdida · readquiriendo sin clic', 0);
+            this.dibujarHUD(t('cinetico.texturaNoVisible'), 0);
             return;
         }
+        this.perdidaDesde = null;
         this.puntoActual = { x: punto.x, y: punto.y };
         // Actualizar textura lentamente permite pequeñas rotaciones e iluminación variable.
         const nueva = this.extraerParche(grises, punto.x, punto.y);
-        this.plantilla.valores = this.plantilla.valores.map((valor, indice) => valor * 0.95 + nueva.valores[indice] * 0.05);
+        this.plantilla.valores = punto.angulo ? nueva.valores : this.plantilla.valores.map((valor, indice) => valor * 0.95 + nueva.valores[indice] * 0.05);
+        this.neutroListo = true;
+        this.puntoGesto = this.controlarGesto(this.puntoActual, this.deteccion?.tiempo ?? tiempo, punto.angulo);
         this.fiableDesde ??= tiempo;
     }
 
@@ -300,20 +784,28 @@ class KineticEngine {
         const media = valores.reduce((suma, valor) => suma + valor, 0) / valores.length;
         const centrados = valores.map(valor => valor - media);
         const contraste = Math.sqrt(centrados.reduce((suma, valor) => suma + valor * valor, 0) / valores.length);
-        return { valores: centrados, contraste };
+        let horizontal = 0, vertical = 0, cruzado = 0;
+        for (let fila = -this.radioPlantilla; fila <= this.radioPlantilla; fila += 2) {
+            for (let columna = -this.radioPlantilla; columna <= this.radioPlantilla; columna += 2) {
+                const indice = (y + fila) * this.ancho + x + columna;
+                const dx = (grises[indice + 1] - grises[indice - 1]) / 2;
+                const dy = (grises[indice + this.ancho] - grises[indice - this.ancho]) / 2;
+                horizontal += dx * dx; vertical += dy * dy; cruzado += dx * dy;
+            }
+        }
+        const detalle = Math.sqrt(Math.max(0, (horizontal + vertical - Math.hypot(horizontal - vertical, 2 * cruzado)) / (2 * valores.length)));
+        return { valores: centrados.map(valor => valor / (contraste || 1)), contraste, detalle };
     }
 
     calibrar(punto = this.puntoActual) {
         if (!this.activa) return false;
         if (!Number.isFinite(punto.x) || !Number.isFinite(punto.y)) return false;
-        // Sólo la textura necesita margen de píxeles enteros, nunca el rostro/cuerpo.
-        const margen = this.modoControl === 'zona' ? this.radioPlantilla + 1 : 0;
-        this.origenControl = this.modoControl === 'zona' ? {
-            x: Math.round(Math.max(margen, Math.min(this.ancho - margen - 1, punto.x))),
-            y: Math.round(Math.max(margen, Math.min(this.alto - margen - 1, punto.y))) } : { x: punto.x, y: punto.y };
+        this.origenControl = this.modoControl === 'cabeza' ? { x: punto.x, y: punto.y } : { ...this.puntoBase };
         this.puntoSuave = { ...this.puntoBase };
         this.plantilla = null;
-        this.neutroListo = false;
+        this.neutroListo = this.modoControl !== 'cabeza';
+        this.muestraGesto = null; this.puntoGesto = null;
+        this.grisesAnteriores = null;
         this.fiableDesde = null;
         this.muestrasPostura = [];
         this.ultimaPostura = null;
@@ -327,6 +819,7 @@ class KineticEngine {
     }
 
     aprenderPostura(punto, tiempo) {
+        if (this.modoControl !== 'cabeza') return false;
         if (tiempo === this.ultimaPostura) return false; // Una inferencia repetida no prueba estabilidad.
         if (this.ultimaPostura != null && tiempo - this.ultimaPostura > 500) this.muestrasPostura = [];
         this.ultimaPostura = tiempo;
@@ -348,52 +841,73 @@ class KineticEngine {
         this.neutroListo = true;
         this.muestrasPostura = [];
         this.cancelarFijacion(true);
-        try { chrome.runtime.sendMessage({ accion: 'hablar', texto: 'Cursor listo. Postura cómoda calibrada.' }, () => { void chrome.runtime.lastError; }); } catch (_) {}
+        try { chrome.runtime.sendMessage({ accion: 'hablar', texto: t('cinetico.listo'), lang: this.langTTS }, () => { void chrome.runtime.lastError; }); } catch (_) {}
         return true;
+    }
+
+    cambiarReferencia(punto) {
+        const dx = punto.x - this.puntoActual.x, dy = punto.y - this.puntoActual.y;
+        this.origenControl.x += dx; this.origenControl.y += dy;
+        this.historialMovimiento = this.historialMovimiento.map(muestra => ({ x: muestra.x + dx, y: muestra.y + dy }));
+        this.puntoActual = { x: punto.x, y: punto.y };
+        this.cancelarFijacion(true);
     }
 
     seguirPunto(grises) {
         // Zona libre: seguir una textura visible, sin asumir anatomía ni exigir manos.
-        // ponytail: correlación local; oclusiones largas exigen elegir otra zona.
+        // shortcut: textura local sin clasificar anatomía, una oclusión larga exige nueva adquisición.
         let mejor = { error: Infinity, x: this.puntoActual.x, y: this.puntoActual.y };
         const errores = [];
         const margen = this.radioPlantilla + 1;
-        const medir = (x, y) => {
+        const energia = this.plantilla.valores.reduce((suma, valor) => suma + valor * valor, 0);
+        const valores = new Float32Array(this.plantilla.valores.length);
+        const medir = (x, y, angulo = 0) => {
             if (x < margen || y < margen || x >= this.ancho - margen || y >= this.alto - margen) return;
             let suma = 0, cuadrados = 0;
             const cantidad = this.plantilla.valores.length;
+            let indice = 0;
+            const coseno = Math.cos(angulo), seno = Math.sin(angulo);
             for (let fila = -this.radioPlantilla; fila <= this.radioPlantilla; fila += 2) {
                 for (let columna = -this.radioPlantilla; columna <= this.radioPlantilla; columna += 2) {
-                    const valor = grises[(y + fila) * this.ancho + x + columna];
+                    const px = angulo ? Math.round(x + columna * coseno - fila * seno) : x + columna;
+                    const py = angulo ? Math.round(y + columna * seno + fila * coseno) : y + fila;
+                    if (px < 0 || px >= this.ancho || py < 0 || py >= this.alto) return;
+                    const valor = grises[py * this.ancho + px];
+                    valores[indice++] = valor;
                     suma += valor; cuadrados += valor * valor;
                 }
             }
             const media = suma / cantidad;
             if (cuadrados / cantidad - media * media < 36) return;
-            let error = 0;
-            let indice = 0;
-            for (let fila = -this.radioPlantilla; fila <= this.radioPlantilla; fila += 2) {
-                for (let columna = -this.radioPlantilla; columna <= this.radioPlantilla; columna += 2) {
-                    error += Math.abs(grises[(y + fila) * this.ancho + x + columna] - media - this.plantilla.valores[indice++]);
-                }
-            }
-            error /= cantidad;
+            let correlacion = 0;
+            for (let indice = 0; indice < cantidad; indice++) correlacion += (valores[indice] - media) * this.plantilla.valores[indice];
+            const error = 1 - correlacion / Math.sqrt(energia * (cuadrados - cantidad * media * media));
             errores.push({ error, x, y });
-            if (error < mejor.error) mejor = { error, x, y };
+            if (error < mejor.error) mejor = { error, x, y, angulo };
         };
         const centroX = Math.round(this.puntoActual.x), centroY = Math.round(this.puntoActual.y);
-        for (let y = centroY - 8; y <= centroY + 8; y++) {
-            for (let x = centroX - 8; x <= centroX + 8; x++) medir(x, y);
+        for (let y = centroY - 12; y <= centroY + 12; y++) {
+            for (let x = centroX - 12; x <= centroX + 12; x++) medir(x, y);
+        }
+        const traslacion = mejor;
+        if (traslacion.error <= 0.4) {
+            for (const angulo of [-0.24, -0.12, 0.12, 0.24]) {
+                for (let y = traslacion.y - 2; y <= traslacion.y + 2; y++) {
+                    for (let x = traslacion.x - 2; x <= traslacion.x + 2; x++) medir(x, y, angulo);
+                }
+            }
+            if (traslacion.error - mejor.error < 0.02) mejor = traslacion;
         }
         const ambiguo = errores.some(candidato => Math.hypot(candidato.x - mejor.x, candidato.y - mejor.y) > 3 &&
-            candidato.error <= mejor.error * 1.15 + 0.5);
-        return mejor.error <= 18 && !ambiguo ? mejor : null;
+            candidato.error <= mejor.error * 1.15 + 0.005);
+        return mejor.error <= 0.15 && !ambiguo ? mejor : null;
     }
 
     filtrarMovimiento(punto, tiempo) {
         if (tiempo !== this.ultimoMovimiento) {
             if (this.ultimoMovimiento == null || tiempo - this.ultimoMovimiento > 500) {
-                this.historialMovimiento = [{ ...this.origenControl }, { ...this.origenControl }];
+                const centro = this.modoControl === 'cabeza' ? this.origenControl : this.puntoBase;
+                this.historialMovimiento = [{ ...centro }, { ...centro }];
             }
             this.ultimoMovimiento = tiempo;
             this.historialMovimiento.push(punto);
@@ -410,13 +924,14 @@ class KineticEngine {
     cancelarFijacion(desarmar = false) {
         this.inicioFijacion = null;
         this.objetivoFijado = null;
-        if (desarmar) { this.armado = false; this.inicioArmado = null; this.enZonaSegura = false; }
+        if (desarmar) { this.armado = false; this.inicioArmado = null; this.enZonaSegura = false; this.gestoClic = null; }
     }
 
     normalizarControl(punto) {
         // Centro fijo. Igual fracción de imagen produce la misma respuesta en ambos ejes.
-        return { x: this.puntoBase.x + (punto.x - this.origenControl.x) / this.amplitudControl,
-            y: this.puntoBase.y + (punto.y - this.origenControl.y) * this.ancho / this.alto / this.amplitudControl };
+        const origen = this.modoControl === 'cabeza' ? this.origenControl : this.puntoBase;
+        return { x: this.puntoBase.x + (punto.x - origen.x) / this.amplitudControl,
+            y: this.puntoBase.y + (punto.y - origen.y) * this.ancho / this.alto / this.amplitudControl };
     }
 
     actualizarControl(punto, tiempo, intervalo) {
@@ -424,8 +939,11 @@ class KineticEngine {
         const distanciaCruda = Math.hypot(punto.x - this.puntoBase.x, punto.y - this.puntoBase.y) / this.ancho;
         const constante = distanciaCruda > this.zonaAtraccion + 0.025 ? 85 : 180;
         const suavizado = 1 - Math.exp(-intervalo / constante);
-        this.puntoSuave.x += (punto.x - this.puntoSuave.x) * suavizado;
-        this.puntoSuave.y += (punto.y - this.puntoSuave.y) * suavizado;
+        if (this.modoControl !== 'cabeza' && distanciaCruda <= this.zonaMuerta) this.puntoSuave = { ...this.puntoBase };
+        else {
+            this.puntoSuave.x += (punto.x - this.puntoSuave.x) * suavizado;
+            this.puntoSuave.y += (punto.y - this.puntoSuave.y) * suavizado;
+        }
         const dx = (this.puntoSuave.x - this.puntoBase.x) / this.ancho;
         const dy = (this.puntoSuave.y - this.puntoBase.y) / this.ancho;
         const distancia = Math.hypot(dx, dy);
@@ -435,8 +953,9 @@ class KineticEngine {
         if (this.enZonaSegura) {
             this.reposoBorde = null;
             this.inicioArmado = null;
+            this.atraerCursor(intervalo);
             const objetivo = this.elementoBajoCursor();
-            if (!this.armado || !objetivo) { this.cancelarFijacion(); return { progreso: 0, estado: 'Seguro · mueve para habilitar clic' }; }
+            if (!this.armado || !objetivo) { this.cancelarFijacion(); return { progreso: 0, estado: t('cinetico.seguroMueve') }; }
             if (objetivo !== this.objetivoFijado) { this.objetivoFijado = objetivo; this.inicioFijacion = tiempo; }
             const progreso = Math.min(1, (tiempo - this.inicioFijacion) / this.duracionClick);
             if (progreso >= 1) {
@@ -445,7 +964,7 @@ class KineticEngine {
                 this.cancelarFijacion(true);
                 this.hacerClick(tipo, objetivo);
             }
-            return { progreso, estado: `Seguro · ${this.tipoClick === 'derecho' ? 'derecho' : 'clic'} ${Math.round(progreso * 100)}%` };
+            return { progreso, estado: t('cinetico.seguroProgreso', { tipo: t(this.tipoClick === 'derecho' ? 'cinetico.derecho' : 'cinetico.clic'), porcentaje: Math.round(progreso * 100) }) };
         }
         this.cancelarFijacion();
         if (distanciaCruda > this.zonaAtraccion && distancia > this.zonaAtraccion) {
@@ -462,32 +981,57 @@ class KineticEngine {
             this.posX = Math.max(1, Math.min(window.innerWidth - 1, this.posX + dx / distancia * paso));
             this.posY = Math.max(1, Math.min(window.innerHeight - 1, this.posY + dy / distancia * paso));
         }
+        if (velocidad * this.sensibilidad <= 180) this.atraerCursor(intervalo);
         // Una dirección mantenida mueve normalmente. Sólo recuperar postura si ya no
         // queda pantalla y la persona descansa allí; nunca centrar durante navegación.
         const enBorde = this.posX === 1 || this.posX === window.innerWidth - 1 || this.posY === 1 || this.posY === window.innerHeight - 1;
         const detenido = Math.hypot(this.posX - anterior.x, this.posY - anterior.y) < 0.01;
-        if (enBorde && detenido && distancia > this.zonaAtraccion) {
+        if (this.modoControl === 'cabeza' && enBorde && detenido && distancia > this.zonaAtraccion) {
             const reposo = this.reposoBorde;
             const tolerancia = this.zonaMuerta > 0.05 ? 0.045 : 0.025;
             if (!reposo || Math.hypot((punto.x - reposo.x) / this.ancho, (punto.y - reposo.y) / this.ancho) > tolerancia) {
                 this.reposoBorde = { ...punto, tiempo };
             } else if (tiempo - reposo.tiempo >= 1200) {
                 this.calibrar();
-                return { progreso: 0, estado: 'Recuperando postura cómoda · sin clic' };
+                return { progreso: 0, estado: t('cinetico.recuperando') };
             }
         } else this.reposoBorde = null;
-        return { progreso: 0, estado: distancia <= this.zonaAtraccion ? 'Atracción · precisión' : 'Moviendo' };
+        return { progreso: 0, estado: t(distancia <= this.zonaAtraccion ? 'cinetico.atraccion' : 'cinetico.moviendo') };
     }
 
-    elementoBajoCursor() {
-        let elemento = document.elementFromPoint(this.posX, this.posY);
+    elementoBajoCursor(x = this.posX, y = this.posY) {
+        let elemento = document.elementFromPoint(x, y);
         // Acceder a shadow roots abiertos. Los iframes ajenos siguen siendo otro documento.
         while (elemento?.shadowRoot?.elementFromPoint) {
-            const interno = elemento.shadowRoot.elementFromPoint(this.posX, this.posY);
+            const interno = elemento.shadowRoot.elementFromPoint(x, y);
             if (!interno || interno === elemento) break;
             elemento = interno;
         }
-        return elemento?.closest('button, a, input, textarea, select, summary, [role="button"], [contenteditable="true"]') || elemento;
+        return elemento?.closest('button, a, input, textarea, select, summary, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [contenteditable="true"]') || elemento;
+    }
+
+    atraerCursor(intervalo) {
+        const selector = 'button, a[href], input, textarea, select, summary, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [contenteditable="true"]';
+        // Sondeo local acotado: no recorrer todos los controles de una página por imagen.
+        let mejor = null;
+        for (const [dx, dy] of [[0, 0], [-28, 0], [28, 0], [0, -28], [0, 28], [-20, -20], [20, -20], [-20, 20], [20, 20]]) {
+            const objetivo = this.elementoBajoCursor(this.posX + dx, this.posY + dy);
+            if (!objetivo?.matches?.(selector) || objetivo.matches(':disabled') || objetivo.closest('[inert], [aria-disabled="true"]')) continue;
+            for (const rectangulo of objetivo.getClientRects()) {
+                if (rectangulo.width <= 0 || rectangulo.height <= 0) continue;
+                const margen = Math.min(4, rectangulo.width / 2, rectangulo.height / 2);
+                const x = Math.max(rectangulo.left + margen, Math.min(rectangulo.right - margen, this.posX));
+                const y = Math.max(rectangulo.top + margen, Math.min(rectangulo.bottom - margen, this.posY));
+                const distancia = Math.hypot(x - this.posX, y - this.posY);
+                if (distancia > 28 || this.elementoBajoCursor(x, y) !== objetivo) continue;
+                if (!mejor || distancia < mejor.distancia) mejor = { x, y, distancia };
+            }
+            if (dx === 0 && dy === 0 && mejor) break;
+        }
+        if (!mejor || mejor.distancia === 0) return;
+        const avance = Math.min(1, 180 * intervalo / 1000 / mejor.distancia);
+        this.posX += (mejor.x - this.posX) * avance;
+        this.posY += (mejor.y - this.posY) * avance;
     }
 
     actualizarHover(elemento) {
@@ -533,7 +1077,7 @@ class KineticEngine {
         const menu = document.createElement('div');
         this.menu = menu;
         menu.id = 'adapta-pe-menu-contextual';
-        menu.setAttribute('role', 'menu'); menu.setAttribute('aria-label', 'Menú contextual Adapta PE');
+        menu.setAttribute('role', 'menu'); menu.setAttribute('aria-label', t('cinetico.menu'));
         menu.style.cssText = `position:fixed;left:${Math.max(0, Math.min(this.posX, window.innerWidth - 230))}px;top:${Math.max(0, Math.min(this.posY, window.innerHeight - 240))}px;max-width:220px;max-height:90vh;overflow:auto;background:#222;color:white;border:2px solid white;border-radius:10px;padding:6px;z-index:2147483646;box-shadow:0 6px 20px #0008;`;
         const abrir = (url, destino) => {
             try { chrome.runtime.sendMessage({ accion: 'abrir_url', url, destino }, () => { void chrome.runtime.lastError; }); } catch (_) {}
@@ -541,11 +1085,11 @@ class KineticEngine {
         const opciones = [];
         const enlace = objetivo.closest('a[href]');
         if (enlace && /^https?:/.test(enlace.href)) {
-            opciones.push(['Abrir enlace en pestaña', () => abrir(enlace.href, 'pestana')], ['Abrir enlace en ventana', () => abrir(enlace.href, 'ventana')]);
+            opciones.push([t('cinetico.menu.enlacePestana'), () => abrir(enlace.href, 'pestana')], [t('cinetico.menu.enlaceVentana'), () => abrir(enlace.href, 'ventana')]);
         }
         const imagen = objetivo.tagName === 'IMG' ? objetivo : objetivo.querySelector('img');
-        if (imagen && /^https?:/.test(imagen.currentSrc || imagen.src)) opciones.push(['Abrir imagen', () => abrir(imagen.currentSrc || imagen.src, 'pestana')]);
-        opciones.push(['Atrás', () => history.back()], ['Recargar página', () => location.reload()], ['Cerrar menú', () => {}]);
+        if (imagen && /^https?:/.test(imagen.currentSrc || imagen.src)) opciones.push([t('cinetico.menu.imagen'), () => abrir(imagen.currentSrc || imagen.src, 'pestana')]);
+        opciones.push([t('cinetico.menu.atras'), () => history.back()], [t('cinetico.menu.recargar'), () => location.reload()], [t('cinetico.menu.cerrar'), () => {}]);
         for (const [texto, accion] of opciones) {
             const boton = document.createElement('button');
             boton.type = 'button'; boton.textContent = texto; boton.setAttribute('role', 'menuitem');
@@ -566,13 +1110,13 @@ class KineticEngine {
             return true;
         }
         if (!this.activa) return false;
-        if (accion === 'calibrar') return this.calibrar();
+        if (accion === 'calibrar') {
+            if (this.modoControl === 'cabeza') return this.calibrar();
+            this.cancelarFijacion(true); return true;
+        }
         if (accion.startsWith('control_')) {
-            this.modoControl = accion.slice(8);
-            this.fuenteControl = null;
-            this.deteccion = null;
+            this.aplicarAjustes({ modo: accion.slice(8) });
             this.errorVision = null;
-            this.calibrar();
             this.guardarAjustes();
             return true;
         }
@@ -586,12 +1130,15 @@ class KineticEngine {
         if (accion === 'movimiento_reducido' || accion === 'movimiento_normal') {
             this.amplitudControl = accion === 'movimiento_reducido' ? 0.55 : 1;
             this.guardarAjustes();
-            return this.calibrar();
+            if (this.modoControl === 'cabeza') return this.calibrar();
+            this.cancelarFijacion(true); return true;
         }
         if (accion === 'preparar_derecho') { this.tipoClick = 'derecho'; this.cancelarFijacion(true); }
         else if (accion === 'pausar' || accion === 'reanudar') {
             this.pausada = accion === 'pausar';
-            if (!this.pausada) this.calibrar();
+            if (!this.pausada && this.modoControl === 'cabeza') this.calibrar();
+            this.muestraGesto = null; this.puntoGesto = null;
+            if (this.modoControl !== 'cabeza') { this.ultimoMovimiento = null; this.puntoSuave = { ...this.puntoBase }; }
             this.cancelarFijacion(true);
         }
         else if (accion === 'lento' || accion === 'rapido') {
@@ -622,99 +1169,169 @@ class KineticEngine {
         this.burbuja.style.borderColor = this.enZonaSegura ? '#2ecc71' : '#e30613';
         const contexto = this.hudCtx;
         contexto.clearRect(0, 0, this.ancho, this.alto);
+        if (this.modoControl === 'zona' && this.plantilla) {
+            contexto.strokeStyle = '#00ffff';
+            contexto.strokeRect(this.puntoActual.x - this.radioPlantilla, this.puntoActual.y - this.radioPlantilla, this.radioPlantilla * 2, this.radioPlantilla * 2);
+        }
+        const centro = this.modoControl === 'cabeza' ? this.origenControl : this.puntoBase;
         contexto.strokeStyle = '#ffffff88'; contexto.lineWidth = 1;
         contexto.beginPath();
-        contexto.moveTo(this.puntoBase.x - 10, this.puntoBase.y); contexto.lineTo(this.puntoBase.x + 10, this.puntoBase.y);
-        contexto.moveTo(this.puntoBase.x, this.puntoBase.y - 10); contexto.lineTo(this.puntoBase.x, this.puntoBase.y + 10);
+        contexto.moveTo(centro.x - 10, centro.y); contexto.lineTo(centro.x + 10, centro.y);
+        contexto.moveTo(centro.x, centro.y - 10); contexto.lineTo(centro.x, centro.y + 10);
         contexto.stroke();
         for (const [radio, color] of [[this.zonaAtraccion, '#ffa500'], [this.zonaMuerta, '#2ecc71']]) {
             contexto.strokeStyle = color; contexto.beginPath();
-            contexto.arc(this.puntoBase.x, this.puntoBase.y, radio * this.ancho, 0, Math.PI * 2); contexto.stroke();
+            contexto.ellipse(centro.x, centro.y, radio * this.ancho * this.amplitudControl, radio * this.alto * this.amplitudControl, 0, 0, Math.PI * 2); contexto.stroke();
         }
         contexto.fillStyle = this.fiableDesde == null ? '#999' : '#3498db';
-        contexto.beginPath(); contexto.arc(this.puntoSuave.x, this.puntoSuave.y, 3, 0, Math.PI * 2); contexto.fill();
+        contexto.beginPath(); contexto.arc(this.puntoActual.x, this.puntoActual.y, 3, 0, Math.PI * 2); contexto.fill();
+        if (this.puntoGesto) {
+            contexto.strokeStyle = '#00ffff'; contexto.beginPath();
+            contexto.moveTo(centro.x, centro.y); contexto.lineTo(this.puntoGesto.x, this.puntoGesto.y); contexto.stroke();
+        }
         this.dibujarCursor(progreso);
     }
 
     bucleRender(tiempo) {
         if (!this.activa) return;
         try {
+            this.solicitarModelo();
             // Una imagen central nueva por paso; no repetir inferencias para completar dwell.
             const imagen = this.numeroFotograma;
             if (this.deteccion && tiempo - this.deteccion.tiempo > 500) {
-                this.perdidaDesde ??= tiempo; this.fiableDesde = null;
+                this.perdidaDesde ??= tiempo; this.fiableDesde = null; this.muestraGesto = null; this.puntoGesto = null;
+                if (this.modoControl !== 'cabeza') { this.ultimoMovimiento = null; this.puntoSuave = { ...this.puntoBase }; }
                 this.cancelarFijacion(true); this.actualizarHover(null);
-                this.dibujarHUD('Esperando cámara central · sin clic', 0); return;
+                this.dibujarHUD(t('cinetico.esperandoCamara'), 0); return;
             }
             if (!imagen || imagen === this.ultimoVideo ||
                 (this.ultimoTiempo != null && tiempo - this.ultimoTiempo < 1000 / 30 - 1)) return;
             const salto = this.ultimoTiempo == null ? 0 : tiempo - this.ultimoTiempo;
-            const intervalo = Math.min(50, salto || 1000 / 30);
-            if (salto > 200) { this.cancelarFijacion(true); this.fiableDesde = null; }
+            const intervalo = Math.min(this.modoControl === 'cabeza' ? 50 : 100, salto || 1000 / 30);
+            if (salto > 200) {
+                this.cancelarFijacion(true); this.fiableDesde = null;
+                if (this.muestraGesto) this.muestraGesto.puno = null;
+                if (salto > 500 || this.modoControl === 'cabeza') this.muestraGesto = null;
+                if (this.modoControl !== 'cabeza') { this.ultimoMovimiento = null; this.puntoSuave = { ...this.puntoBase }; }
+            }
             this.ultimoTiempo = tiempo;
             this.ultimoVideo = imagen;
-            if (this.modoControl === 'zona') {
+            if (this.modoControl.startsWith('zona')) {
                 this.controlarZona(tiempo);
             } else {
-                this.solicitarModelo();
-                const punto = this.deteccion && tiempo - this.deteccion.tiempo < 500 ? this.elegirPunto(this.deteccion) : null;
+                let punto = this.deteccion && tiempo - this.deteccion.tiempo < 500 ? this.elegirPunto(this.deteccion) : null;
                 if (!punto) {
                     this.perdidaDesde ??= tiempo;
-                    this.fuenteCandidata = null;
-                    this.muestrasPostura = [];
+                    this.fuenteCandidata = null; this.adquisicion = null;
+                    if (tiempo - this.perdidaDesde >= 500) this.muestrasPostura = [];
                     this.reposoBorde = null;
                     this.fiableDesde = null;
+                    if (this.muestraGesto) this.muestraGesto.puno = null;
+                    if (tiempo - this.perdidaDesde > 500) this.muestraGesto = null;
+                    this.puntoGesto = null;
+                    if (this.modoControl !== 'cabeza') { this.ultimoMovimiento = null; this.puntoSuave = { ...this.puntoBase }; }
                     this.cancelarFijacion(true);
                     this.actualizarHover(null);
-                    this.dibujarHUD(this.errorVision || (this.deteccion ? 'Seguimiento en espera · vuelve a tu postura cómoda' : 'Esperando cámara central…'), 0);
+                    this.dibujarHUD(this.errorVision || t(this.deteccion ? 'cinetico.enEspera' : 'cinetico.esperandoInicio'), 0);
                     return;
                 }
+                if (this.modoControl === 'manos' && punto.fuente.startsWith('mano:') &&
+                    (!this.fuenteControl || this.perdidaDesde != null && tiempo - this.perdidaDesde > 500)) {
+                    // Una mano nueva controla tras >=3 inferencias y >=150 ms: un falso positivo fugaz no mueve el cursor.
+                    const adquisicion = this.adquisicion ??= { inicio: tiempo, cuenta: 0 };
+                    if (adquisicion.ultima !== this.deteccion.tiempo) { adquisicion.ultima = this.deteccion.tiempo; adquisicion.cuenta++; }
+                    if (adquisicion.cuenta < 3 || tiempo - adquisicion.inicio < 150) {
+                        this.cancelarFijacion(true); this.dibujarHUD(t('cinetico.confirmando'), 0); return;
+                    }
+                }
+                this.adquisicion = null;
                 if (this.fuenteControl && punto.fuente !== this.fuenteControl) {
                     if (this.fuenteCandidata !== punto.fuente) {
                         this.fuenteCandidata = punto.fuente;
                         this.inicioCandidata = tiempo;
                         this.ultimaCandidata = null;
                         this.confirmacionesCandidata = 0;
+                        this.desfaseCandidata = { x: punto.x - this.puntoActual.x, y: punto.y - this.puntoActual.y };
                     }
                     if (this.ultimaCandidata !== this.deteccion.tiempo) {
                         this.ultimaCandidata = this.deteccion.tiempo;
                         this.confirmacionesCandidata++;
                     }
-                    if (tiempo - this.inicioCandidata < 1200 || this.confirmacionesCandidata < 3) {
-                        this.fiableDesde = null;
+                    if (tiempo - this.inicioCandidata < (this.modoControl === 'automatico' ? 1200 : 150) || this.confirmacionesCandidata < 3) {
                         this.cancelarFijacion(true);
-                        this.dibujarHUD('Confirmando ' + punto.fuente + ' · sin clic', 0);
-                        return;
+                        const anterior = this.modoControl === 'manos' ? this.elegirPunto({ ...this.deteccion, manos: [] }) : null;
+                        if (!this.neutroListo || anterior?.fuente !== this.fuenteControl) {
+                            this.fiableDesde = null;
+                            this.dibujarHUD(t('cinetico.confirmando'), 0); return;
+                        }
+                        punto = anterior;
                     }
                 } else this.fuenteCandidata = null;
                 if (punto.fuente !== this.fuenteControl) {
+                    if (this.modoControl === 'cabeza') {
+                        if (this.neutroListo) this.cambiarReferencia({ x: this.puntoActual.x + this.desfaseCandidata.x,
+                            y: this.puntoActual.y + this.desfaseCandidata.y });
+                        else this.calibrar(punto);
+                    } else {
+                        this.neutroListo = true; this.muestraGesto = null;
+                        this.ultimoMovimiento = null; this.puntoSuave = { ...this.puntoBase };
+                        this.cancelarFijacion(true);
+                    }
                     this.fuenteControl = punto.fuente;
-                    this.calibrar(punto);
-                } else if (this.perdidaDesde != null && tiempo - this.perdidaDesde >= 1200) this.calibrar(punto);
+                    this.fuenteCandidata = null;
+                } else if (this.perdidaDesde != null && tiempo - this.perdidaDesde >= 1200) {
+                    if (this.modoControl === 'cabeza') this.calibrar(punto);
+                }
+                const separacion = Math.hypot(punto.x - this.puntoActual.x, punto.y - this.puntoActual.y);
+                if (this.modoControl === 'manos' && this.perdidaDesde != null && separacion > this.ancho * 0.1) this.muestraGesto = null;
+                else if (this.modoControl === 'manos' && separacion > this.ancho * 0.2) {
+                    // Otra mano con la misma etiqueta o un salto del modelo: nuevo reposo, nunca un gesto ni un clic.
+                    this.muestraGesto = null; this.ultimoMovimiento = null; this.puntoSuave = { ...this.puntoBase };
+                    this.cancelarFijacion(true);
+                }
                 this.perdidaDesde = null;
                 this.puntoActual = { x: punto.x, y: punto.y };
+                this.estadoClic = punto.clic ?? null;
                 if (!this.neutroListo) {
                     this.puntoSuave = { ...this.puntoBase };
                     if (!this.aprenderPostura(punto, this.deteccion.tiempo)) {
-                        this.dibujarHUD('Descansa en una postura cómoda · calibrando sin clic', 0); return;
+                        this.dibujarHUD(t('cinetico.calibrando'), 0); return;
                     }
                 }
                 this.fiableDesde ??= tiempo;
+                if (this.modoControl === 'manos') {
+                    this.puntoGesto = this.controlarGesto(this.puntoActual, this.deteccion.tiempo, 0, punto.gesto);
+                } else this.puntoGesto = null;
             }
             if (!this.neutroListo || this.fiableDesde == null) return;
-            if (this.pausada || tiempo - this.fiableDesde < 250) {
+            if (this.pausada) {
                 this.cancelarFijacion(true);
-                this.dibujarHUD(this.pausada ? 'Cursor pausado · di «reanudar cursor»' : 'Estabilizando seguimiento', 0);
+                this.dibujarHUD(t('cinetico.pausado'), 0);
                 return;
             }
-            const puntoControl = this.modoControl === 'zona' ? this.puntoActual : this.filtrarMovimiento(this.puntoActual, this.deteccion.tiempo);
+            if (tiempo - this.fiableDesde < 250) this.cancelarFijacion(true); // Estabilizar clic sin bloquear movimiento.
+            const fuente = t('cinetico.fuente.' + (this.fuenteControl || 'zona').replace(/^mano:.*/, 'mano').replace(/^brazo_.*/, 'brazo').replace(' ', '_'));
+            if (this.modoControl !== 'zona' && this.procesarGestoClic(this.estadoClic, this.deteccion.tiempo, tiempo)) {
+                // Cursor quieto durante el gesto para que el clic no se desvíe del objetivo.
+                this.cancelarFijacion();
+                this.actualizarHover(this.elementoBajoCursor());
+                const derecho = this.tipoClick === 'derecho';
+                this.dibujarHUD(fuente + ' · ' + t(this.modoControl === 'manos' ? this.gestoClic.derecho ? 'cinetico.pinzaDerechoHecho' :
+                    derecho ? 'cinetico.pinzaSueltaDerecho' : 'cinetico.pinzaSuelta' : derecho ? 'cinetico.bocaDerecho' : 'cinetico.boca'), 0);
+                return;
+            }
+            const puntoControl = this.filtrarMovimiento(this.puntoGesto || this.puntoActual, this.deteccion.tiempo);
             const control = this.actualizarControl(puntoControl, tiempo, intervalo);
             this.actualizarHover(this.elementoBajoCursor());
-            this.dibujarHUD((this.fuenteControl || 'Zona libre') + ' · ' + control.estado, control.progreso);
+            const entrada = this.muestraGesto?.puno?.activo ? 'cinetico.puno' : this.muestraGesto?.puno?.detectado && !this.muestraGesto.puno.abierta ?
+                'cinetico.punoPreparar' : this.muestraGesto?.senalActiva ? 'cinetico.senal' : 'cinetico.joystick';
+            this.dibujarHUD(fuente + (this.puntoGesto ? ' · ' + t(entrada) : '') + ' · ' + control.estado, control.progreso);
         } catch (_) {
             this.fiableDesde = null;
+            this.muestraGesto = null; this.puntoGesto = null;
+            if (this.modoControl !== 'cabeza') { this.ultimoMovimiento = null; this.puntoSuave = { ...this.puntoBase }; }
             this.cancelarFijacion(true);
-            this.dibujarHUD('Esperando una imagen válida de la cámara', 0);
+            this.dibujarHUD(t('cinetico.esperandoImagen'), 0);
         } finally { this.programarFotograma(); }
     }
 }

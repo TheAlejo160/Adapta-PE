@@ -8,7 +8,7 @@ CORS(app)
 
 @app.route('/estado', methods=['GET'])
 def estado_servidor():
-    return jsonify({"mensaje": "¡Cerebro Python de Adapta PE en línea! 🇵🇪"})
+    return jsonify({"mensaje": "¡Cerebro Python de AdaptaPE en línea! 🇵🇪"})
 
 
 @app.route('/analizar_imagen', methods=['POST'])
@@ -34,5 +34,5 @@ def analizar():
 
 
 if __name__ == '__main__':
-    print("🚀 Servidor de Inteligencia Artificial Adapta PE encendido en el puerto 5000...")
+    print("🚀 Servidor de Inteligencia Artificial AdaptaPE encendido en el puerto 5000...")
     app.run(port=5000, debug=True)

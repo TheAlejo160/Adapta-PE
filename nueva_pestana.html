@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es" data-tema="sistema">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title data-i18n="ntp.titulo">Nueva pestaña</title>
+  <link rel="stylesheet" href="nueva_pestana.css">
+  <!-- Idéntico en Base y Lite: aplica el tema y carga el controlador según el manifest de la variante. -->
+  <script src="nueva_pestana_inicio.js"></script>
+</head>
+<body>
+  <nav class="ntp-superior" data-i18n-aria-label="ntp.google" aria-label="Servicios de Google">
+    <a class="ntp-enlace" href="https://mail.google.com/" data-i18n="ntp.gmail">Gmail</a>
+    <a class="ntp-enlace" href="https://www.google.com/imghp" data-i18n="ntp.imagenes">Imágenes</a>
+    <button type="button" id="adapta-pe-ntp-apps" class="ntp-icono" aria-expanded="false" aria-controls="adapta-pe-ntp-lista-apps"
+      data-i18n-aria-label="ntp.apps" data-i18n-title="ntp.apps" aria-label="Aplicaciones de Google" title="Aplicaciones de Google">
+      <svg viewBox="0 0 24 24" aria-hidden="true" class="ntp-rejilla"><circle cx="5" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="19" cy="19" r="2"/></svg>
+    </button>
+    <a class="ntp-icono ntp-cuenta" href="https://myaccount.google.com/" data-i18n-aria-label="ntp.cuenta" data-i18n-title="ntp.cuenta"
+      aria-label="Cuenta de Google" title="Cuenta de Google">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3.5"/><path d="M5.5 19c1.4-2.6 3.7-4 6.5-4s5.1 1.4 6.5 4"/></svg>
+    </a>
+    <div id="adapta-pe-ntp-lista-apps" class="ntp-apps" hidden>
+      <div class="ntp-apps-favoritos">
+        <h2 id="adapta-pe-ntp-titulo-favoritos" data-i18n="ntp.favoritos">Tus favoritos</h2>
+        <ul id="adapta-pe-ntp-apps-favoritos" aria-labelledby="adapta-pe-ntp-titulo-favoritos"></ul>
+      </div>
+      <ul id="adapta-pe-ntp-apps-resto" data-i18n-aria-label="ntp.apps" aria-label="Aplicaciones de Google"></ul>
+      <a class="ntp-boton ntp-mas" href="https://about.google/products/" data-i18n="ntp.masProductos">Más productos de Google</a>
+    </div>
+  </nav>
+  <main class="ntp">
+    <header class="ntp-marca">
+      <img id="adapta-pe-ntp-logo" alt="" width="56" height="56">
+      <h1 id="adapta-pe-ntp-nombre">AdaptaPE</h1>
+    </header>
+
+    <form id="adapta-pe-ntp-busqueda" class="ntp-busqueda" role="search">
+      <label for="adapta-pe-ntp-consulta" class="ntp-oculto" data-i18n="ntp.buscar">Buscar en la web</label>
+      <svg class="ntp-lupa" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+      <input id="adapta-pe-ntp-consulta" type="search" name="q" autocomplete="off" spellcheck="false" enterkeyhint="search"
+        data-i18n-placeholder="ntp.buscar" placeholder="Buscar en la web">
+      <button type="button" id="adapta-pe-ntp-voz" class="ntp-icono" data-i18n-aria-label="ntp.voz" data-i18n-title="ntp.voz"
+        aria-label="Buscar por voz" title="Buscar por voz" aria-controls="adapta-pe-ntp-aviso">
+        <svg aria-hidden="true"><use href="iconos.svg#voz"/></svg>
+      </button>
+      <a id="adapta-pe-ntp-lens" class="ntp-icono" href="https://images.google.com/" data-i18n-aria-label="ntp.lens" data-i18n-title="ntp.lens"
+        aria-label="Buscar con una imagen en Google Lens" title="Buscar con una imagen en Google Lens">
+        <svg aria-hidden="true"><use href="iconos.svg#camara"/></svg>
+      </a>
+      <button type="submit" class="ntp-enviar" data-i18n="ntp.botonBuscar">Buscar</button>
+    </form>
+    <div class="ntp-extra">
+      <button type="button" id="adapta-pe-ntp-ia" class="ntp-ia" aria-describedby="adapta-pe-ntp-ia-ayuda">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 4.6 3.4 7.4 8 8-4.6.6-7.4 3.4-8 8-.6-4.6-3.4-7.4-8-8 4.6-.6 7.4-3.4 8-8z"/></svg>
+        <span data-i18n="ntp.modoIA">Modo IA</span>
+      </button>
+      <span id="adapta-pe-ntp-ia-ayuda" class="ntp-oculto" data-i18n="ntp.ayudaIA">Abre tu consulta en el Modo IA de Google.</span>
+    </div>
+    <p id="adapta-pe-ntp-aviso" class="ntp-aviso" role="status"></p>
+
+    <section class="ntp-seccion" aria-labelledby="adapta-pe-ntp-titulo-atajos">
+      <h2 id="adapta-pe-ntp-titulo-atajos" data-i18n="ntp.atajos">Accesos directos</h2>
+      <ul id="adapta-pe-ntp-atajos" class="ntp-atajos"></ul>
+      <p id="adapta-pe-ntp-sin-atajos" class="ntp-vacio" data-i18n="ntp.sinAtajos" hidden>Aquí aparecerán los sitios que más visitas.</p>
+    </section>
+
+    <section class="ntp-seccion" aria-labelledby="adapta-pe-ntp-titulo-marcadores">
+      <h2 id="adapta-pe-ntp-titulo-marcadores" data-i18n="ntp.marcadores">Marcadores</h2>
+      <ul id="adapta-pe-ntp-marcadores" class="ntp-marcadores"></ul>
+      <p id="adapta-pe-ntp-sin-marcadores" class="ntp-vacio" data-i18n="ntp.sinMarcadores" hidden>Aún no tienes marcadores. Pulsa la estrella de la barra de direcciones para guardar una página.</p>
+    </section>
+
+    <footer class="ntp-pie">
+      <a class="ntp-boton" href="https://adaptape.thealejo-dev.cc" data-i18n="ntp.oficial">Página oficial de AdaptaPE</a>
+      <button type="button" id="adapta-pe-ntp-personalizar" class="ntp-boton" aria-expanded="false" aria-controls="adapta-pe-ntp-panel">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18c1.4 0 2-1 1.5-2.2-.6-1.4.3-2.8 1.8-2.8H18a3 3 0 0 0 3-3 9 9 0 0 0-9-10z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="11" cy="7.5" r="1.2"/><circle cx="15.5" cy="8.5" r="1.2"/></svg>
+        <span data-i18n="ntp.personalizar">Personalizar</span>
+      </button>
+    </footer>
+
+    <section id="adapta-pe-ntp-panel" class="ntp-panel" aria-labelledby="adapta-pe-ntp-titulo-panel" hidden>
+      <div class="ntp-panel-cabecera">
+        <h2 id="adapta-pe-ntp-titulo-panel" data-i18n="ntp.personalizar">Personalizar</h2>
+        <button type="button" id="adapta-pe-ntp-cerrar" class="ntp-icono" data-i18n-aria-label="ntp.cerrar" data-i18n-title="ntp.cerrar" aria-label="Cerrar" title="Cerrar">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <p class="ntp-ayuda" data-i18n="ntp.ayudaTema">Los temas de Chrome no cambian esta página. Elige aquí su aspecto.</p>
+      <fieldset class="ntp-temas">
+        <legend data-i18n="ntp.tema">Tema</legend>
+        <label class="ntp-tema"><input type="radio" name="adapta-pe-ntp-tema" value="sistema"><span class="ntp-muestra" aria-hidden="true"></span><span data-i18n="ntp.temaSistema">Sistema</span></label>
+        <label class="ntp-tema"><input type="radio" name="adapta-pe-ntp-tema" value="claro"><span class="ntp-muestra" aria-hidden="true"></span><span data-i18n="ntp.temaClaro">Claro</span></label>
+        <label class="ntp-tema"><input type="radio" name="adapta-pe-ntp-tema" value="oscuro"><span class="ntp-muestra" aria-hidden="true"></span><span data-i18n="ntp.temaOscuro">Oscuro</span></label>
+        <label class="ntp-tema"><input type="radio" name="adapta-pe-ntp-tema" value="contraste"><span class="ntp-muestra" aria-hidden="true"></span><span data-i18n="ntp.temaContraste">Alto contraste</span></label>
+        <label class="ntp-tema"><input type="radio" name="adapta-pe-ntp-tema" value="pacifico"><span class="ntp-muestra" aria-hidden="true"></span><span data-i18n="ntp.temaPacifico">Pacífico</span></label>
+        <label class="ntp-tema"><input type="radio" name="adapta-pe-ntp-tema" value="selva"><span class="ntp-muestra" aria-hidden="true"></span><span data-i18n="ntp.temaSelva">Selva</span></label>
+        <label class="ntp-tema"><input type="radio" name="adapta-pe-ntp-tema" value="cielo"><span class="ntp-muestra" aria-hidden="true"></span><span data-i18n="ntp.temaCielo">Cielo</span></label>
+      </fieldset>
+      <div class="ntp-campo">
+        <label for="adapta-pe-ntp-acento" data-i18n="ntp.acento">Color de acento</label>
+        <div class="ntp-fila">
+          <input type="color" id="adapta-pe-ntp-acento" value="#bd0611">
+          <button type="button" id="adapta-pe-ntp-acento-tema" class="ntp-boton" data-i18n="ntp.acentoTema">Usar el color del tema</button>
+        </div>
+      </div>
+      <div class="ntp-campo" role="group" aria-labelledby="adapta-pe-ntp-titulo-fondo" aria-describedby="adapta-pe-ntp-ayuda-fondo">
+        <span id="adapta-pe-ntp-titulo-fondo" class="ntp-etiqueta" data-i18n="ntp.fondo">Imagen de fondo</span>
+        <div class="ntp-fila">
+          <button type="button" id="adapta-pe-ntp-elegir-fondo" class="ntp-boton" data-i18n="ntp.elegirFondo">Elegir imagen</button>
+          <button type="button" id="adapta-pe-ntp-quitar-fondo" class="ntp-boton" data-i18n="ntp.quitarFondo">Quitar imagen</button>
+          <input type="file" id="adapta-pe-ntp-archivo" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" hidden>
+        </div>
+        <p id="adapta-pe-ntp-ayuda-fondo" class="ntp-ayuda" data-i18n="ntp.ayudaFondo">Se guarda reducida en este equipo. Alto contraste no la muestra.</p>
+      </div>
+      <p id="adapta-pe-ntp-estado-panel" class="ntp-ayuda ntp-estado" role="status"></p>
+    </section>
+  </main>
+</body>
+</html>

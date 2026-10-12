@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="bienvenida.titulo">Bienvenida a AdaptaPE</title>
+  <link rel="stylesheet" href="interfaz.css">
+</head>
+<body class="permisos">
+  <main class="container">
+    <header class="header"><img src="AdaptaPE.png" alt="" width="48" height="48"><p>AdaptaPE</p></header>
+    <h1 class="bienvenida-titulo" data-i18n="bienvenida.encabezado">Ya puedes usar AdaptaPE</h1>
+    <p data-i18n="bienvenida.sinRecargar">Funciona en las pestañas que ya tenías abiertas, sin recargarlas.</p>
+    <ol class="bienvenida-pasos">
+      <li data-i18n="bienvenida.paso1">Activa aquí una ayuda. Puedes cambiarla cuando quieras.</li>
+      <li data-i18n="bienvenida.paso2">Si Chrome pide permiso para el micrófono o la cámara, elige «Permitir».</li>
+      <li data-i18n="bienvenida.paso3">Para tener el panel a mano, pulsa el icono de extensiones (pieza de rompecabezas) junto a la barra de direcciones y luego el alfiler de AdaptaPE.</li>
+    </ol>
+    <p id="adapta-pe-bienvenida-estado" class="estado-panel" role="status" data-i18n="popup.cargando">Cargando tus ajustes…</p>
+
+    <section class="opcion" aria-labelledby="tituloVoz">
+      <div class="fila">
+        <label class="opcion-info" for="checkVoz">
+          <svg class="icono" aria-hidden="true"><use href="iconos.svg#voz"/></svg>
+          <span><strong id="tituloVoz" data-i18n="popup.voz">Control por voz</strong><span class="estado-modulo" id="estadoVoz" data-i18n="popup.desactivado">Desactivado</span></span>
+        </label>
+        <label class="switch"><input type="checkbox" id="checkVoz" data-clave="voz" aria-labelledby="tituloVoz" aria-describedby="ayudaVoz estadoVoz"><span class="slider" aria-hidden="true"></span></label>
+      </div>
+      <p id="ayudaVoz" class="descripcion" data-i18n="bienvenida.ayudaVoz">Di «Computadora», espera el sonido y da tu orden, por ejemplo «Abre YouTube».</p>
+    </section>
+
+    <section class="opcion" aria-labelledby="tituloCursor">
+      <div class="fila">
+        <label class="opcion-info" for="checkOjos">
+          <svg class="icono" aria-hidden="true"><use href="iconos.svg#cursor"/></svg>
+          <span><strong id="tituloCursor" data-i18n="popup.cursor">Cursor con cámara</strong><span class="estado-modulo" id="estadoOjos" data-i18n="popup.desactivado">Desactivado</span></span>
+        </label>
+        <label class="switch"><input type="checkbox" id="checkOjos" data-clave="ojos" aria-labelledby="tituloCursor" aria-describedby="ayudaCursor estadoOjos"><span class="slider" aria-hidden="true"></span></label>
+      </div>
+      <p id="ayudaCursor" class="descripcion" data-i18n="bienvenida.ayudaCursor">Mueve el cursor con la cabeza o una extremidad. Para hacer clic, quédate quieto un segundo.</p>
+    </section>
+
+    <section class="opcion" aria-labelledby="tituloLectura">
+      <div class="fila">
+        <label class="opcion-info" for="checkTalkBack">
+          <svg class="icono" aria-hidden="true"><use href="iconos.svg#lectura"/></svg>
+          <span><strong id="tituloLectura" data-i18n="popup.lectura">Lectura en voz alta</strong><span class="estado-modulo" id="estadoTalkback" data-i18n="popup.desactivado">Desactivado</span></span>
+        </label>
+        <label class="switch"><input type="checkbox" id="checkTalkBack" data-clave="talkback" aria-labelledby="tituloLectura" aria-describedby="ayudaLectura estadoTalkback"><span class="slider" aria-hidden="true"></span></label>
+      </div>
+      <p id="ayudaLectura" class="descripcion" data-i18n="popup.ayudaLectura">Escucha el elemento que señalas.</p>
+    </section>
+
+    <p data-i18n="bienvenida.final">Los filtros de color, el idioma de voz y la mascota están en el panel de AdaptaPE.</p>
+    <script src="textos.js"></script>
+    <script src="sitios.js"></script>
+    <script src="textos_paginas.js"></script>
+    <script src="bienvenida.js"></script>
+  </main>
+</body>
+</html>

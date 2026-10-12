@@ -1,21 +1,22 @@
 (() => {
 class FiltrosDaltonismo {
-    constructor() {
+    constructor(soloPantallaCompleta = false) {
         this.idFiltro = "adapta-pe-filtros-svg";
         this.idStyle = "adapta-pe-daltonismo-style";
         this.filtroActual = "ninguno";
+        this.soloPantallaCompleta = soloPantallaCompleta;
     }
 
     aplicar(tipo) {
         tipo = tipo || "ninguno";
 
-        if (this.filtroActual === tipo) return;
+        if (this.filtroActual === tipo && (tipo === 'ninguno' ||
+            this.urlDocumento === location.href.split('#')[0] && document.getElementById(this.idFiltro) && document.getElementById(this.idStyle))) return;
 
         this.limpiar();
         this.filtroActual = tipo;
 
         if (tipo === "ninguno") {
-            document.documentElement.style.removeProperty('filter');
             return;
         }
 
@@ -30,15 +31,19 @@ class FiltrosDaltonismo {
         let oldStyle = document.getElementById(this.idStyle);
         if (oldStyle) oldStyle.remove();
 
-        document.documentElement.style.removeProperty('filter');
+        if (!this.soloPantallaCompleta && window === window.top) document.documentElement.style.removeProperty('filter');
     }
 
     inyectarCSS(tipo) {
         let styleTag = document.createElement("style");
         styleTag.id = this.idStyle;
+        // Filtrar la raíz de Docs corrompe su dibujo en ventanas grandes; body lo conserva.
+        const superficie = location.hostname === 'docs.google.com' && location.pathname.startsWith('/document/') ? 'body' : 'html';
+        // srcdoc y páginas con <base> resuelven una referencia relativa fuera de este documento.
+        this.urlDocumento = location.href.split('#')[0];
         styleTag.textContent = `
-            html, :fullscreen, ::backdrop {
-                filter: url(#${tipo}) !important;
+            ${this.soloPantallaCompleta ? '' : superficie + ', '}:fullscreen:not(iframe[data-adapta-pe-filtro-interno]), ::backdrop {
+                filter: url(${JSON.stringify(this.urlDocumento + '#' + tipo)}) !important;
             }
         `;
         (document.head || document.documentElement).appendChild(styleTag);

@@ -1,0 +1,176 @@
+/* Nueva pestaña de AdaptaPE (idéntica en Base y Lite): objetivos de 48 px o más para cursor por
+   cámara y clic por permanencia. Los temas sólo cambian tokens; el acento propio llega en línea. */
+:root, :root[data-tema="claro"] {
+  color-scheme: light;
+  --acento: #bd0611; --acento-texto: #ffffff; --texto: #293239; --secundario: #536168;
+  --borde: #69777e; --linea: #d3dbdf; --fondo: #edf0f2; --superficie: #ffffff; --velo: rgb(237 240 242 / 0.78);
+}
+:root[data-tema="oscuro"] {
+  color-scheme: dark;
+  --acento: #ff7b82; --acento-texto: #000000; --texto: #e4eaed; --secundario: #a8b5bb;
+  --borde: #8a989e; --linea: #3a464c; --fondo: #151b1e; --superficie: #1f282c; --velo: rgb(21 27 30 / 0.78);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-tema="sistema"] {
+    color-scheme: dark;
+    --acento: #ff7b82; --acento-texto: #000000; --texto: #e4eaed; --secundario: #a8b5bb;
+    --borde: #8a989e; --linea: #3a464c; --fondo: #151b1e; --superficie: #1f282c; --velo: rgb(21 27 30 / 0.78);
+  }
+}
+:root[data-tema="contraste"] {
+  color-scheme: dark;
+  --acento: #ffeb3b; --acento-texto: #000000; --texto: #ffffff; --secundario: #ffffff;
+  --borde: #ffffff; --linea: #ffffff; --fondo: #000000; --superficie: #000000; --velo: #000000;
+}
+:root[data-tema="pacifico"] {
+  color-scheme: dark;
+  --acento: #5ec8d8; --acento-texto: #000000; --texto: #e8f1f8; --secundario: #a9c1d6;
+  --borde: #7f9bb5; --linea: #2c4a6a; --fondo: #0f2236; --superficie: #183150; --velo: rgb(15 34 54 / 0.78);
+}
+:root[data-tema="selva"] {
+  color-scheme: dark;
+  --acento: #8bd17c; --acento-texto: #000000; --texto: #e6f2ea; --secundario: #a8c7b3;
+  --borde: #7fa18b; --linea: #2a4c38; --fondo: #10261c; --superficie: #183626; --velo: rgb(16 38 28 / 0.78);
+}
+:root[data-tema="cielo"] {
+  color-scheme: light;
+  --acento: #1f6fb2; --acento-texto: #ffffff; --texto: #1d3245; --secundario: #41596d;
+  --borde: #5e778b; --linea: #c4d6e6; --fondo: #e3eef7; --superficie: #fbfdff; --velo: rgb(227 238 247 / 0.78);
+}
+/* Con imagen: velo del 78 % y todo el texto en el color principal; el peor caso sigue sobre 4,5:1. */
+:root[data-fondo]:not([data-tema="contraste"]) { --secundario: var(--texto); }
+:root[data-fondo]:not([data-tema="contraste"]) body {
+  background: linear-gradient(var(--velo), var(--velo)), var(--imagen-fondo) center / cover no-repeat fixed, var(--fondo);
+}
+
+* { box-sizing: border-box; }
+html { background: var(--fondo); }
+body { margin: 0; min-height: 100vh; background: var(--fondo); color: var(--texto); font: 17px/1.5 system-ui, sans-serif; }
+[hidden] { display: none !important; }
+.ntp-oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+.ntp { width: min(760px, 100%); margin: 0 auto; padding: clamp(32px, 12vh, 120px) 16px 48px; }
+.ntp-marca { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 32px; }
+.ntp-marca img { flex: none; object-fit: contain; }
+.ntp-marca h1 { margin: 0; font-size: clamp(40px, 8vw, 64px); font-weight: 750; letter-spacing: -0.03em; line-height: 1; overflow-wrap: anywhere; }
+
+/* La barra es la pieza principal: alta, con borde grueso y controles de 52 px. */
+.ntp-busqueda { display: flex; align-items: center; gap: 4px; min-height: 68px; padding: 6px 6px 6px 20px;
+  background: var(--superficie); border: 2px solid var(--borde); border-radius: 34px; }
+.ntp-busqueda:focus-within { border-color: var(--acento); }
+.ntp-lupa { flex: none; width: 24px; height: 24px; fill: none; stroke: var(--secundario); stroke-width: 2; stroke-linecap: round; }
+.ntp-busqueda input { flex: 1; min-width: 0; height: 52px; padding: 0 8px; border: 0; background: transparent; color: inherit; font: inherit; font-size: 19px; }
+.ntp-busqueda input:focus { outline: none; }
+.ntp-busqueda input::placeholder { color: var(--secundario); opacity: 1; }
+
+button, .ntp-icono, .ntp-boton { font: inherit; color: inherit; cursor: pointer; }
+.ntp-icono { display: inline-grid; place-items: center; flex: none; width: 52px; height: 52px; padding: 0;
+  border: 0; border-radius: 50%; background: transparent; color: var(--texto); }
+.ntp-icono svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.ntp-icono:hover { background: var(--fondo); }
+.ntp-enviar { flex: none; min-height: 52px; padding: 0 22px; border: 0; border-radius: 26px; background: var(--acento); color: var(--acento-texto); font-weight: 650; }
+.ntp-enviar:hover { filter: brightness(1.08); }
+
+.ntp-extra { display: flex; justify-content: center; margin-top: 16px; }
+.ntp-ia, .ntp-boton { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 20px;
+  border: 2px solid var(--borde); border-radius: 24px; background: var(--superficie); color: var(--texto); font-weight: 600; text-decoration: none; }
+.ntp-ia svg { width: 20px; height: 20px; fill: var(--acento); }
+.ntp-boton svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.ntp-ia:hover, .ntp-boton:hover { border-color: var(--acento); }
+.ntp-boton:disabled { cursor: not-allowed; opacity: 0.55; border-color: var(--borde); }
+.ntp-aviso { min-height: 1.5em; margin: 16px 0 0; text-align: center; color: var(--secundario); }
+.ntp-aviso:not(:empty) { color: var(--texto); font-weight: 600; }
+
+/* Foco en el color de texto: un acento elegido por la persona podría no contrastar con el fondo. */
+a:focus-visible, button:focus-visible, input[type="color"]:focus-visible, .ntp-busqueda:has(input:focus-visible), .ntp-tema:has(input:focus-visible) {
+  outline: 3px solid var(--texto); outline-offset: 3px;
+}
+
+.ntp-seccion { margin-top: 48px; }
+.ntp-seccion h2, .ntp-panel h2 { margin: 0 0 16px; font-size: 18px; font-weight: 650; color: var(--secundario); }
+.ntp-vacio { margin: 0; color: var(--secundario); }
+.ntp-atajos, .ntp-marcadores { margin: 0; padding: 0; list-style: none; }
+
+/* Atajos: celdas de 116 px; el nombre se recorta en dos líneas sin desbordar. */
+.ntp-atajos { display: grid; grid-template-columns: repeat(auto-fill, minmax(116px, 1fr)); gap: 12px; }
+.ntp-atajo { display: flex; flex-direction: column; align-items: center; gap: 10px; min-height: 116px; padding: 16px 8px 12px;
+  border-radius: 16px; color: inherit; text-decoration: none; text-align: center; }
+.ntp-atajo img { width: 48px; height: 48px; padding: 8px; border-radius: 50%; background: var(--superficie); }
+.ntp-atajo span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; font-size: 15px; line-height: 1.3; }
+.ntp-atajo:hover { background: var(--superficie); }
+
+.ntp-marcadores { display: flex; flex-wrap: wrap; gap: 8px; }
+.ntp-marcador { display: inline-flex; align-items: center; gap: 10px; max-width: 100%; min-height: 48px; padding: 8px 16px 8px 12px;
+  border: 1px solid var(--linea); border-radius: 24px; background: var(--superficie); color: inherit; text-decoration: none; }
+.ntp-marcador img { flex: none; width: 20px; height: 20px; }
+.ntp-marcador span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 28ch; font-size: 15px; }
+.ntp-marcador:hover { border-color: var(--acento); }
+
+.ntp-pie { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 56px; }
+
+/* Panel en el flujo de la página: sin trampa de foco ni capas que tapen al cursor por cámara. */
+.ntp-panel { margin-top: 16px; padding: 20px; border: 2px solid var(--borde); border-radius: 20px; background: var(--superficie); }
+.ntp-panel-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.ntp-panel h2 { margin: 0; color: var(--texto); }
+.ntp-ayuda { margin: 8px 0 0; color: var(--secundario); font-size: 15px; }
+.ntp-estado:empty { display: none; }
+.ntp-estado:not(:empty) { color: var(--texto); font-weight: 600; }
+.ntp-temas { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin: 20px 0 0; padding: 0; border: 0; }
+.ntp-temas legend, .ntp-campo > label, .ntp-etiqueta { display: block; margin-bottom: 8px; padding: 0; font-weight: 650; }
+.ntp-tema { position: relative; display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px;
+  border: 2px solid var(--linea); border-radius: 14px; cursor: pointer; }
+.ntp-tema input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.ntp-tema:has(input:checked) { border-color: var(--texto); font-weight: 650; }
+.ntp-tema:has(input:checked)::after { content: ""; flex: none; width: 10px; height: 18px; margin-left: auto; border: solid var(--texto); border-width: 0 3px 3px 0; transform: rotate(45deg) translate(-2px, -2px); }
+.ntp-muestra { flex: none; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--borde);
+  background: linear-gradient(135deg, var(--m1) 50%, var(--m2) 50%); }
+.ntp-tema:has(input[value="sistema"]) .ntp-muestra { --m1: #edf0f2; --m2: #151b1e; }
+.ntp-tema:has(input[value="claro"]) .ntp-muestra { --m1: #ffffff; --m2: #bd0611; }
+.ntp-tema:has(input[value="oscuro"]) .ntp-muestra { --m1: #151b1e; --m2: #ff7b82; }
+.ntp-tema:has(input[value="contraste"]) .ntp-muestra { --m1: #000000; --m2: #ffeb3b; }
+.ntp-tema:has(input[value="pacifico"]) .ntp-muestra { --m1: #0f2236; --m2: #5ec8d8; }
+.ntp-tema:has(input[value="selva"]) .ntp-muestra { --m1: #10261c; --m2: #8bd17c; }
+.ntp-tema:has(input[value="cielo"]) .ntp-muestra { --m1: #e3eef7; --m2: #1f6fb2; }
+.ntp-campo { margin-top: 20px; }
+.ntp-fila { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+input[type="color"] { width: 64px; height: 48px; padding: 4px; border: 2px solid var(--borde); border-radius: 12px; background: var(--superficie); cursor: pointer; }
+
+/* Barra superior (Gmail, Imágenes, apps, cuenta) fija a la derecha, como en Google. */
+.ntp-superior { position: absolute; top: 8px; right: 16px; z-index: 1; display: flex; align-items: center; gap: 4px; }
+.ntp-enlace { display: inline-flex; align-items: center; min-height: 48px; padding: 0 12px; border-radius: 24px; color: var(--texto); font-size: 15px; text-decoration: none; }
+.ntp-enlace:hover { text-decoration: underline; }
+.ntp-rejilla { fill: currentColor !important; stroke: none !important; }
+.ntp-apps { position: absolute; top: 60px; right: 0; width: 360px; max-height: min(560px, calc(100vh - 80px)); overflow: hidden auto;
+  padding: 8px; border: 2px solid var(--borde); border-radius: 28px; background: var(--superficie); }
+.ntp-apps ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin: 0; padding: 8px 0; list-style: none; }
+.ntp-apps-favoritos { padding: 8px 8px 0; border-radius: 22px; background: var(--fondo); }
+.ntp-apps-favoritos h2 { margin: 4px 8px 0; font-size: 18px; font-weight: 500; color: var(--texto); }
+.ntp-app { display: flex; flex-direction: column; align-items: center; gap: 8px; min-height: 96px; padding: 12px 4px;
+  border-radius: 16px; color: inherit; text-decoration: none; text-align: center; font-size: 14px; line-height: 1.3; }
+.ntp-app img { width: 40px; height: 40px; object-fit: contain; }
+/* El logotipo de NotebookLM es negro: Google lo muestra sobre un círculo blanco. */
+.ntp-app img[src$="notebooklm.png"] { padding: 4px; border-radius: 50%; background: #ffffff; }
+.ntp-app span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ntp-mas { display: flex; width: fit-content; margin: 8px auto; }
+.ntp-app:hover { background: var(--fondo); }
+.ntp-apps-favoritos .ntp-app:hover { background: var(--superficie); }
+
+@media (max-width: 520px) {
+  .ntp-busqueda { flex-wrap: wrap; border-radius: 24px; padding: 6px 6px 6px 16px; }
+  .ntp-busqueda input { flex-basis: calc(100% - 40px); }
+  .ntp-enviar { flex: 1; }
+  .ntp-atajos { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+  .ntp-panel { padding: 16px; }
+  .ntp-superior { position: static; justify-content: flex-end; padding: 8px 8px 0; }
+  .ntp-apps { top: 64px; right: 8px; width: min(360px, calc(100vw - 16px)); }
+}
+/* Colores forzados: el sistema decide colores; se quita la imagen para no restar legibilidad. */
+@media (forced-colors: active) {
+  body, :root[data-fondo] body { background: Canvas; }
+  .ntp-enviar, .ntp-icono, .ntp-atajo, .ntp-apps, .ntp-ia, .ntp-boton, .ntp-tema, .ntp-panel { border: 1px solid ButtonText; }
+  .ntp-tema:has(input:checked) { border: 3px solid Highlight; }
+  .ntp-muestra { forced-color-adjust: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ntp-icono, .ntp-atajo, .ntp-marcador, .ntp-ia, .ntp-boton, .ntp-busqueda, .ntp-tema { transition: background-color 120ms ease-out, border-color 120ms ease-out; }
+}

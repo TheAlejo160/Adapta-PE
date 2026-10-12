@@ -1,4 +1,9 @@
 (() => {
+// Sólo se traducen las palabras que añade AdaptaPE; el contenido de la página se lee tal cual.
+const textos = { es: { 'talkback.boton': 'Botón' }, en: { 'talkback.boton': 'Button' }, pt: { 'talkback.boton': 'Botão' },
+    de: { 'talkback.boton': 'Schaltfläche' }, fr: { 'talkback.boton': 'Bouton' }, it: { 'talkback.boton': 'Pulsante' } };
+globalThis.TextosAdapta?.definir(textos);
+const t = clave => globalThis.TextosAdapta ? globalThis.TextosAdapta.t(clave) : textos.es[clave];
 class TalkBack {
     constructor() {
         this.activo = false;
@@ -54,14 +59,17 @@ class TalkBack {
         finalEl.style.outlineOffset = "2px";
         finalEl.style.borderRadius = "4px";
 
+        // Idioma del contenido según la página; sin atributo, el de AdaptaPE (undefined: es-ES del worker).
+        let lang = finalEl.closest('[lang]')?.lang;
+        if (!/^[a-z]{2,3}(-[a-z0-9]{2,8})*$/i.test(lang || '')) lang = this.langTTS; // Atributo ajeno: sólo códigos BCP 47 simples.
         let texto = finalEl.getAttribute('aria-label') || finalEl.getAttribute('alt') || finalEl.innerText || finalEl.textContent;
         if (!texto || texto.trim() === "") {
-            if (finalEl.querySelector('svg')) texto = "Botón";
+            if (finalEl.querySelector('svg')) { texto = t('talkback.boton'); lang = this.langTTS; }
         }
 
         if (texto && texto.trim() !== "") {
             this.temporizador = setTimeout(() => {
-                if (this.activo && finalEl === this.elementoActual) this.enviar({ accion: "hablar", texto: texto.trim() });
+                if (this.activo && finalEl === this.elementoActual) this.enviar({ accion: "hablar", texto: texto.trim(), origen: 'lectura', lang });
             }, 300);
         }
     }

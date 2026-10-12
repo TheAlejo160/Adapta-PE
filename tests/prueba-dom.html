@@ -1,9 +1,9 @@
-<!doctype html><html lang="es"><meta charset="utf-8"><title>Prueba DOM Adapta PE</title><body>
+<!doctype html><html lang="es"><meta charset="utf-8"><title>Prueba DOM AdaptaPE</title><body>
 <input id="campo" aria-label="Nombre" value="Hola Perú"><input id="casilla" type="checkbox"><div id="editor" contenteditable="true">Buenos días</div>
 <form id="formulario"><input id="buscador" name="q" type="search"><button type="submit">Buscar</button></form>
 <a id="enlace" href="https://example.org/">Contacto</a><pre id="resultado">Pendiente</pre><script>
 window.chrome={runtime:{sendMessage(peticion, respuesta){window.mensajes.push(peticion);respuesta?.({ok:true});}},storage:{local:{async set(){}}}};window.mensajes=[];
-</script><script src="../sitios.js"></script><script src="../classes/VoiceAssistant.js"></script><script src="../classes/KineticEngine.js"></script><script>
+</script><script src="../sitios.js"></script><script src="../textos.js"></script><script src="../classes/VoiceAssistant.js"></script><script src="../classes/KineticEngine.js"></script><script>
 try {
  const exigir=(condicion,texto)=>{if(!condicion) throw new Error(texto);};
  const arranques=[];
@@ -30,6 +30,20 @@ try {
  exigir(!motor.burbuja.querySelector('button'),'Cámara sin botones que exijan apuntar');
  exigir(getComputedStyle(motor.burbuja).pointerEvents==='none','La cámara no intercepta clics en la web');
  const vozCinetica=new VoiceAssistant(accion=>motor.ejecutarAccion(accion));
+ const objetivoAtraccion=document.createElement('button');objetivoAtraccion.textContent='Atracción';
+ objetivoAtraccion.style.cssText='position:fixed;left:200px;top:300px;width:80px;height:40px';document.body.appendChild(objetivoAtraccion);
+ motor.posX=190;motor.posY=320;motor.atraerCursor(33);
+ exigir(motor.posX>190&&motor.posX<204,'Atracción gradual a control cercano');
+ for(let paso=0;paso<8;paso++) motor.atraerCursor(33);
+ exigir(motor.elementoBajoCursor()===objetivoAtraccion,'Atracción termina sobre control real');
+ let clicsAtraccion=0;objetivoAtraccion.addEventListener('click',()=>clicsAtraccion++);
+ motor.neutroListo=true;motor.fiableDesde=performance.now()-350;motor.ultimoTiempo=performance.now();
+ vozCinetica.ejecutarComando('clic');exigir(clicsAtraccion===1,'Voz hace clic sin exigir armado por movimiento');
+ motor.posX=190;objetivoAtraccion.disabled=true;motor.atraerCursor(33);
+ exigir(motor.posX===190,'Control deshabilitado no atrae');
+ objetivoAtraccion.disabled=false;const grupoDeshabilitado=document.createElement('fieldset');grupoDeshabilitado.disabled=true;
+ grupoDeshabilitado.appendChild(objetivoAtraccion);document.body.appendChild(grupoDeshabilitado);motor.atraerCursor(33);
+ exigir(motor.posX===190,'Grupo deshabilitado no atrae');grupoDeshabilitado.remove();
  vozCinetica.ejecutarComando('activar temblor');vozCinetica.ejecutarComando('activar temblor');
  exigir(motor.zonaMuerta===0.07,'Ajuste repetido no desactiva temblor');
  vozCinetica.ejecutarComando('movimientos pequeños');exigir(motor.amplitudControl===0.55,'Movilidad reducida por voz');
@@ -44,7 +58,30 @@ try {
  exigir(mensajes.at(-1).destino==='pestana'&&!document.getElementById('adapta-pe-menu-contextual'),'Menú navegable por cursor');
  let nativoSitio=0;enlace.addEventListener('contextmenu',evento=>{evento.preventDefault();nativoSitio++;});
  motor.hacerClick('derecho',enlace);exigir(nativoSitio===1&&!document.getElementById('adapta-pe-menu-contextual'),'Respetar menú del sitio');
+ const reposo=new KineticEngine();reposo.solicitarModelo=reposo.programarFotograma=reposo.actualizarHover=()=>{};
+ reposo.activa=true;reposo.aplicarAjustes({modo:'manos'});reposo.dibujarHUD=()=>{};
+ const botonDwell=document.createElement('button');botonDwell.textContent='Puño y permanencia';
+ botonDwell.style.cssText='position:fixed;left:220px;top:200px;width:140px;height:40px';document.body.appendChild(botonDwell);
+ let clicsDwell=0;botonDwell.addEventListener('click',()=>clicsDwell++);
+ const manoDwell=cerrada=>{
+  const puntos=Array.from({length:21},()=>({x:0.5,y:0.7,z:0}));puntos[4]={x:0.25,y:0.4,z:0};
+  for(const [indice,base] of [5,9,13,17].entries()) {
+   const x=0.45+indice*0.04,y=0.55; puntos[base]={x,y,z:0};
+   for(let paso=1;paso<=3;paso++) puntos[base+paso]={x,y:y+(cerrada?[-0.04,0.03,0.065][paso-1]:-paso*0.04),z:0};
+  }return puntos;
+ };
+ const inferenciaDwell=(tiempo,cerrada)=>{
+  reposo.recibirFotograma({modo:'manos',edad:0,manos:manoDwell(cerrada),mano:'Left'});
+  reposo.deteccion.tiempo=tiempo;reposo.bucleRender(tiempo);
+ };
+ for(let tiempo=0;tiempo<=400;tiempo+=50) inferenciaDwell(tiempo,false);
+ reposo.posX=290;reposo.posY=220;
+ for(let tiempo=450;tiempo<=1550;tiempo+=50) inferenciaDwell(tiempo,true);
+ exigir(clicsDwell===0,'Puño no adelanta el dwell');inferenciaDwell(1600,true);
+ exigir(clicsDwell===1,'Puño activa un botón real por permanencia');
+ for(let tiempo=1650;tiempo<=2850;tiempo+=50) inferenciaDwell(tiempo,true);
+ exigir(clicsDwell===1,'Puño mantenido no duplica clic');botonDwell.remove();
  motor.detenerCamara();exigir(!document.getElementById('adapta-pe-cursor')&&!document.getElementById('adapta-pe-camara-box'),'Limpieza de cámara y cursor');
- document.getElementById('resultado').textContent='OK: dictado, selección, formulario, cámara sin botones, ajustes por voz, checkbox, coordenadas, menú, limpieza, micrófono compartido';
+ document.getElementById('resultado').textContent='OK: dictado, selección, formulario, cámara sin botones, ajustes por voz, checkbox, coordenadas, menú, puño/dwell, limpieza, micrófono compartido';
 } catch(error) {document.getElementById('resultado').textContent='FALLO: '+error.stack;}
 </script></body></html>

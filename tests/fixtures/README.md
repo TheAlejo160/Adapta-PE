@@ -1,1 +1,3 @@
 Imágenes de prueba públicas de MediaPipe: `https://storage.googleapis.com/mediapipe-assets/portrait.jpg`, `pose.jpg`, `right_hands.jpg`. Se usan exclusivamente para regresiones de los modelos originales, sin cámara ni micrófono de personas usuarias. Proyecto de origen: https://github.com/google-ai-edge/mediapipe (Apache 2.0).
+
+`puno.jpg` procede de `https://storage.googleapis.com/mediapipe-assets/fist.jpg`. Verifica un puño cerrado real y la secuencia mano abierta, puño, mano abierta. La prueba comprueba que KineticEngine reconoce el cierre con los 21 landmarks, no sólo que el modelo detecta una mano; no contiene imágenes de personas usuarias.

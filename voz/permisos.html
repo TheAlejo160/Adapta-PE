@@ -1,5 +1,23 @@
-<!doctype html><html lang="es"><meta charset="utf-8"><title>Permiso de voz — Adapta PE</title><body>
-<h1>Voz en todo Chrome</h1><p>Permite el micrófono de Adapta PE una vez para usar «Computadora» al cambiar de pestaña o ventana y desde Nueva pestaña. Se utiliza el reconocimiento de voz del navegador; este servicio puede procesar audio en línea.</p>
-<button id="adapta-pe-permitir-microfono" type="button">Permitir micrófono</button>
-<p id="adapta-pe-permiso-estado" role="status">Cuando quieras dejar de escuchar, desactiva Voz en el popup.</p>
-<script src="permisos.js"></script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="permisos.tituloMicro">Permiso de voz de AdaptaPE</title>
+  <link rel="stylesheet" href="../interfaz.css">
+</head>
+<body class="permisos">
+  <main class="container">
+    <header class="header"><img src="../AdaptaPE.png" alt="" width="48" height="48"><p>AdaptaPE</p></header>
+    <div class="permiso-icono"><svg class="icono" aria-hidden="true"><use id="adapta-pe-icono-permiso" href="../iconos.svg#voz"/></svg><h1 data-i18n="permisos.encabezadoMicro">Permitir el micrófono</h1></div>
+    <p id="adapta-pe-instruccion-permiso" data-i18n="permisos.instruccionMicro">AdaptaPE necesita tu permiso para escuchar tus órdenes, incluso al cambiar de pestaña o ventana. Cuando Chrome lo solicite, elige «Permitir».</p>
+    <p id="adapta-pe-privacidad-permiso" data-i18n="permisos.privacidadMicro">Se utiliza el reconocimiento de voz del navegador; este servicio puede procesar audio en línea.</p>
+    <button id="adapta-pe-permitir-microfono" type="button" data-i18n="permisos.botonMicro">Permitir micrófono</button>
+    <p id="adapta-pe-permiso-estado" role="status" data-i18n="permisos.estadoMicro">Puedes detener la escucha desactivando Control por voz en el panel de AdaptaPE.</p>
+    <script src="../textos.js"></script>
+    <script src="../sitios.js"></script>
+    <script src="../textos_paginas.js"></script>
+    <script src="permisos.js"></script>
+  </main>
+</body>
+</html>
