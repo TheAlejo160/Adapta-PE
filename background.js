@@ -12,7 +12,6 @@ let transicionPaginas = Promise.resolve(), revisionPaginas = 0, conectarTodas = 
 let pestanaConControl = null;
 let retornoCamara = null;
 let detenerMascotaLectura = null;
-const estadosVentana = new Map();
 // 'auto' (o valor desconocido) sigue el primer idioma del sistema que el parser admite.
 function idiomaVoz(valor) {
     if (CodigosVoz.includes(valor)) return valor;
@@ -263,7 +262,11 @@ chrome.runtime.onInstalled.addListener(detalles => {
     if (detalles?.reason === 'install') chrome.tabs.create({ url: chrome.runtime.getURL('bienvenida.html') }).catch(() => {});
 });
 chrome.tabs.onActivated.addListener(() => sincronizarPaginas().catch(() => {}));
-chrome.tabs.onUpdated.addListener((_, cambios) => { if (cambios.status === 'complete' || cambios.url) sincronizarPaginas().catch(() => {}); });
+// Sólo la pestaña activa puede cambiar el destino (navegación completa o URL de una SPA); una carga en fondo
+// registra su propio controlador con `pagina_lista` y no justifica recorrer todas las pestañas.
+chrome.tabs.onUpdated.addListener((_, cambios, pestana) => {
+    if (pestana?.active && (cambios.status === 'complete' || cambios.url)) sincronizarPaginas().catch(() => {});
+});
 chrome.windows.onFocusChanged.addListener(() => sincronizarPaginas().catch(() => {}));
 chrome.windows.onRemoved.addListener(() => sincronizarPaginas().catch(() => {}));
 // Recuperar también al reiniciarse el worker o recargar la extensión sin cambiar versión.
@@ -335,9 +338,11 @@ async function ejecutarAccion(peticion, pestana, documentId) {
     if (accion === 'silenciar') return chrome.tabs.update(pestana.id, { muted: Boolean(peticion.activo) });
     if (accion === 'pantalla_completa') {
         const ventana = await chrome.windows.get(pestana.windowId);
-        if (peticion.activa && ventana.state !== 'fullscreen') estadosVentana.set(ventana.id, ventana.state);
-        const estado = peticion.activa ? 'fullscreen' : estadosVentana.get(ventana.id) || 'normal';
-        if (!peticion.activa) estadosVentana.delete(ventana.id);
+        // storage.session sobrevive a la suspensión del service worker: salir restaura maximizada/normal.
+        const clave = 'estadoVentana' + ventana.id;
+        if (peticion.activa && ventana.state !== 'fullscreen') await chrome.storage.session.set({ [clave]: ventana.state });
+        const estado = peticion.activa ? 'fullscreen' : (await chrome.storage.session.get(clave))[clave] || 'normal';
+        if (!peticion.activa) await chrome.storage.session.remove(clave);
         return chrome.windows.update(ventana.id, { state: estado });
     }
     if (['cambiar_pestana', 'ir_pestana', 'cerrar_otras'].includes(accion)) {

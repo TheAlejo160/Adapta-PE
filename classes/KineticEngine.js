@@ -451,7 +451,7 @@ class KineticEngine {
         }
         if (this.modoControl === 'manos' || this.modoControl === 'automatico') {
             if (!candidatos.some(Boolean) && this.fuenteControl?.startsWith('mano:')) {
-                const cercana = [15, 16].filter(visible).map(indice => convertir(cuerpo[indice], this.fuenteControl))
+                const cercana = [15, 16].filter(visible).map(indice => ({ ...convertir(cuerpo[indice], this.fuenteControl), respaldo: true }))
                     .sort((a, b) => Math.hypot(a.x - this.puntoActual.x, a.y - this.puntoActual.y) - Math.hypot(b.x - this.puntoActual.x, b.y - this.puntoActual.y))[0];
                 if (cercana && Math.hypot(cercana.x - this.puntoActual.x, cercana.y - this.puntoActual.y) <= this.ancho * 0.2) candidatos.push(cercana);
                 else return null; // Una pérdida de mano no elige otro codo incidental.
@@ -595,6 +595,9 @@ class KineticEngine {
         if (estado !== 'activo' && estado !== 'intermedio') { this.gestoClic = { suelto: false, ultima: inferencia }; return false; }
         if (estado === 'activo' && gesto.suelto) gesto.inicio ??= inferencia;
         if (gesto.inicio == null) return false;
+        // Antes de confirmar, la banda intermedia (habla, mano relajada) no cuenta ni congela: una sola imagen
+        // activa ruidosa seguida de banda intermedia confirmaba el gesto y hacía clic (o derecho a 700 ms).
+        if (estado === 'intermedio' && !gesto.confirmado) { gesto.inicio = null; gesto.cuenta = 0; return false; }
         gesto.cuenta = (gesto.cuenta || 0) + 1;
         const duracion = inferencia - gesto.inicio;
         if (duracion >= config.maximo) { this.gestoClic = { suelto: false, ultima: inferencia }; return false; } // Bostezo: sin clic.
@@ -712,7 +715,7 @@ class KineticEngine {
                 const indice = y * this.ancho + x;
                 if (Math.abs(grises[indice] - anterior[indice] - luz) > 12) { sumaX += x; sumaY += y; movidos++; }
             }
-            let mejor = null;
+            const candidatos = [];
             const margen = this.radioPlantilla + 1;
             // Movimiento local propone textura; una variación de luz o imagen completa no adquiere control.
             if (movidos >= 12 && movidos < grises.length * 0.35 / 4) {
@@ -723,11 +726,16 @@ class KineticEngine {
                         const movimiento = Math.abs(grises[indice] - anterior[indice] - luz);
                         if (movimiento <= 12) continue;
                         const parche = this.extraerParche(grises, x, y);
-                        const puntuacion = parche.detalle * movimiento;
-                        if (parche.contraste >= 6 && parche.detalle >= 1 && (!mejor || puntuacion > mejor.puntuacion)) mejor = { x, y, parche, puntuacion };
+                        if (parche.contraste >= 6 && parche.detalle >= 1) candidatos.push({ x, y, parche, puntuacion: parche.detalle * movimiento });
                     }
                 }
             }
+            // La diferencia temporal es máxima en siluetas sobre fondo con textura y en fondo descubierto: adquirir sólo
+            // un parche que reaparece desplazado en la imagen anterior, para no quedar anclado al fondo inmóvil.
+            const mejor = candidatos.sort((a, b) => b.puntuacion - a.puntuacion).slice(0, 4).find(candidato => {
+                const origen = this.seguirPunto(anterior, candidato.parche, candidato);
+                return origen && origen.error <= 0.15 && Math.hypot(origen.x - candidato.x, origen.y - candidato.y) >= 1;
+            });
             anterior.set(grises);
             if (!mejor) { this.dibujarHUD(t('cinetico.buscandoTextura'), 0); return; }
             this.plantilla = mejor.parche;
@@ -736,8 +744,13 @@ class KineticEngine {
             this.puntoSuave = { ...this.puntoBase };
             this.fuenteControl = 'zona libre';
         }
-        const punto = this.seguirPunto(grises);
+        const plantilla = this.plantilla, inferencia = this.deteccion?.tiempo ?? tiempo;
+        // Predicción por velocidad (en memoria, sólo con seguimiento continuo): un movimiento rápido no sale de la
+        // búsqueda de ±12 px; limitarla a 12 px mantiene dentro de la ventana el punto anterior si la textura se detiene.
+        const avance = eje => plantilla.velocidad ? Math.max(-12, Math.min(12, plantilla.velocidad[eje] * (inferencia - plantilla.ultima))) : 0;
+        const punto = this.seguirPunto(grises, plantilla, { x: this.puntoActual.x + avance('x'), y: this.puntoActual.y + avance('y') });
         if (!punto) {
+            plantilla.velocidad = null; plantilla.ultima = null; // Sin extrapolar puntos perdidos.
             this.perdidaDesde ??= tiempo;
             this.fiableDesde = null; this.muestraGesto = null; this.puntoGesto = null;
             this.ultimoMovimiento = null; this.puntoSuave = { ...this.puntoBase };
@@ -750,12 +763,17 @@ class KineticEngine {
             return;
         }
         this.perdidaDesde = null;
+        if (plantilla.ultima != null && inferencia > plantilla.ultima) plantilla.velocidad = { x: (punto.x - this.puntoActual.x) / (inferencia - plantilla.ultima),
+            y: (punto.y - this.puntoActual.y) / (inferencia - plantilla.ultima) };
+        plantilla.ultima = inferencia;
         this.puntoActual = { x: punto.x, y: punto.y };
-        // Actualizar textura lentamente permite pequeñas rotaciones e iluminación variable.
+        // Actualizar textura lentamente permite pequeñas rotaciones e iluminación variable. Un giro reemplaza la plantilla
+        // (el giro se acumula una vez); una coincidencia dudosa (desenfoque) no la contamina ni la hace derivar.
         const nueva = this.extraerParche(grises, punto.x, punto.y);
-        this.plantilla.valores = punto.angulo ? nueva.valores : this.plantilla.valores.map((valor, indice) => valor * 0.95 + nueva.valores[indice] * 0.05);
+        if (punto.angulo) plantilla.valores = nueva.valores;
+        else if (punto.error <= 0.15) plantilla.valores = plantilla.valores.map((valor, indice) => valor * 0.95 + nueva.valores[indice] * 0.05);
         this.neutroListo = true;
-        this.puntoGesto = this.controlarGesto(this.puntoActual, this.deteccion?.tiempo ?? tiempo, punto.angulo);
+        this.puntoGesto = this.controlarGesto(this.puntoActual, inferencia, punto.angulo);
         this.fiableDesde ??= tiempo;
     }
 
@@ -853,41 +871,54 @@ class KineticEngine {
         this.cancelarFijacion(true);
     }
 
-    seguirPunto(grises) {
+    seguirPunto(grises, plantilla = this.plantilla, centro = this.puntoActual) {
         // Zona libre: seguir una textura visible, sin asumir anatomía ni exigir manos.
         // shortcut: textura local sin clasificar anatomía, una oclusión larga exige nueva adquisición.
-        let mejor = { error: Infinity, x: this.puntoActual.x, y: this.puntoActual.y };
-        const errores = [];
+        const radio = 12, lado = radio * 2 + 1;
+        const centroX = Math.round(centro.x), centroY = Math.round(centro.y);
+        let mejor = { error: Infinity, x: centroX, y: centroY };
+        const rejilla = new Float32Array(lado * lado).fill(Infinity); // Error de cada traslación, sin objetos por posición.
         const margen = this.radioPlantilla + 1;
-        const energia = this.plantilla.valores.reduce((suma, valor) => suma + valor * valor, 0);
-        const valores = new Float32Array(this.plantilla.valores.length);
-        const medir = (x, y, angulo = 0) => {
-            if (x < margen || y < margen || x >= this.ancho - margen || y >= this.alto - margen) return;
-            let suma = 0, cuadrados = 0;
-            const cantidad = this.plantilla.valores.length;
-            let indice = 0;
-            const coseno = Math.cos(angulo), seno = Math.sin(angulo);
+        const muestras = plantilla.valores, cantidad = muestras.length;
+        let energia = 0, sumaPlantilla = 0;
+        for (const valor of muestras) { energia += valor * valor; sumaPlantilla += valor; }
+        // Desplazamientos precalculados por ángulo y una sola pasada por posición: antes ~3 ms por imagen
+        // (redondeos y trigonometría por muestra), ahora una fracción de milisegundo.
+        const tablas = new Map();
+        const tabla = angulo => {
+            if (tablas.has(angulo)) return tablas.get(angulo);
+            const coseno = Math.cos(angulo), seno = Math.sin(angulo), lista = new Int32Array(cantidad);
+            let indice = 0, minX = 0, maxX = 0, minY = 0, maxY = 0;
             for (let fila = -this.radioPlantilla; fila <= this.radioPlantilla; fila += 2) {
                 for (let columna = -this.radioPlantilla; columna <= this.radioPlantilla; columna += 2) {
-                    const px = angulo ? Math.round(x + columna * coseno - fila * seno) : x + columna;
-                    const py = angulo ? Math.round(y + columna * seno + fila * coseno) : y + fila;
-                    if (px < 0 || px >= this.ancho || py < 0 || py >= this.alto) return;
-                    const valor = grises[py * this.ancho + px];
-                    valores[indice++] = valor;
-                    suma += valor; cuadrados += valor * valor;
+                    const dx = Math.round(columna * coseno - fila * seno), dy = Math.round(columna * seno + fila * coseno);
+                    lista[indice++] = dy * this.ancho + dx;
+                    minX = Math.min(minX, dx); maxX = Math.max(maxX, dx); minY = Math.min(minY, dy); maxY = Math.max(maxY, dy);
                 }
+            }
+            const resultado = { lista, minX, maxX, minY, maxY };
+            tablas.set(angulo, resultado);
+            return resultado;
+        };
+        const medir = (x, y, angulo = 0) => {
+            const { lista, minX, maxX, minY, maxY } = tabla(angulo);
+            if (x < margen || y < margen || x >= this.ancho - margen || y >= this.alto - margen ||
+                x + minX < 0 || x + maxX >= this.ancho || y + minY < 0 || y + maxY >= this.alto) return;
+            let suma = 0, cuadrados = 0, producto = 0;
+            const base = y * this.ancho + x;
+            for (let indice = 0; indice < cantidad; indice++) {
+                const valor = grises[base + lista[indice]];
+                suma += valor; cuadrados += valor * valor; producto += valor * muestras[indice];
             }
             const media = suma / cantidad;
             if (cuadrados / cantidad - media * media < 36) return;
-            let correlacion = 0;
-            for (let indice = 0; indice < cantidad; indice++) correlacion += (valores[indice] - media) * this.plantilla.valores[indice];
+            const correlacion = producto - media * sumaPlantilla;
             const error = 1 - correlacion / Math.sqrt(energia * (cuadrados - cantidad * media * media));
-            errores.push({ error, x, y });
+            if (!angulo) rejilla[(y - centroY + radio) * lado + x - centroX + radio] = error;
             if (error < mejor.error) mejor = { error, x, y, angulo };
         };
-        const centroX = Math.round(this.puntoActual.x), centroY = Math.round(this.puntoActual.y);
-        for (let y = centroY - 12; y <= centroY + 12; y++) {
-            for (let x = centroX - 12; x <= centroX + 12; x++) medir(x, y);
+        for (let y = centroY - radio; y <= centroY + radio; y++) {
+            for (let x = centroX - radio; x <= centroX + radio; x++) medir(x, y);
         }
         const traslacion = mejor;
         if (traslacion.error <= 0.4) {
@@ -898,9 +929,23 @@ class KineticEngine {
             }
             if (traslacion.error - mejor.error < 0.02) mejor = traslacion;
         }
-        const ambiguo = errores.some(candidato => Math.hypot(candidato.x - mejor.x, candidato.y - mejor.y) > 3 &&
-            candidato.error <= mejor.error * 1.15 + 0.005);
-        return mejor.error <= 0.15 && !ambiguo ? mejor : null;
+        // Ambiguo sólo si hay otro mínimo local separado (textura repetida o borde sin detalle). La cuenca ancha de una
+        // textura suave o desenfocada desciende hacia el mejor punto y no es ambigua: antes cortaba el seguimiento.
+        const limite = mejor.error * 1.15 + 0.005;
+        let ambiguo = false;
+        for (let fila = 0; fila < lado && !ambiguo; fila++) {
+            for (let columna = 0; columna < lado && !ambiguo; columna++) {
+                const error = rejilla[fila * lado + columna];
+                if (!(error <= limite) || Math.hypot(centroX - radio + columna - mejor.x, centroY - radio + fila - mejor.y) <= 3) continue;
+                ambiguo = true;
+                for (let dy = -1; dy <= 1 && ambiguo; dy++) for (let dx = -1; dx <= 1 && ambiguo; dx++) {
+                    const vecina = rejilla[(fila + dy) * lado + columna + dx];
+                    if (fila + dy >= 0 && fila + dy < lado && columna + dx >= 0 && columna + dx < lado && vecina < error) ambiguo = false;
+                }
+            }
+        }
+        // Correlación >=0,75 sigue una textura desenfocada; la plantilla sólo se actualiza con coincidencias >=0,85.
+        return mejor.error <= 0.25 && !ambiguo ? mejor : null;
     }
 
     filtrarMovimiento(punto, tiempo) {
@@ -1282,6 +1327,11 @@ class KineticEngine {
                 } else if (this.perdidaDesde != null && tiempo - this.perdidaDesde >= 1200) {
                     if (this.modoControl === 'cabeza') this.calibrar(punto);
                 }
+                if (this.modoControl === 'manos' && this.muestraGesto && Boolean(punto.respaldo) !== Boolean(this.respaldoMano)) {
+                    // Muñeca de Pose y punto de la mano (o palma) difieren varios píxeles: cambiar de modelo no es un gesto.
+                    this.muestraGesto.x += punto.x - this.puntoActual.x; this.muestraGesto.y += punto.y - this.puntoActual.y;
+                }
+                this.respaldoMano = Boolean(punto.respaldo);
                 const separacion = Math.hypot(punto.x - this.puntoActual.x, punto.y - this.puntoActual.y);
                 if (this.modoControl === 'manos' && this.perdidaDesde != null && separacion > this.ancho * 0.1) this.muestraGesto = null;
                 else if (this.modoControl === 'manos' && separacion > this.ancho * 0.2) {

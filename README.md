@@ -8,6 +8,7 @@
 > **Requisito mínimo del manifest:** Chromium 119 o posterior.
 > **Navegadores objetivo:** Google Chrome y derivados Chromium, como Edge y Brave; la voz requiere una API de reconocimiento disponible.
 > **Sitio oficial:** [adaptape.thealejo-dev.cc](https://adaptape.thealejo-dev.cc).
+> **Detección desde la web:** `content_script.js` sólo marca `data-adapta-extension="true"` en `https://adaptape.cc`, `https://www.adaptape.cc` y `https://adaptape.thealejo-dev.cc`. En `localhost`, `http` u otros dominios la marca no aparece y la web local se comporta como si la extensión no estuviera instalada. No hay interruptor de desarrollo: para probar la web en local, ejecuta en la consola de la página `document.documentElement.setAttribute('data-adapta-extension','true')` (simula la marca; la extensión no la gestiona ahí) o, en una copia desempaquetada de pruebas, añade temporalmente el nombre de host a la lista de `content_script.js` (no lo subas).
 > **Código fuente:** [TheAlejo160/Adapta-PE](https://github.com/TheAlejo160/Adapta-PE).
 
 ## Contenido
@@ -217,7 +218,7 @@ Los ejemplos de esta sección se pronuncian después de **«Computadora»** o de
 | `ayuda`, `qué puedo decir`, `qué comandos hay`, `qué puedes hacer` | Lee en voz alta un resumen de órdenes en el idioma de voz elegido y lo muestra en el indicador. |
 | `cállate`, `silencio`, `basta`, `deja de leer`, `para de hablar` | Detiene la lectura en voz alta en curso. |
 
-El dictado conserva el texto reconocido, incluidos acentos, mayúsculas y signos. Las palabras de navegación dentro del dictado o una búsqueda no se tratan como órdenes independientes. La puntuación y precisión finales dependen del reconocimiento del navegador.
+El dictado conserva el texto reconocido, incluidos acentos, mayúsculas y signos. No inserta ni borra texto en campos de contraseña, incluidos campos revelados o editores con `autocomplete="current-password"` o `"new-password"`. Esta protección actúa después del reconocimiento; no evita que el servicio de voz procese lo que se haya pronunciado. Las palabras de navegación dentro del dictado o una búsqueda no se tratan como órdenes independientes. La puntuación y precisión finales dependen del reconocimiento del navegador.
 
 ### Formas de decir la misma orden
 
@@ -448,7 +449,7 @@ flowchart TD
 | `classes/VoiceAssistant.js` | Clase reutilizable: reconocimiento en offscreen y parser de comandos DOM en la página. `prepararComando()` lleva cortesías, conjugaciones y otros idiomas a la orden canónica en español; `setIdioma()` cambia el idioma del reconocedor. |
 | `classes/FiltrosDaltonismo.js` | Inserta, aplica y retira filtros SVG/CSS. |
 | `filtros_frames.js` | Aplica preferencias a los marcos y coordina sus filtros en pantalla completa; evita duplicar la transformación de colores. |
-| `content_script.js` | Instancia los módulos de esta variante, aplica preferencias y recibe órdenes e indicadores. Se retira solo si la extensión se desactiva o desinstala, y se reanuda tras bfcache, congelación o precarga. Añade `data-adapta-extension="true"` para detección por la web oficial. |
+| `content_script.js` | Instancia los módulos de esta variante, aplica preferencias y recibe órdenes e indicadores. Se retira solo si la extensión se desactiva o desinstala, y se reanuda tras bfcache, congelación o precarga. Añade `data-adapta-extension="true"` sólo en la web oficial (https `adaptape.cc`, `www.adaptape.cc`, `adaptape.thealejo-dev.cc`) y lo retira al desactivarse la última instalación. Cada extensión conserva su propia marca para no ocultar otra instalación activa. Otros sitios no reciben esta marca; los recursos de mascotas usan URL dinámica para impedir sondeos con el ID fijo. |
 | `classes/TalkBack.js` | Lectura semántica por hover, contorno y debounce de 300 ms. |
 | `classes/KineticEngine.js` | Recibe detecciones recientes; calibración, movimiento, clic por permanencia, pinza o boca y menú contextual. |
 | `voz/camara.js` | Captura única central, permiso, token de generación y carga adaptativa; envía inferencias y una vista de cámara efímera al controlador prioritario. Sólo Base. |
@@ -652,3 +653,9 @@ El 14 de octubre de 2026 pasaron **69 grupos** en `tests/motores.test.cjs`, **21
 | macOS Lite independiente | [Adapta-PE-Lite-MacOS](https://github.com/TheAlejo160/Adapta-PE-Lite-MacOS): voz y siete filtros en una aplicación autónoma. |
 
 Los números de versión y permisos pertenecen a cada plataforma. Un ZIP de la extensión no instala la aplicación de escritorio. Los repositorios publican fuentes y recursos necesarios; los instaladores generados y la configuración personal quedan fuera de Git.
+
+## Catálogo para paridad nativa (17 de octubre de 2026)
+
+`node tools/exportar-catalogo.cjs` genera `catalogos/nativo-v1.json` con seis idiomas, sitios, reglas ordenadas, textos comunes y 36 casos sintéticos. `--check` detecta una exportación ausente o desactualizada. Desde Base, `node tests/catalogo.test.cjs` comprueba ambas ediciones, las variables de traducción, el transporte de regex y los casos. Detalles y límites en `catalogos/README.md`.
+
+No se modificó el comportamiento de la extensión ni sus permisos. El catálogo todavía no está integrado en las apps nativas; exportarlo no acredita reconocimiento en seis idiomas, pruebas acústicas ni paridad de cámara. Regresiones locales: voz 14 grupos y motores 70 grupos aprobados; no se ejecutó navegador por la restricción del titular.

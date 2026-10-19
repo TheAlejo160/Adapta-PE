@@ -455,6 +455,74 @@ comprobar('Abrir popup no suspende sensores; visibilidad real controla ambas var
     assert.ok(fs.statSync(path.join(raiz, 'vision/modelos/rostro.task')).size > 1000000);
 });
 
+comprobar('Privacidad e idioma: sprites sólo con URL dinámica, marca sólo en la web oficial, idioma de Chrome como respaldo', () => {
+    for (const carpeta of [raiz, lite]) {
+        const manifiesto = JSON.parse(fs.readFileSync(path.join(carpeta, 'manifest.json'), 'utf8'));
+        // Sin URL dinámica cualquier web puede pedir chrome-extension://<id fijo>/mascotas/motor.js y saber que está instalada.
+        assert.ok(manifiesto.web_accessible_resources.every(regla => regla.use_dynamic_url === true));
+        // getURL() sólo da la URL dinámica a rutas declaradas: Mascota pasa la carpeta como assetBaseURL.
+        assert.ok(manifiesto.web_accessible_resources[0].resources.includes('mascotas/*/'));
+        const controlador = fs.readFileSync(path.join(carpeta, 'content_script.js'), 'utf8');
+        const marcas = controlador.match(/setAttribute\('data-adapta-extension'/g) || [];
+        assert.equal(marcas.length, 1);
+        assert.match(controlador, /location\.protocol === 'https:' && \['adaptape\.cc', 'www\.adaptape\.cc', 'adaptape\.thealejo-dev\.cc'\]\.includes\(location\.hostname\)\) \{\s*(?:document\.documentElement\.setAttribute\(marcaInstalacion, 'true'\);\s*)?document\.documentElement\.setAttribute\('data-adapta-extension'/);
+        assert.match(controlador.slice(controlador.indexOf('function destruir()')), /removeAttribute\('data-adapta-extension'\)/);
+        assert.match(controlador.slice(controlador.indexOf('function aplicarIdioma('), controlador.indexOf('function aplicarIdioma(') + 300),
+            /detectarIdiomaVoz\?\.\(\[\.\.\.navigator\.languages, navigator\.language, chrome\.i18n\?\.getUILanguage\?\.\(\)\]\)/);
+    }
+});
+
+comprobar('SDK de mascotas: src/cuy.js es la fuente única de mascotas/motor.js (se omite sin la carpeta del SDK)', () => {
+    // ADAPTA_SDK_MASCOTA permite otra ubicación del SDK (ruta a su src/cuy.js).
+    const fuente = [process.env.ADAPTA_SDK_MASCOTA, path.join(require('node:os').homedir(), 'Desktop/Mascota-Modular-Adapta-PE/src/cuy.js')]
+        .find(ruta => ruta && fs.existsSync(ruta));
+    if (!fuente) { console.log('  (SDK de mascotas ausente: comparación omitida)'); return; }
+    assert.ok(fs.readFileSync(fuente).equals(fs.readFileSync(path.join(raiz, 'mascotas/motor.js'))), 'Copia src/cuy.js del SDK a mascotas/motor.js (Base y Lite)');
+});
+
+comprobar('Controlador: zona llega como Array y la marca oficial conserva otras instalaciones activas', () => {
+    const atributos = new Map(), evento = { addListener() {}, removeListener() {} };
+    const documento = { hidden: true, body: {}, head: {}, getElementById: () => null,
+        addEventListener() {}, removeEventListener() {}, dispatchEvent() {}, documentElement: {
+            setAttribute: (clave, valor) => atributos.set(clave, valor), removeAttribute: clave => atributos.delete(clave),
+            getAttributeNames: () => [...atributos.keys()]
+        } };
+    class Modulo {
+        actualizarVisibilidad() {} actualizarPrioridad() {} setEstado() {} aplicar() {}
+        limpiarSeleccion() {} limpiar() {} destruir() {}
+        recibirFotograma(datos) { this.datos = datos; }
+    }
+    const cargar = (archivo, id, url = 'https://adaptape.cc') => {
+        let alMensaje;
+        const contexto = vm.createContext({ document: documento, location: new URL(url), Event, atob,
+            window: { addEventListener() {}, removeEventListener() {} }, MutationObserver: class { observe() {} disconnect() {} },
+            VoiceAssistant: Modulo, FiltrosDaltonismo: Modulo, Mascota: Modulo, KineticEngine: Modulo, TalkBack: Modulo,
+            chrome: { runtime: { id, getURL: ruta => ruta, getManifest: () => ({}),
+                onMessage: { addListener: funcion => { alMensaje = funcion; }, removeListener() {} },
+                sendMessage: async () => ({ ok: false }) }, storage: { onChanged: evento, local: { get: () => new Promise(() => {}) } } }
+        });
+        vm.runInContext(fs.readFileSync(archivo, 'utf8'), contexto);
+        return { ...contexto.adaptaPEControlador, enviar: peticion => alMensaje(peticion, { id }, () => {}) };
+    };
+    // Base y Lite viven en mundos aislados y comparten el DOM.
+    const base = cargar(path.join(raiz, 'content_script.js'), 'base');
+    const otra = cargar(path.join(lite, 'content_script.js'), 'otra');
+    base.enviar({ accion: 'control_prioridad', activa: true });
+    documento.hidden = false;
+    base.enviar({ accion: 'camara_fotograma', datos: { grises: btoa(String.fromCharCode(...Array.from({ length: 19200 }, (_, i) => i % 256))) } });
+    assert.equal(Array.isArray(base.cinetico.datos.grises), true, 'El motor requiere un Array normal');
+    assert.equal(base.cinetico.datos.grises.length, 19200);
+    assert.ok(base.cinetico.datos.grises.every((valor, i) => valor === i % 256), 'Conserva los 256 valores de gris');
+    documento.hidden = true;
+    assert.equal(atributos.get('data-adapta-extension'), 'true');
+    base.destruir();
+    assert.equal(atributos.get('data-adapta-extension'), 'true', 'La otra instalación sigue viva');
+    otra.destruir();
+    assert.equal(atributos.size, 0);
+    cargar(path.join(raiz, 'content_script.js'), 'ajena', 'https://otro.test').destruir();
+    assert.equal(atributos.size, 0, 'No publica marcas en otros dominios');
+});
+
 function imagen(dx = 0, dy = 0, luz = 0) {
     const grises = new Float32Array(160 * 120);
     for (let y = 0; y < 120; y++) for (let x = 0; x < 160; x++) {
@@ -1138,6 +1206,7 @@ async function principal() {
     });
     const pruebaCaptura = entorno();
     pruebaCaptura.contexto.chrome.runtime.onMessage = { addListener() {} };
+    pruebaCaptura.contexto.btoa = btoa;
     pruebaCaptura.contexto.window.addEventListener = () => {};
     pruebaCaptura.cargar(path.join(raiz, 'voz/camara.js'));
     const captura = vm.runInContext('camaraCentral', pruebaCaptura.contexto);
@@ -1166,7 +1235,10 @@ async function principal() {
         await captura.capturar(captura.generacion);
         const salida = pruebaCaptura.mensajes.at(-1);
         assert.equal(salida.accion, 'camara_fotograma'); assert.equal(salida.datos.modo, modo);
-        assert.equal(salida.datos.grises.length, 19200); assert.equal(salida.datos.grises[0], 120);
+        // Base64 en el mensaje (no un Array JSON de 19.200 números); content_script lo devuelve a Array.
+        assert.equal(typeof salida.datos.grises, 'string');
+        const grises = Array.from(atob(salida.datos.grises), letra => letra.charCodeAt(0));
+        assert.equal(grises.length, 19200); assert.equal(grises[0], 120);
         assert.equal(captura.ocupada, false, 'Textura no inicia otra inferencia');
     }
     captura.ocupada = true;
@@ -1406,6 +1478,53 @@ async function principal() {
     assert.equal((await enviar({ accion: 'hablar', texto: 'Respuesta' })).ok, false);
     assert.equal(notificaciones.at(-1).datos.hablando, false, 'Un fallo TTS no deja a la mascota hablando');
     comprobaciones++; console.log('✓ Mascotas: selección validada y reacciones TTS sin finales antiguos');
+    // Worker con storage.session compartido: se carga dos veces para simular su reinicio.
+    const sesionFondo = {}, estadosAplicados = [];
+    const cargarFondo = () => {
+        const prueba = entorno(), chromeFondo = prueba.contexto.chrome, evento = { addListener() {} }, fondo = { recorridos: 0 };
+        chromeFondo.storage = { local: { get: async () => ({}) }, onChanged: evento, session: {
+            get: async clave => ({ [clave]: sesionFondo[clave] }), set: async datos => { Object.assign(sesionFondo, datos); },
+            remove: async clave => { delete sesionFondo[clave]; } } };
+        chromeFondo.runtime.getManifest = () => JSON.parse(fs.readFileSync(path.join(raiz, 'manifest.json'), 'utf8'));
+        chromeFondo.runtime.getURL = archivo => 'chrome-extension://prueba/' + archivo;
+        chromeFondo.runtime.getContexts = async () => [];
+        chromeFondo.runtime.onStartup = chromeFondo.runtime.onInstalled = chromeFondo.runtime.onConnect = evento;
+        chromeFondo.runtime.onMessage = { addListener: accion => { fondo.manejador = accion; } };
+        chromeFondo.tabs = { query: async filtro => { if (!filtro.active) fondo.recorridos++; return []; }, sendMessage: async () => ({ ok: true }),
+            onActivated: evento, onUpdated: { addListener: accion => { fondo.alActualizar = accion; } } };
+        chromeFondo.windows = { getLastFocused: async () => ({ focused: false }), get: async id => ({ id, state: fondo.estado }),
+            update: async (_, datos) => estadosAplicados.push(datos.state), onFocusChanged: evento, onRemoved: evento };
+        prueba.contexto.importScripts = () => {};
+        prueba.cargar(path.join(raiz, 'background.js'));
+        fondo.contexto = prueba.contexto;
+        fondo.enviar = peticion => new Promise(responder => fondo.manejador(peticion, { tab: { id: 6, windowId: 3 } }, responder));
+        fondo.esperar = () => vm.runInContext('transicionPaginas', prueba.contexto);
+        return fondo;
+    };
+    const fondoActual = cargarFondo();
+    await fondoActual.esperar();
+    const recorridosIniciales = fondoActual.recorridos;
+    fondoActual.alActualizar(5, { status: 'complete' }, { id: 5, active: false });
+    fondoActual.alActualizar(5, { url: 'https://fondo.test/' }, { id: 5, active: false });
+    fondoActual.alActualizar(6, { title: 'Título' }, { id: 6, active: true });
+    await fondoActual.esperar();
+    assert.equal(fondoActual.recorridos, recorridosIniciales, 'Cargas en fondo o cambios de título no recorren todas las pestañas');
+    fondoActual.alActualizar(6, { url: 'https://spa.test/#ruta' }, { id: 6, active: true });
+    await fondoActual.esperar();
+    assert.equal(fondoActual.recorridos, recorridosIniciales + 1, 'La URL nueva de una SPA activa sí sincroniza');
+    fondoActual.alActualizar(6, { status: 'complete' }, { id: 6, active: true });
+    await fondoActual.esperar();
+    assert.equal(fondoActual.recorridos, recorridosIniciales + 2, 'La carga completa de la activa sí sincroniza');
+    comprobaciones++; console.log('✓ Service worker: onUpdated sólo sincroniza la pestaña activa');
+    fondoActual.estado = 'maximized';
+    assert.equal((await fondoActual.enviar({ accion: 'pantalla_completa', activa: true })).ok, true);
+    assert.equal(estadosAplicados.at(-1), 'fullscreen');
+    const fondoReiniciado = cargarFondo();
+    fondoReiniciado.estado = 'fullscreen';
+    assert.equal((await fondoReiniciado.enviar({ accion: 'pantalla_completa', activa: false })).ok, true);
+    assert.equal(estadosAplicados.at(-1), 'maximized', 'Reiniciar el worker no pierde el estado previo a pantalla completa');
+    assert.deepEqual(Object.keys(sesionFondo), [], 'Salir de pantalla completa limpia storage.session');
+    comprobaciones++; console.log('✓ Service worker: pantalla completa restaura la ventana tras reiniciarse');
     console.log(`${comprobaciones} grupos de regresiones correctos.`);
 }
 principal().catch(error => { console.error(error); process.exitCode = 1; });

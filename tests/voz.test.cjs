@@ -316,6 +316,26 @@ comprobar('Avisos en el idioma de la interfaz con tipo para la mascota; español
     } finally { prueba.contexto.TextosAdapta.fijarIdioma('es'); }
 });
 
+comprobar('Dictado y borrado nunca escriben en campos de contraseña y avisan traducido', () => {
+    for (const idioma of ['es-PE', 'en-US', 'pt-BR', 'de-DE', 'fr-FR', 'it-IT']) {
+        const entornoPass = entorno(); entornoPass.contexto.TextosAdapta.fijarIdioma(idioma);
+        entornoPass.contexto.HTMLInputElement = class {};
+        Object.defineProperty(entornoPass.contexto.HTMLInputElement.prototype, 'value', { set(valor) { this.value = valor; } });
+        const asistente = new entornoPass.contexto.VoiceAssistant(); const avisos = [];
+        asistente.mostrarEstado = (texto, tipo) => avisos.push([texto, tipo]);
+        for (const campo of [
+            { tagName: 'INPUT', type: 'password', value: 'secreta' },
+            { tagName: 'INPUT', type: 'text', value: 'secreta', getAttribute: () => 'section-login current-password', dispatchEvent() {} },
+            { tagName: 'DIV', isContentEditable: true, textContent: 'secreta', getAttribute: () => 'new-password' }
+        ]) {
+            assert.equal(asistente.escribirEnCampo(campo, 'hola'), false); assert.equal(asistente.escribirEnCampo(campo, '', true), false);
+            assert.equal(campo.value ?? campo.textContent, 'secreta');
+        }
+        assert.equal(avisos.length, 6); assert.equal(avisos[0][1], 'error');
+        assert.ok(avisos[0][0] && avisos[0][0] !== 'voz.sinContrasena', 'Aviso traducido en ' + idioma);
+    }
+});
+
 comprobar('Base y Lite comparten exactamente los archivos de voz', () => {
     for (const [base, ligera] of [['sitios.js', 'sitios.js'], ['classes/VoiceAssistant.js', 'clases/VoiceAssistant.js'], ['background.js', 'background.js'],
         ['voz/escucha.js', 'voz/escucha.js'], ['voz/permisos.js', 'voz/permisos.js'], ['voz/popup.js', 'voz/popup.js'], ['textos.js', 'textos.js']]) {
@@ -339,7 +359,12 @@ async function principal() {
     chrome.runtime.getContexts = async () => [{}];
     chrome.runtime.onMessage = { addListener: accion => { manejador = accion; } };
     chrome.runtime.onStartup = chrome.runtime.onInstalled = chrome.runtime.onConnect = evento;
-    chrome.storage = { local: { get: async () => ({ ...almacen }), set: async () => {} }, onChanged: { addListener: accion => { alCambiar = accion; } } };
+    const sesion = {};
+    chrome.storage = {
+        local: { get: async () => ({ ...almacen }), set: async () => {} },
+        session: { get: async clave => (clave in sesion ? { [clave]: sesion[clave] } : {}), set: async datos => { Object.assign(sesion, datos); }, remove: async clave => { delete sesion[clave]; } },
+        onChanged: { addListener: accion => { alCambiar = accion; } }
+    };
     chrome.tabs = { query: async () => [{ id: 10, index: 0 }, { id: 20, index: 1, pinned: true }, { id: 30, index: 2 }], sendMessage: async () => ({ ok: true }),
         update: async (id, datos) => llamadas.push({ update: id, ...datos }), remove: async ids => llamadas.push({ remove: ids }),
         duplicate: async id => llamadas.push({ duplicate: id }), onActivated: evento, onUpdated: evento };

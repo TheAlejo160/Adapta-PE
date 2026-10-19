@@ -1,7 +1,7 @@
 // Única cámara de Completa. Vive con la voz en el origen de la extensión, no en cada sitio.
 const camaraCentral = {
     deseada: false, procesar: false, iniciando: false, generacion: 0, flujo: null,
-    trabajador: null, visionLista: false, ocupada: false, modo: 'cabeza', fuente: null, permisoPendiente: false,
+    trabajador: null, visionLista: false, ocupada: false, modo: 'cabeza', fuente: null, permisoPendiente: false, fallos: 0, reintentos: 0,
     configurar(datos) {
         this.procesar = Boolean(datos.procesar);
         this.cambiarModelo(datos);
@@ -57,19 +57,7 @@ const camaraCentral = {
             this.contextoVista = this.canvasVista.getContext('2d');
             this.vistaOcupada = false; this.ultimoVideoVista = -1;
             this.previsualizar(generacion);
-            this.trabajador = new Worker(chrome.runtime.getURL('vision/trabajador.js'));
-            this.trabajador.onmessage = evento => {
-                if (generacion !== this.generacion) return;
-                const datos = evento.data;
-                if (datos.tipo === 'listo') this.visionLista = true;
-                else if (datos.tipo === 'puntos') { this.ocupada = false; this.medirCarga(performance.now() - this.envio); this.publicar(datos); }
-                else if (datos.tipo === 'error') { this.ocupada = false; this.informarError('Detección no disponible. Di control zona libre para usar textura.', 'cinetico.error.deteccion'); }
-            };
-            this.trabajador.onerror = () => {
-                this.ocupada = false; this.visionLista = false;
-                this.informarError('No se pudo cargar la detección local. Di control zona libre para usar textura.', 'cinetico.error.carga');
-            };
-            this.trabajador.postMessage({ tipo: 'iniciar' });
+            this.crearTrabajador(generacion);
             flujo.getVideoTracks().forEach(pista => pista.addEventListener('ended', () => {
                 if (generacion === this.generacion) { this.detener(); this.informarError('La cámara se desconectó. Comprueba la conexión y di activar cursor.', 'cinetico.error.desconectada'); }
             }));
@@ -80,6 +68,42 @@ const camaraCentral = {
         }
         finally { if (generacion === this.generacion) this.iniciando = false; }
     },
+    crearTrabajador(generacion) {
+        const trabajador = this.trabajador = new Worker(chrome.runtime.getURL('vision/trabajador.js'));
+        trabajador.onmessage = evento => {
+            if (generacion !== this.generacion || trabajador !== this.trabajador) return;
+            const datos = evento.data;
+            if (datos.tipo === 'listo') this.visionLista = true;
+            else if (datos.tipo === 'puntos') {
+                clearTimeout(this.limiteRespuesta);
+                this.ocupada = false; this.fallos = 0; this.reintentos = 0;
+                if (!datos.calentamiento) this.medirCarga(performance.now() - this.envio);
+                this.publicar(datos);
+            } else if (datos.tipo === 'error') this.fallarDeteccion(generacion);
+        };
+        trabajador.onerror = () => {
+            if (generacion !== this.generacion || trabajador !== this.trabajador) return;
+            this.informarError('No se pudo cargar la detección local. Di control zona libre para usar textura.', 'cinetico.error.carga');
+            this.reiniciarTrabajador(generacion);
+        };
+        trabajador.postMessage({ tipo: 'iniciar' });
+    },
+    fallarDeteccion(generacion, sinRespuesta = false) {
+        clearTimeout(this.limiteRespuesta);
+        if (!sinRespuesta) this.ocupada = false;
+        this.informarError('Detección no disponible. Di control zona libre para usar textura.', 'cinetico.error.deteccion');
+        // Carga inicial fallida o WASM abortado (cada imagen vuelve a fallar): sin reintento la detección quedaría parada.
+        if (!this.visionLista || ++this.fallos >= 3) this.reiniciarTrabajador(generacion);
+    },
+    reiniciarTrabajador(generacion) {
+        clearTimeout(this.limiteRespuesta);
+        this.trabajador?.terminate(); this.trabajador = null;
+        this.visionLista = false; this.ocupada = false; this.fallos = 0;
+        // Espera creciente (1 s … 30 s) para no recargar el runtime sin pausa si el fallo es permanente.
+        const espera = Math.min(30000, 1000 * 2 ** this.reintentos++);
+        clearTimeout(this.temporizadorTrabajador);
+        this.temporizadorTrabajador = setTimeout(() => { if (generacion === this.generacion && this.flujo) this.crearTrabajador(generacion); }, espera);
+    },
     // `clave` permite a la página mostrar el aviso en su idioma; `texto` queda como respaldo en español.
     informarError(texto, clave) {
         if (texto === this.ultimoError) return;
@@ -88,6 +112,7 @@ const camaraCentral = {
     },
     async capturar(generacion) {
         if (generacion !== this.generacion || !this.flujo) return;
+        let imagen = null;
         try {
             if (!this.procesar || this.ocupada || this.video.readyState < 2 || this.video.currentTime === this.ultimoVideo) return;
             this.ultimoVideo = this.video.currentTime;
@@ -96,20 +121,33 @@ const camaraCentral = {
                 const contexto = this.contexto;
                 contexto.setTransform(-1, 0, 0, 1, 160, 0); contexto.drawImage(this.video, 0, 0, 160, 120); contexto.resetTransform();
                 const pixeles = contexto.getImageData(0, 0, 160, 120).data;
-                const grises = Array.from({ length: 19200 }, (_, indice) => Math.round(pixeles[indice * 4] * 0.299 + pixeles[indice * 4 + 1] * 0.587 + pixeles[indice * 4 + 2] * 0.114));
-                this.publicar({ tipo: 'puntos', tiempo, modo: this.modo, grises });
+                const grises = new Uint8Array(19200);
+                for (let indice = 0; indice < 19200; indice++) grises[indice] = Math.round(pixeles[indice * 4] * 0.299 + pixeles[indice * 4 + 1] * 0.587 + pixeles[indice * 4 + 2] * 0.114);
+                // Mensajes de runtime se serializan como JSON: base64 (25,6 kB) evita ~70 kB de números por imagen.
+                this.publicar({ tipo: 'puntos', tiempo, modo: this.modo, grises: btoa(String.fromCharCode(...grises)) });
             } else if (this.visionLista && !(performance.now() < this.carga?.reposoHasta)) {
                 this.ocupada = true;
                 // Nunca supera 640×480 en extremidades ni 320×240 en cabeza; nunca amplía la cámara.
                 const detalle = this.detalle() * [1, 0.75, 0.5][this.carga?.nivel || 0];
                 const escala = Math.min(1, 320 * detalle / this.video.videoWidth, 240 * detalle / this.video.videoHeight);
-                const imagen = await createImageBitmap(this.video, { resizeWidth: Math.max(1, Math.round(this.video.videoWidth * escala)),
+                imagen = await createImageBitmap(this.video, { resizeWidth: Math.max(1, Math.round(this.video.videoWidth * escala)),
                     resizeHeight: Math.max(1, Math.round(this.video.videoHeight * escala)) });
-                if (generacion !== this.generacion) { imagen.close(); return; }
-                this.trabajador.postMessage({ tipo: 'imagen', imagen, tiempo, modo: this.modo, fuente: this.fuente }, [imagen]);
+                // El worker pudo reiniciarse durante la espera: liberar la imagen en vez de enviarla a ninguno.
+                if (generacion !== this.generacion || !this.visionLista) { imagen.close(); return; }
+                const trabajador = this.trabajador;
+                trabajador.postMessage({ tipo: 'imagen', imagen, tiempo, modo: this.modo, fuente: this.fuente }, [imagen]);
                 this.envio = performance.now();
+                // Sin respuesta conservamos una sola imagen en vuelo, también si aún carga un modelo.
+                // Tres esperas de 5 s recrean el worker y liberan la imagen transferida.
+                clearTimeout(this.limiteRespuesta);
+                const alAgotar = () => {
+                    if (generacion !== this.generacion || trabajador !== this.trabajador || !this.ocupada) return;
+                    this.fallarDeteccion(generacion, true);
+                    if (trabajador === this.trabajador && this.ocupada) this.limiteRespuesta = setTimeout(alAgotar, 5000);
+                };
+                this.limiteRespuesta = setTimeout(alAgotar, 5000);
             }
-        } catch (_) { this.ocupada = false; }
+        } catch (_) { imagen?.close(); this.ocupada = false; } // Transferida, close() no hace nada; si no, se libera.
         finally { if (generacion === this.generacion && this.flujo) this.temporizador = setTimeout(() => this.capturar(generacion), 50); }
     },
     publicar(datos) {
@@ -139,12 +177,13 @@ const camaraCentral = {
         this.temporizadorVista = setTimeout(mostrar, 1000 / 30);
     },
     detener() {
-        ++this.generacion; clearTimeout(this.temporizador); clearTimeout(this.temporizadorVista);
+        ++this.generacion; clearTimeout(this.temporizador); clearTimeout(this.temporizadorVista); clearTimeout(this.temporizadorTrabajador);
+        clearTimeout(this.limiteRespuesta);
         this.vistaOcupada = false;
         this.flujo?.getTracks().forEach(pista => pista.stop()); this.flujo = null;
         if (this.video) { this.video.pause(); this.video.srcObject = null; }
         this.trabajador?.terminate(); this.trabajador = null;
-        this.iniciando = false; this.visionLista = false; this.ocupada = false;
+        this.iniciando = false; this.visionLista = false; this.ocupada = false; this.fallos = 0; this.reintentos = 0;
     }
 };
 chrome.runtime.onMessage.addListener((datos, emisor, responder) => {

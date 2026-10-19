@@ -76,11 +76,13 @@
       "resources": [
         "mascotas/motor.js",
         "mascotas/*/cuy.json",
-        "mascotas/*/atlas.webp"
+        "mascotas/*/atlas.webp",
+        "mascotas/*/"
       ],
       "matches": [
         "<all_urls>"
-      ]
+      ],
+      "use_dynamic_url": true
     }
   ],
   "content_security_policy": {

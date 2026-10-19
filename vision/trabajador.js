@@ -12,8 +12,11 @@ const { FilesetResolver, FaceLandmarker, PoseLandmarker, HandLandmarker } = self
 let archivos, rostro, cuerpo, manos;
 let manoPreferida = null;
 const modelos = {};
+// Un modelo creado durante una imagen (p. ej. Pose al perder la mano) alarga esa inferencia: no mide la carga real.
+let estrenado = false;
 async function cargar(nombre, clase, opciones) {
     archivos ||= await FilesetResolver.forVisionTasks('vendor/wasm');
+    if (!modelos[nombre]) estrenado = true;
     modelos[nombre] ||= clase.createFromOptions(archivos, {
         baseOptions: { modelAssetPath: 'modelos/' + nombre + '.task', delegate: 'CPU' },
         runningMode: 'VIDEO', ...opciones
@@ -35,6 +38,7 @@ self.onmessage = async evento => {
     if (datos?.tipo !== 'imagen' || !datos.imagen) return;
     if (ocupado) { datos.imagen.close(); return; }
     ocupado = true;
+    estrenado = false;
     try {
         const { imagen, tiempo, modo } = datos;
         const resultado = { tipo: 'puntos', tiempo, modo, rostro: [], cuerpo: [], manos: [] };
@@ -49,21 +53,29 @@ self.onmessage = async evento => {
         if (modo === 'manos' || modo === 'automatico') {
             manos ||= await cargar('manos', HandLandmarker, { numHands: 2, minHandDetectionConfidence: 0.45, minHandPresenceConfidence: 0.45 });
             const detectadas = manos.detectForVideo(imagen, tiempo);
-            let indice = detectadas.handedness.findIndex(etiquetas => etiquetas[0]?.categoryName === manoPreferida?.nombre);
-            let continua = false;
+            // Mismos umbrales que KineticEngine.elegirPunto() (adquirir >=0,8, conservar >=0,6): una mano falsa
+            // en rostro/ropa no debe fijarse ni tapar a la real cuando el modelo entrega ambas.
+            const puntuacion = candidata => detectadas.handedness[candidata]?.[0]?.score ?? 1;
+            let indice = -1, continua = false;
             if (manoPreferida && tiempo - manoPreferida.tiempo <= 1200) {
-                let distancia = 0.2;
+                // Entre las próximas, una mano fiable (>=0,8) gana a una dudosa aunque ésta quede más cerca.
+                let distancia = 0.2, fiable = false;
                 detectadas.landmarks.forEach((puntos, candidata) => {
                     const separacion = Math.hypot(puntos[0]?.x - manoPreferida.x, puntos[0]?.y - manoPreferida.y);
-                    if (separacion < distancia) { indice = candidata; distancia = separacion; continua = true; }
+                    const segura = puntuacion(candidata) >= 0.8;
+                    if (separacion < 0.2 && puntuacion(candidata) >= 0.6 && (segura > fiable || (segura === fiable && separacion < distancia))) {
+                        indice = candidata; distancia = separacion; fiable = segura; continua = true;
+                    }
                 });
             }
-            if (indice < 0) indice = 0;
+            if (indice < 0) indice = detectadas.handedness.findIndex((etiquetas, candidata) =>
+                etiquetas[0]?.categoryName === manoPreferida?.nombre && puntuacion(candidata) >= 0.8);
+            if (indice < 0) indice = detectadas.landmarks.reduce((mejor, _, candidata) => puntuacion(candidata) > puntuacion(mejor) ? candidata : mejor, 0);
             resultado.manos = detectadas.landmarks[indice] || [];
             resultado.mano = continua ? manoPreferida.nombre : detectadas.handedness[indice]?.[0]?.categoryName || null;
             // Puntuación de lateralidad: manos reales ~0,93+; falsas en rostro/ropa ~0,55-0,72 (fixtures MediaPipe).
             resultado.manoConfianza = detectadas.handedness[indice]?.[0]?.score ?? null;
-            if (resultado.manos[0]) manoPreferida = { ...resultado.manos[0], nombre: resultado.mano, tiempo };
+            if (resultado.manos[0] && puntuacion(indice) >= (continua ? 0.6 : 0.8)) manoPreferida = { ...resultado.manos[0], nombre: resultado.mano, tiempo };
         }
         if ((modo === 'cabeza' && (!resultado.rostro.length || datos.fuente === 'torso' || datos.fuente === 'cabeza corporal')) ||
             (modo === 'manos' && (!resultado.manos.length || datos.fuente?.startsWith('brazo_'))) ||
@@ -84,6 +96,7 @@ self.onmessage = async evento => {
                 }
             }
         }
+        if (estrenado) resultado.calentamiento = true;
         postMessage(resultado);
     } catch (error) { postMessage({ tipo: 'error', mensaje: String(error.message) }); }
     finally { datos.imagen.close(); ocupado = false; }

@@ -11,6 +11,7 @@ TextosAdapta.definir({
         'voz.microfono': 'Micrófono no disponible. Revisa el permiso y vuelve a activar Voz.', 'voz.reconectando': 'Reconectando micrófono…',
         'voz.accionFallida': 'No se pudo realizar la acción en esta página.', 'voz.reconectandoExtension': 'AdaptaPE se está reconectando. Vuelve a decir el comando.',
         'voz.enfocaCampo': 'Primero enfoca un campo de texto.', 'voz.sinBoton': 'No encontré ese botón o enlace visible.',
+        'voz.sinContrasena': 'Por seguridad no dicto en campos de contraseña. Escríbela con el teclado.',
         'voz.noDisponible': 'Ese elemento ya no está disponible. Selecciónalo de nuevo.', 'voz.sinElemento': 'No encontré ese elemento. Di selecciona y su nombre.',
         'voz.elemento': 'Elemento', 'voz.seleccionado': 'Seleccionado: {nombre}. Di «dale clic» para activarlo.',
         'voz.sinSeleccion': 'Primero di selecciona y el nombre del elemento.', 'voz.seleccionCambio': 'El elemento seleccionado cambió. Selecciónalo de nuevo.',
@@ -33,6 +34,7 @@ TextosAdapta.definir({
         'voz.microfono': 'Microphone unavailable. Check the permission and turn Voice on again.', 'voz.reconectando': 'Reconnecting microphone…',
         'voz.accionFallida': 'Could not perform the action on this page.', 'voz.reconectandoExtension': 'AdaptaPE is reconnecting. Say the command again.',
         'voz.enfocaCampo': 'First focus a text field.', 'voz.sinBoton': 'I could not find that visible button or link.',
+        'voz.sinContrasena': 'For security I do not dictate into password fields. Type it with the keyboard.',
         'voz.noDisponible': 'That element is no longer available. Select it again.', 'voz.sinElemento': 'I could not find that element. Say select and its name.',
         'voz.elemento': 'Element', 'voz.seleccionado': 'Selected: {nombre}. Say “click selection” to activate it.',
         'voz.sinSeleccion': 'First say select and the element name.', 'voz.seleccionCambio': 'The selected element changed. Select it again.',
@@ -55,6 +57,7 @@ TextosAdapta.definir({
         'voz.microfono': 'Microfone indisponível. Verifique a permissão e ative a Voz de novo.', 'voz.reconectando': 'Reconectando o microfone…',
         'voz.accionFallida': 'Não foi possível realizar a ação nesta página.', 'voz.reconectandoExtension': 'O AdaptaPE está se reconectando. Diga o comando de novo.',
         'voz.enfocaCampo': 'Primeiro foque um campo de texto.', 'voz.sinBoton': 'Não encontrei esse botão ou link visível.',
+        'voz.sinContrasena': 'Por segurança não dito em campos de senha. Digite com o teclado.',
         'voz.noDisponible': 'Esse elemento não está mais disponível. Selecione-o de novo.', 'voz.sinElemento': 'Não encontrei esse elemento. Diga seleciona e o nome dele.',
         'voz.elemento': 'Elemento', 'voz.seleccionado': 'Selecionado: {nombre}. Diga «clica» para ativá-lo.',
         'voz.sinSeleccion': 'Primeiro diga seleciona e o nome do elemento.', 'voz.seleccionCambio': 'O elemento selecionado mudou. Selecione-o de novo.',
@@ -77,6 +80,7 @@ TextosAdapta.definir({
         'voz.microfono': 'Mikrofon nicht verfügbar. Prüfe die Berechtigung und aktiviere Sprache erneut.', 'voz.reconectando': 'Mikrofon wird neu verbunden…',
         'voz.accionFallida': 'Die Aktion konnte auf dieser Seite nicht ausgeführt werden.', 'voz.reconectandoExtension': 'AdaptaPE verbindet sich neu. Sag den Befehl noch einmal.',
         'voz.enfocaCampo': 'Wähle zuerst ein Textfeld aus.', 'voz.sinBoton': 'Ich habe diese sichtbare Schaltfläche oder diesen Link nicht gefunden.',
+        'voz.sinContrasena': 'Aus Sicherheitsgründen diktiere ich nicht in Passwortfelder. Tippe es mit der Tastatur.',
         'voz.noDisponible': 'Dieses Element ist nicht mehr verfügbar. Wähle es erneut aus.', 'voz.sinElemento': 'Ich habe dieses Element nicht gefunden. Sag markiere und seinen Namen.',
         'voz.elemento': 'Element', 'voz.seleccionado': 'Ausgewählt: {nombre}. Sag „klick“, um es zu aktivieren.',
         'voz.sinSeleccion': 'Sag zuerst markiere und den Namen des Elements.', 'voz.seleccionCambio': 'Das ausgewählte Element hat sich geändert. Wähle es erneut aus.',
@@ -99,6 +103,7 @@ TextosAdapta.definir({
         'voz.microfono': "Micro indisponible. Vérifiez l'autorisation et réactivez la Voix.", 'voz.reconectando': 'Reconnexion du micro…',
         'voz.accionFallida': "Impossible d'effectuer l'action sur cette page.", 'voz.reconectandoExtension': 'AdaptaPE se reconnecte. Répétez la commande.',
         'voz.enfocaCampo': "Placez d'abord le curseur dans un champ de texte.", 'voz.sinBoton': "Je n'ai pas trouvé ce bouton ou ce lien visible.",
+        'voz.sinContrasena': 'Par sécurité, je ne dicte pas dans les champs de mot de passe. Saisissez-le au clavier.',
         'voz.noDisponible': "Cet élément n'est plus disponible. Sélectionnez-le à nouveau.", 'voz.sinElemento': "Je n'ai pas trouvé cet élément. Dites sélectionne et son nom.",
         'voz.elemento': 'Élément', 'voz.seleccionado': "Sélectionné : {nombre}. Dites « clique » pour l'activer.",
         'voz.sinSeleccion': "Dites d'abord sélectionne et le nom de l'élément.", 'voz.seleccionCambio': "L'élément sélectionné a changé. Sélectionnez-le à nouveau.",
@@ -121,6 +126,7 @@ TextosAdapta.definir({
         'voz.microfono': 'Microfono non disponibile. Controlla il permesso e riattiva la Voce.', 'voz.reconectando': 'Riconnessione del microfono…',
         'voz.accionFallida': "Impossibile eseguire l'azione in questa pagina.", 'voz.reconectandoExtension': 'AdaptaPE si sta riconnettendo. Ripeti il comando.',
         'voz.enfocaCampo': 'Prima seleziona un campo di testo.', 'voz.sinBoton': 'Non ho trovato quel pulsante o link visibile.',
+        'voz.sinContrasena': 'Per sicurezza non detto nei campi password. Scrivila con la tastiera.',
         'voz.noDisponible': "Quell'elemento non è più disponibile. Selezionalo di nuovo.", 'voz.sinElemento': "Non ho trovato quell'elemento. Di seleziona e il suo nome.",
         'voz.elemento': 'Elemento', 'voz.seleccionado': 'Selezionato: {nombre}. Di «clicca» per attivarlo.',
         'voz.sinSeleccion': "Prima di' seleziona e il nome dell'elemento.", 'voz.seleccionCambio': "L'elemento selezionato è cambiato. Selezionalo di nuovo.",
@@ -416,6 +422,10 @@ class VoiceAssistant {
     }
 
     escribirEnCampo(campo, texto, reemplazar = false) {
+        // También cubre contraseñas reveladas y editores personalizados que declaran su finalidad.
+        if ((campo?.tagName === 'INPUT' && campo.type === 'password') || /(?:^|\s)(?:current-password|new-password)(?:\s|$)/i.test(campo?.getAttribute?.('autocomplete') || '')) {
+            this.mostrarEstado(t('voz.sinContrasena'), 'error'); return false;
+        }
         if (!this.esEditable(campo)) { this.mostrarEstado(t('voz.enfocaCampo'), 'error'); return false; }
         if (campo.isContentEditable) {
             if (reemplazar) campo.textContent = texto;

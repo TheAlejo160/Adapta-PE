@@ -71,6 +71,43 @@ function motorManos(idioma, formaInicial = 'abierta') {
     return { motor, clics, fotograma, serie };
 }
 
+// Zona libre: imágenes de 160×120 en grises, deterministas.
+function motorZona() {
+    const prueba = entorno();
+    prueba.cargar('classes/KineticEngine.js');
+    const motor = new prueba.contexto.KineticEngine();
+    motor.activa = true; motor.modoControl = 'zona'; motor.grisesRecibidos = true;
+    motor.dibujarHUD = motor.actualizarHover = () => {};
+    const fotograma = (tiempo, grises) => { motor.grises.set(grises); motor.deteccion = { tiempo }; motor.controlarZona(tiempo); };
+    return { motor, fotograma };
+}
+const ruidoZona = (x, y, semilla = 0) => 80 + ((Math.imul(x + 19 + semilla, 73856093) ^ Math.imul(y + 31, 19349663)) >>> 0) % 90;
+function texturaZona(dx = 0, dy = 0, semilla = 0) {
+    const grises = new Float32Array(19200);
+    for (let y = 0; y < 120; y++) for (let x = 0; x < 160; x++) grises[y * 160 + x] = ruidoZona(x - dx, y - dy, semilla);
+    return grises;
+}
+// Ruido de valor interpolado (textura suave, como piel con poco detalle) más ruido de sensor.
+function suaveZona(semilla, escala, dx, dy, ruido) {
+    let estado = semilla;
+    const azar = () => (estado = (Math.imul(estado, 1664525) + 1013904223) >>> 0) / 4294967296;
+    const rejilla = Array.from({ length: 900 }, azar), curva = t => t * t * (3 - 2 * t);
+    const valor = (x, y) => {
+        const fx = x / escala + 1, fy = y / escala + 1, ix = Math.floor(fx), iy = Math.floor(fy), tx = curva(fx - ix), ty = curva(fy - iy);
+        const a = rejilla[iy * 30 + ix], b = rejilla[iy * 30 + ix + 1], c = rejilla[(iy + 1) * 30 + ix], d = rejilla[(iy + 1) * 30 + ix + 1];
+        return 80 + 90 * (a + (b - a) * tx + (c - a) * ty + (a - b - c + d) * tx * ty);
+    };
+    const grises = new Float32Array(19200);
+    for (let y = 0; y < 120; y++) for (let x = 0; x < 160; x++) grises[y * 160 + x] = valor(x - dx, y - dy) + (azar() - 0.5) * 2 * ruido;
+    return grises;
+}
+// Objeto con textura propia sobre fondo liso.
+function objetoZona(x0, y0 = 45) {
+    const grises = new Float32Array(19200).fill(150);
+    for (let y = y0; y < y0 + 30; y++) for (let x = Math.max(0, x0); x < Math.min(160, x0 + 30); x++) grises[y * 160 + x] = ruidoZona(x - x0, y - y0, 3);
+    return grises;
+}
+
 (async () => {
     await comprobar('Puño completo: cuatro dedos doblados; pinza, mano parcial y puntos ausentes no lo inventan', () => {
         const { motor } = motorManos();
@@ -476,6 +513,175 @@ function motorManos(idioma, formaInicial = 'abierta') {
         vm.runInContext("TextosAdapta.fijarIdioma('en')", prueba.contexto);
         mascota.actualizarTextos();
         assert.equal(mascota.botonMover.ariaLabel, 'Move Yati: drag or use the arrow keys');
+    });
+
+    await comprobar('Zona: la cuenca ancha de una textura suave no es ambigua; otro mínimo separado sí', () => {
+        const { motor } = motorZona();
+        motor.puntoActual = { x: 80, y: 60 };
+        motor.plantilla = motor.extraerParche(suaveZona(27, 16, 0, 0, 0), 80, 60);
+        const punto = motor.seguirPunto(suaveZona(27, 16, 4, 2, 6));
+        assert.ok(punto, 'Antes una vecina a >3 px con error parecido cortaba el seguimiento');
+        assert.ok(Math.abs(punto.x - 84) <= 1 && Math.abs(punto.y - 62) <= 1);
+        // Mismo patrón repetido 8 px a la derecha: dos mínimos separados siguen siendo ambiguos.
+        const doble = texturaZona(), patron = texturaZona(0, 0, 9);
+        for (let y = 40; y < 81; y++) for (let x = 60; x < 108; x++) doble[y * 160 + x] = patron[y * 160 + 60 + (x - 60) % 8];
+        motor.plantilla = motor.extraerParche(doble, 80, 60);
+        assert.equal(motor.seguirPunto(doble), null);
+    });
+
+    await comprobar('Zona: coincidencia de 0,75-0,85 sigue sin tocar la plantilla; >=0,85 la actualiza; <0,75 se pierde', () => {
+        const { motor, fotograma } = motorZona();
+        const mezcla = k => texturaZona().map((valor, indice) => valor + k * (texturaZona(0, 0, 5)[indice] - 125));
+        motor.puntoActual = { x: 80, y: 60 };
+        motor.plantilla = motor.extraerParche(texturaZona(), 80, 60);
+        const dudosa = motor.seguirPunto(mezcla(0.75));
+        assert.ok(dudosa && dudosa.error > 0.15 && dudosa.error <= 0.25, 'Desenfoque/ruido moderado no corta el seguimiento');
+        assert.equal(dudosa.x, 80); assert.equal(dudosa.y, 60);
+        assert.equal(motor.seguirPunto(mezcla(0.9)), null, 'Una textura irreconocible se pierde');
+        const valores = [...motor.plantilla.valores];
+        fotograma(0, mezcla(0.75));
+        assert.equal(motor.perdidaDesde, null);
+        assert.deepEqual([...motor.plantilla.valores], valores, 'Una coincidencia dudosa no contamina la plantilla');
+        fotograma(50, mezcla(0.6));
+        assert.notDeepEqual([...motor.plantilla.valores], valores, 'Una coincidencia buena actualiza lentamente');
+    });
+
+    await comprobar('Zona: luz local o textura cambiada en su sitio no adquieren; textura desplazada sí', () => {
+        const luz = motorZona();
+        const pared = texturaZona(), iluminada = pared.map((valor, indice) => {
+            const x = indice % 160, y = Math.floor(indice / 160);
+            return x >= 60 && x < 100 && y >= 40 && y < 80 ? valor * 1.5 : valor;
+        });
+        for (let indice = 0; indice < 8; indice++) luz.fotograma(indice * 50, indice % 2 ? iluminada : pared);
+        assert.equal(luz.motor.plantilla, null, 'Una sombra o luz sobre el fondo inmóvil no ancla el control');
+        const cambio = motorZona(), otra = pared.map((valor, indice) => {
+            const x = indice % 160, y = Math.floor(indice / 160);
+            return x >= 60 && x < 100 && y >= 40 && y < 80 ? ruidoZona(x, y, 11) : valor;
+        });
+        for (let indice = 0; indice < 8; indice++) cambio.fotograma(indice * 50, indice % 2 ? otra : pared);
+        assert.equal(cambio.motor.plantilla, null, 'Un cambio sin desplazamiento (pantalla, reflejo) no adquiere');
+        const movil = motorZona();
+        movil.fotograma(0, objetoZona(60)); movil.fotograma(50, objetoZona(63));
+        assert.ok(movil.motor.plantilla, 'Una textura que se desplaza se adquiere');
+        const { x, y } = movil.motor.puntoActual;
+        assert.ok(x >= 63 - 12 && x < 93 + 12 && y >= 45 - 12 && y < 75 + 12, 'El parche cubre el objeto que se movió');
+    });
+
+    await comprobar('Zona: predicción por velocidad sigue >12 px por inferencia y no extrapola tras una pérdida', () => {
+        const { motor, fotograma } = motorZona();
+        fotograma(0, objetoZona(10)); fotograma(50, objetoZona(12));
+        assert.ok(motor.plantilla);
+        const inicio = motor.puntoActual.x;
+        fotograma(100, objetoZona(20)); // 8 px: dentro de ±12, fija la velocidad.
+        assert.equal(motor.puntoActual.x, inicio + 8);
+        for (const [tiempo, x0] of [[150, 36], [200, 52], [250, 68]]) {
+            fotograma(tiempo, objetoZona(x0)); // 16 px por inferencia: fuera de ±12 sin predicción.
+            assert.equal(motor.perdidaDesde, null, 'No se pierde con movimiento rápido');
+            assert.equal(motor.puntoActual.x, inicio + x0 - 12);
+        }
+        fotograma(300, new Float32Array(19200).fill(150));
+        assert.equal(motor.plantilla.velocidad, null, 'Una pérdida descarta la velocidad');
+        const quieto = motor.puntoActual.x;
+        fotograma(350, objetoZona(68));
+        assert.equal(motor.perdidaDesde, null); assert.equal(motor.puntoActual.x, quieto, 'Recupera sin desplazar la búsqueda');
+    });
+
+    await comprobar('Zona: búsqueda con desplazamientos precalculados equivale a la correlación normalizada directa', () => {
+        const { motor } = motorZona();
+        // Referencia: muestreo por píxel como la versión anterior (redondeo y límites por muestra).
+        const referencia = (grises, plantilla, cx, cy) => {
+            const medir = (x, y, angulo) => {
+                if (x < 13 || y < 13 || x >= 147 || y >= 107) return null;
+                const muestras = [], c = Math.cos(angulo), s = Math.sin(angulo);
+                for (let fila = -12; fila <= 12; fila += 2) for (let columna = -12; columna <= 12; columna += 2) {
+                    const px = angulo ? Math.round(x + columna * c - fila * s) : x + columna, py = angulo ? Math.round(y + columna * s + fila * c) : y + fila;
+                    if (px < 0 || px >= 160 || py < 0 || py >= 120) return null;
+                    muestras.push(grises[py * 160 + px]);
+                }
+                const media = muestras.reduce((a, b) => a + b) / muestras.length;
+                const varianza = muestras.reduce((a, b) => a + (b - media) ** 2, 0);
+                if (varianza / muestras.length < 36) return null;
+                const energia = plantilla.reduce((a, b) => a + b * b, 0);
+                return 1 - muestras.reduce((a, b, i) => a + (b - media) * plantilla[i], 0) / Math.sqrt(energia * varianza);
+            };
+            let mejor = { error: Infinity };
+            for (let y = cy - 12; y <= cy + 12; y++) for (let x = cx - 12; x <= cx + 12; x++) {
+                const error = medir(x, y, 0); if (error != null && error < mejor.error) mejor = { error, x, y, angulo: 0 };
+            }
+            const traslacion = mejor;
+            if (traslacion.error <= 0.4) {
+                for (const angulo of [-0.24, -0.12, 0.12, 0.24]) for (let y = traslacion.y - 2; y <= traslacion.y + 2; y++) for (let x = traslacion.x - 2; x <= traslacion.x + 2; x++) {
+                    const error = medir(x, y, angulo); if (error != null && error < mejor.error) mejor = { error, x, y, angulo };
+                }
+                if (traslacion.error - mejor.error < 0.02) mejor = traslacion;
+            }
+            return mejor;
+        };
+        const girada = angulo => {
+            const grises = new Float32Array(19200), c = Math.cos(angulo), s = Math.sin(angulo);
+            for (let y = 0; y < 120; y++) for (let x = 0; x < 160; x++) {
+                const u = (x - 30) * c + (y - 20) * s, v = -(x - 30) * s + (y - 20) * c;
+                grises[y * 160 + x] = 120 + 35 * Math.sin(u * 0.37) + 30 * Math.sin(v * 0.51) + 15 * Math.cos(u * 0.13 + v * 0.27);
+            }
+            return grises;
+        };
+        // Incluye un centro junto al borde: las muestras giradas pueden salir de la imagen.
+        for (const [base, imagen, cx, cy] of [[texturaZona(), texturaZona(5, -3, 0).map(v => v * 0.7 + 30), 80, 60],
+            [girada(0), girada(0.24), 30, 20], [girada(0), girada(-0.12), 30, 20], [suaveZona(27, 16, 0, 0, 0), suaveZona(27, 16, 4, 2, 6), 80, 60]]) {
+            const plantilla = motor.extraerParche(base, cx, cy);
+            const esperado = referencia(imagen, plantilla.valores, cx, cy);
+            const obtenido = motor.seguirPunto(imagen, plantilla, { x: cx, y: cy });
+            assert.ok(obtenido);
+            assert.deepEqual([obtenido.x, obtenido.y, obtenido.angulo], [esperado.x, esperado.y, esperado.angulo]);
+            assert.ok(Math.abs(obtenido.error - esperado.error) < 1e-9);
+        }
+    });
+
+    await comprobar('Pinza y boca: una imagen activa seguida de banda intermedia no confirma, no hace clic ni congela', () => {
+        const media = () => { const puntos = mano('pinza'); puntos[4] = { x: 0.38, y: 0.52, z: 0 }; return puntos; }; // Pulgar a 1/3 de palma.
+        const prueba = motorManos();
+        const fotograma = (tiempo, manos) => {
+            prueba.motor.recibirFotograma({ modo: 'manos', edad: 0, manos, mano: 'Left' }); prueba.motor.deteccion.tiempo = tiempo; prueba.motor.bucleRender(tiempo);
+        };
+        assert.equal(prueba.motor.medirPinza(media()), 'intermedio');
+        fotograma(450, mano('pinza'));
+        for (let tiempo = 500; tiempo <= 1300; tiempo += 50) fotograma(tiempo, media());
+        assert.deepEqual(prueba.clics, [], 'Antes: un clic derecho a 700 ms con una sola imagen de pinza');
+        assert.doesNotMatch(prueba.motor.estadoPrueba, /pinza/, 'La mano relajada no deja el cursor congelado');
+        fotograma(1350, mano('abierta')); assert.deepEqual(prueba.clics, []);
+        prueba.serie(1400, 1550, 'pinza'); fotograma(1600, media()); fotograma(1650, mano('abierta'));
+        assert.deepEqual(prueba.clics, ['izquierdo'], 'Confirmada, la banda intermedia sigue manteniendo la pinza');
+        const cabeza = entorno(); cabeza.cargar('classes/KineticEngine.js');
+        const motor = new cabeza.contexto.KineticEngine(), clics = [];
+        motor.activa = true; motor.aplicarAjustes({ modo: 'cabeza' });
+        motor.solicitarModelo = motor.programarFotograma = motor.actualizarHover = () => {};
+        motor.dibujarHUD = () => {}; motor.elementoBajoCursor = () => ({}); motor.hacerClick = tipo => clics.push(tipo);
+        const rostro = []; rostro[1] = { x: 0.5, y: 0.5 }; rostro[33] = { x: 0.45, y: 0.45 }; rostro[263] = { x: 0.55, y: 0.45 };
+        const boca = (tiempo, valor) => { motor.recibirFotograma({ modo: 'cabeza', edad: 0, rostro, boca: valor }); motor.deteccion.tiempo = tiempo; motor.bucleRender(tiempo); };
+        for (let tiempo = 0; tiempo <= 1500; tiempo += 50) boca(tiempo, 0.02);
+        boca(1550, 0.55); [0.3, 0.35, 0.25, 0.4, 0.3, 0.28].forEach((valor, indice) => boca(1600 + indice * 50, valor)); boca(1900, 0.1);
+        assert.deepEqual(clics, [], 'Habla con un pico de apertura no hace clic');
+    });
+
+    await comprobar('Manos: sustituir la mano perdida por la muñeca de Pose no mueve el cursor; el movimiento real sí', () => {
+        for (const desfase of [0.02, 0.05]) {
+            const prueba = motorManos(undefined, 'puno_completo'); prueba.motor.atraerCursor = () => {};
+            prueba.serie(450, 1000, 'puno_completo');
+            const inicio = prueba.motor.posX;
+            const pose = (tiempo, x) => {
+                const cuerpo = []; cuerpo[15] = { x, y: 0.7, visibility: 0.9 };
+                prueba.motor.recibirFotograma({ modo: 'manos', edad: 0, manos: [], cuerpo, mano: null });
+                prueba.motor.deteccion.tiempo = tiempo; prueba.motor.bucleRender(tiempo);
+            };
+            for (let tiempo = 1050; tiempo <= 1600; tiempo += 50) pose(tiempo, 0.5 + desfase);
+            assert.equal(prueba.motor.fuenteControl, 'mano:Left');
+            assert.equal(prueba.motor.posX, inicio, 'Antes: el desfase entre modelos movía el cursor >100 px');
+            prueba.serie(1650, 2100, 'puno_completo');
+            assert.equal(prueba.motor.posX, inicio, 'Volver a la mano tampoco es un gesto');
+            for (let tiempo = 2150; tiempo <= 2400; tiempo += 50) pose(tiempo, 0.5 + desfase);
+            for (let tiempo = 2450; tiempo <= 2700; tiempo += 50) pose(tiempo, 0.5 + desfase + 0.03);
+            assert.ok(prueba.motor.posX < inicio, 'Mover la muñeca seguida por Pose sí mueve el cursor');
+        }
     });
 
     console.log(comprobaciones + ' grupos de regresiones cinéticas correctos.');

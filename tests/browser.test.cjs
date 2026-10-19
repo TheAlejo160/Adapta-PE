@@ -307,6 +307,10 @@ async function conectar(url) {
             await esperar(async()=>contextoDe(pagina,id)&&(await evaluarEn(pagina,id,'Boolean(globalThis.adaptaPEControlador?.vigente())')).result?.value,'Mascotas conectadas a página previa');
             await pagina.pedir('Page.bringToFront');
             await esperar(async()=>(await evaluarEn(pagina,id,'adaptaPEControlador.mascota.visible')).result?.value,'Página prioritaria para mascota');
+            // use_dynamic_url: la web (mundo principal) no puede comprobar el ID fijo; la mascota carga por URL dinámica.
+            const porIdFijo=(await pagina.pedir('Runtime.evaluate',{expression:`fetch('chrome-extension://${id}/mascotas/motor.js').then(()=>'visible',()=>'oculta')`,awaitPromise:true,returnByValue:true})).result.value;
+            assert.equal(porIdFijo,'oculta','Una web no detecta AdaptaPE pidiendo recursos con su ID fijo');
+            assert.equal((await pagina.pedir('Runtime.evaluate',{expression:'document.documentElement.hasAttribute("data-adapta-extension")',returnByValue:true})).result.value,false,'Sin marca fuera de la web oficial');
             await evaluarEn(pagina,id,"chrome.storage.local.set({daltonismo:'protanopia'})");
             for (const nombre of ['tinku', 'cuchu', 'yati']) {
                 await evaluarEn(pagina,id,`adaptaPEControlador.voz.ejecutarComando('mascota ${nombre}')`);

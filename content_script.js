@@ -3,6 +3,7 @@
     globalThis.adaptaPEControlador?.destruir();
     const runtimeOriginal = chrome.runtime;
     const idRecuperacion = 'adapta-pe-reconectar-' + runtimeOriginal.id;
+    const marcaInstalacion = 'data-adapta-extension-' + runtimeOriginal.id;
     const urlEscucha = runtimeOriginal.getURL('voz/escucha.html');
     // El mundo aislado anterior puede sobrevivir a una actualización; retirar sus recursos.
     document.dispatchEvent(new Event(idRecuperacion));
@@ -65,7 +66,7 @@
     const clavesPreferencias = ['voz', 'daltonismo', 'ojos', 'talkback', 'ajustesCineticos', 'mascota', 'posicionMascota', 'idiomaVoz'];
     // Un solo ajuste (`idiomaVoz`, «auto» por defecto) fija voz e interfaz; los módulos se retraducen sin recargar.
     function aplicarIdioma(valor) {
-        const codigo = globalThis.CodigosVoz?.includes(valor) ? valor : globalThis.detectarIdiomaVoz?.([...navigator.languages, navigator.language]) ?? 'es-PE';
+        const codigo = globalThis.CodigosVoz?.includes(valor) ? valor : globalThis.detectarIdiomaVoz?.([...navigator.languages, navigator.language, chrome.i18n?.getUILanguage?.()]) ?? 'es-PE';
         langTTS = motorCinetico.langTTS = lector.langTTS = codigo.startsWith('es') ? undefined : codigo;
         if (!globalThis.TextosAdapta) return;
         const anterior = globalThis.TextosAdapta.idioma;
@@ -103,7 +104,6 @@
         // En la Nueva pestaña propia (página de extensión) también llegan los runtime.sendMessage de
         // pestañas y del documento offscreen; sólo valen los envíos dirigidos del worker o del popup.
         if (emisor.tab || emisor.url === urlEscucha) return;
-        if (peticion.accion === 'pagina_comprobar') { responder({ ok: true }); return; }
         if (peticion.accion === 'mascota_estado') { mascota.reaccionar(peticion.estado, peticion.hablando); return; }
         if (peticion.accion === 'control_prioridad') {
             prioridad = Boolean(peticion.activa);
@@ -112,7 +112,12 @@
             revisarPreferencias().then(() => responder({ ok: true })).catch(() => responder({ ok: false }));
             return true;
         }
-        if (peticion.accion === 'camara_fotograma' && prioridad && !document.hidden) { motorCinetico.recibirFotograma(peticion.datos); return; }
+        if (peticion.accion === 'camara_fotograma' && prioridad && !document.hidden) {
+            // Zona llega empaquetada en base64 desde voz/camara.js; KineticEngine sigue recibiendo un Array de grises.
+            const datos = peticion.datos;
+            if (typeof datos?.grises === 'string') datos.grises = Array.from(atob(datos.grises), letra => letra.charCodeAt(0));
+            motorCinetico.recibirFotograma(datos); return;
+        }
         if (peticion.accion === 'camara_vista' && prioridad && !document.hidden) { motorCinetico.recibirVista(peticion.vista); return; }
         if (peticion.accion === 'camara_error' && prioridad) {
             const clave = /^cinetico\.error\.\w+$/.test(peticion.clave) ? peticion.clave : undefined;
@@ -172,6 +177,10 @@
         motorCinetico.setEstado(false); lector.destruir();
         mascota.destruir();
         document.getElementById(idIndicador)?.remove();
+        document.documentElement.removeAttribute(marcaInstalacion);
+        if (!document.documentElement.getAttributeNames().some(nombre => nombre.startsWith('data-adapta-extension-'))) {
+            document.documentElement.removeAttribute('data-adapta-extension');
+        }
         document.removeEventListener('visibilitychange', actualizarVisibilidad);
         document.removeEventListener(idRecuperacion, destruir);
         window.removeEventListener('pagehide', alOcultar); window.removeEventListener('pageshow', reanudar);
@@ -180,7 +189,11 @@
     }
     globalThis.adaptaPEControlador = { voz: voiceAssistantNuevo, filtros, mascota, cinetico: motorCinetico, talkback: lector,
         vigente, destruir };
-    document.documentElement.setAttribute('data-adapta-extension', 'true');
+    // Sólo la web oficial recibe esta marca para mostrar su aviso y evitar duplicar la demo.
+    if (location.protocol === 'https:' && ['adaptape.cc', 'www.adaptape.cc', 'adaptape.thealejo-dev.cc'].includes(location.hostname)) {
+        document.documentElement.setAttribute(marcaInstalacion, 'true');
+        document.documentElement.setAttribute('data-adapta-extension', 'true');
+    }
     runtimeOriginal.onMessage.addListener(alMensaje); chrome.storage.onChanged.addListener(alCambiar);
     document.addEventListener('visibilitychange', actualizarVisibilidad);
     document.addEventListener(idRecuperacion, destruir);

@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     document.getElementById("quitarDaltonismo").addEventListener("click", async () => {
         selectDaltonismo.value = "ninguno";
-        await guardarCambios();
+        await guardarCambios({ daltonismo: "ninguno" });
         selectDaltonismo.focus();
     });
     chrome.storage.onChanged.addListener((cambios, area) => {
@@ -77,23 +77,18 @@ document.addEventListener('DOMContentLoaded', () => {
     function actualizarUI() {
         actualizarFiltro();
         hintGestos.hidden = !checkOjos.checked;
-        for (const [control, estado] of [[checkTalkBack, "estadoLectura"], [checkVoz, "estadoVoz"], [checkOjos, "estadoCursor"]]) {
+        for (const [control, estado] of [[checkTalkBack, "estadoLectura"], [checkOjos, "estadoCursor"]]) {
             ponerTexto(document.getElementById(estado), control.checked ? "popup.activado" : "popup.desactivado");
         }
     }
 
     // 3. Guardar cambios y forzar actualización híbrida (Storage + Mensaje Directo)
-    async function guardarCambios() {
+    async function guardarCambios(cambio) {
         actualizarUI();
         mostrarEstadoPanel("popup.guardando");
         try {
-            await chrome.storage.local.set({
-                talkback: checkTalkBack.checked,
-                voz: checkVoz.checked,
-                idiomaVoz: selectIdiomaVoz.value,
-                daltonismo: selectDaltonismo.value,
-                ojos: checkOjos.checked
-            });
+            // Sólo la clave que cambió: no pisa cambios hechos por voz con el panel abierto.
+            await chrome.storage.local.set(cambio);
             mostrarEstadoPanel("popup.guardados");
             const tabs = await chrome.tabs.query({}).catch(() => []);
             for (const tab of tabs) {
@@ -107,11 +102,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 4. Asignar los eventos ('change' es nativo y seguro para el estado final del Select)
-    checkTalkBack.addEventListener("change", guardarCambios);
-    checkVoz.addEventListener("change", guardarCambios);
-    selectIdiomaVoz.addEventListener("change", guardarCambios);
-    selectDaltonismo.addEventListener("change", guardarCambios);
-    checkOjos.addEventListener("change", guardarCambios);
+    checkTalkBack.addEventListener("change", () => guardarCambios({ talkback: checkTalkBack.checked }));
+    checkVoz.addEventListener("change", () => guardarCambios({ voz: checkVoz.checked }));
+    selectIdiomaVoz.addEventListener("change", () => guardarCambios({ idiomaVoz: selectIdiomaVoz.value }));
+    selectDaltonismo.addEventListener("change", () => guardarCambios({ daltonismo: selectDaltonismo.value }));
+    checkOjos.addEventListener("change", () => guardarCambios({ ojos: checkOjos.checked }));
     modoControl.addEventListener("change", async () => {
         const modo = modoControl.value;
         mostrarEstadoPanel("popup.guardando");

@@ -1,0 +1,4 @@
+interface:
+  display_name: '/adaptape-nativo'
+  short_description: 'Portar voz, gestos y mascotas de AdaptaPE a escritorio'
+  default_prompt: '$adaptape-nativo: Porta el clic por pinza de la extensión Base a Adapta-PE-Win'
