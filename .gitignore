@@ -67,3 +67,7 @@ Desktop.ini
 *.pem
 *.key
 # Conservar tests/ y sus fixtures públicos para reproducir las comprobaciones.
+
+# Skills y ajustes locales de agentes de IA
+/.claude/
+/.agents/
