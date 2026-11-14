@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AdaptaPE en macOS</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #cap12-raiz { position: absolute; inset: 0; font-family: var(--ap-fuente-texto); color: var(--ap-texto); }
+        .cap12-sec { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+
+        /* Barra de menú macOS */
+        .cap12-menubar { position: absolute; left: 96px; top: 104px; width: 1728px; height: 48px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.12); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; font-size: 18px; font-weight: 600; color: #e2e8f0; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35); z-index: 20; }
+        .cap12-menubar-left { display: flex; align-items: center; gap: 24px; }
+        .cap12-apple-icon { width: 20px; height: 20px; fill: currentColor; }
+        .cap12-menubar-right { display: flex; align-items: center; gap: 20px; color: #cbd5e1; }
+        .cap12-menu-adaptape-icon { width: 26px; height: 26px; border-radius: 6px; display: grid; place-items: center; background: rgba(134, 239, 172, 0.2); border: 1px solid var(--ap-verde); }
+
+        /* f1: Compatibilidad */
+        #cap12-escritorio { position: absolute; left: 96px; top: 168px; width: 1728px; height: 650px; border-radius: 20px; background: radial-gradient(circle at 70% 30%, #312e81 0%, #1e1b4b 45%, #0f172a 100%); border: 2px solid #334155; box-shadow: var(--sombra-2); overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .cap12-compat-card { width: 1200px; padding: 48px; border-radius: var(--r-l); background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(24px); border: 2px solid rgba(255, 255, 255, 0.15); box-shadow: var(--sombra-2); display: flex; flex-direction: column; align-items: center; gap: 32px; text-align: center; }
+        .cap12-compat-titulo { font-family: var(--ap-fuente-titulo); font-size: 54px; font-weight: 700; color: #ffffff; }
+        .cap12-compat-chips { display: flex; justify-content: center; gap: 36px; }
+        .cap12-chip-proc { padding: 18px 40px; border-radius: var(--r-pastilla); background: var(--ap-superficie-2); border: 2px solid var(--ap-verde); font-family: var(--ap-fuente-titulo); font-size: 32px; font-weight: 700; color: #f1f5f9; display: flex; align-items: center; gap: 16px; }
+        .cap12-chip-proc svg { width: 34px; height: 34px; color: var(--ap-verde); stroke-width: 2.5; flex: none; }
+
+        /* f2: DMG */
+        #cap12-dmg-lienzo { position: absolute; left: 410px; top: 180px; width: 1100px; height: 540px; border-radius: 22px; border: 2px solid #475569; background: #f8fafc; box-shadow: var(--sombra-2); overflow: hidden; display: flex; flex-direction: column; }
+        .cap12-dmg-barra { height: 52px; background: #e2e8f0; border-bottom: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; position: relative; font-size: 22px; font-weight: 700; color: #334155; }
+        .cap12-dmg-semaforo { position: absolute; left: 20px; display: flex; gap: 10px; }
+        .cap12-dmg-semaforo i { width: 16px; height: 16px; border-radius: 50%; display: block; }
+        .cap12-dmg-cuerpo { flex: 1; position: relative; display: flex; align-items: center; justify-content: space-around; padding: 40px 60px; }
+        .cap12-dmg-icono-caja { display: flex; flex-direction: column; align-items: center; gap: 16px; color: #1e293b; font-size: 26px; font-weight: 700; }
+        .cap12-dmg-app-img { width: 130px; height: 130px; border-radius: 28px; box-shadow: 0 16px 32px rgba(0,0,0,0.18); }
+        .cap12-dmg-folder-icon { width: 130px; height: 130px; border-radius: 28px; background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%); display: grid; place-items: center; color: #ffffff; box-shadow: 0 16px 32px rgba(2, 132, 199, 0.3); }
+        .cap12-dmg-folder-icon svg { width: 68px; height: 68px; }
+
+        /* f3: Ajustes de Seguridad */
+        #cap12-ajustes-seg { position: absolute; left: 280px; top: 120px; width: 1360px; height: 460px; border-radius: 20px; border: 2px solid #475569; background: #1e293b; color: #f1f5f9; box-shadow: var(--sombra-2); overflow: hidden; display: flex; }
+        .cap12-ajustes-sidebar { width: 360px; background: #0f172a; border-right: 1px solid #334155; padding: 20px 16px; display: flex; flex-direction: column; gap: 10px; }
+        .cap12-ajustes-item-side { display: flex; align-items: center; gap: 14px; padding: 12px 18px; border-radius: 10px; font-size: 21px; font-weight: 600; color: #cbd5e1; }
+        .cap12-ajustes-item-side.activo { background: #0369a1; color: #ffffff; }
+        .cap12-ajustes-item-side svg { width: 28px; height: 28px; flex: none; stroke-width: 2.2; }
+        .cap12-ajustes-main { flex: 1; padding: 30px 40px; display: flex; flex-direction: column; gap: 20px; }
+        .cap12-aviso-bloqueo { background: rgba(239, 68, 68, 0.12); border: 2px solid #ef4444; border-radius: var(--r-m); padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+        .cap12-btn-abrir-modos { align-self: flex-start; padding: 14px 32px; border-radius: 10px; background: var(--ap-verde); color: var(--ap-tinta); font-family: var(--ap-fuente-titulo); font-size: 26px; font-weight: 700; border: none; cursor: pointer; }
+
+        /* f4: Permisos */
+        #cap12-permisos-lista { position: absolute; left: 340px; top: 110px; width: 1240px; border-radius: var(--r-m); background: var(--ap-superficie); border: var(--borde-grueso) solid var(--ap-borde); box-shadow: var(--sombra-2); padding: 24px 36px 28px; display: flex; flex-direction: column; gap: 12px; }
+        .cap12-perm-fila { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; border-radius: var(--r-s); background: var(--ap-superficie-2); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .cap12-perm-info { display: flex; align-items: center; gap: 18px; }
+        .cap12-perm-icono { width: 46px; height: 46px; border-radius: 10px; background: rgba(134, 239, 172, 0.15); color: var(--ap-verde); display: grid; place-items: center; }
+        .cap12-perm-icono svg { width: 26px; height: 26px; flex: none; }
+        .cap12-btn-control-esc { padding: 14px 36px; border-radius: 12px; background: #0369a1; color: #ffffff; font-family: var(--ap-fuente-titulo); font-size: 26px; font-weight: 700; border: none; display: inline-flex; align-items: center; justify-content: center; gap: 14px; cursor: pointer; box-shadow: 0 4px 14px rgba(3, 105, 161, 0.4); }
+        .cap12-btn-control-esc svg { width: 26px; height: 26px; flex: none; stroke-width: 2.5; }
+
+        /* f5: Especiales */
+        #cap12-perm-especiales { position: absolute; left: 320px; top: 190px; width: 1280px; display: flex; flex-direction: column; gap: 26px; }
+        .cap12-tarjeta-esp { padding: 28px 34px; border-radius: var(--r-l); background: var(--ap-superficie); border: var(--borde-grueso) solid var(--ap-borde); box-shadow: var(--sombra-2); display: flex; align-items: center; justify-content: space-between; }
+        .cap12-tarjeta-esp.camara { border-color: var(--ap-azul-base); }
+
+        /* f6: Menú superior y Safari */
+        #cap12-menu-desplegable { position: absolute; right: 180px; top: 156px; width: 340px; background: rgba(30, 41, 59, 0.96); backdrop-filter: blur(20px); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: var(--sombra-2); padding: 8px 0; display: flex; flex-direction: column; z-index: 30; opacity: 0; }
+        .cap12-menu-opcion { padding: 10px 20px; font-size: 21px; font-weight: 600; color: #f1f5f9; display: flex; align-items: center; justify-content: space-between; }
+        .cap12-menu-opcion.activo { background: rgba(134, 239, 172, 0.18); color: var(--ap-verde); }
+        .cap12-menu-opcion svg { width: 22px; height: 22px; flex: none; stroke-width: 2.5; }
+        #cap12-safari-win { position: absolute; left: 400px; top: 180px; width: 1120px; height: 480px; border-radius: 20px; border: 2px solid #475569; background: #ffffff; box-shadow: var(--sombra-2); overflow: hidden; display: flex; flex-direction: column; opacity: 0; }
+        .cap12-safari-bar { height: 56px; background: #f1f5f9; border-bottom: 1px solid #cbd5e1; display: flex; align-items: center; padding: 0 20px; gap: 16px; }
+        .cap12-safari-url { flex: 1; height: 38px; border-radius: 8px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 19px; color: #1e293b; font-weight: 600; }
+        .cap12-safari-url svg { width: 18px; height: 18px; flex: none; color: #475569; }
+
+        /* f7: Español */
+        #cap12-esp-banner { position: absolute; left: 420px; top: 240px; width: 1080px; border-radius: var(--r-l); background: var(--ap-superficie); border: 4px solid var(--ap-verde); box-shadow: var(--sombra-2); padding: 44px; display: flex; flex-direction: column; align-items: center; gap: 22px; text-align: center; }
+        .cap12-esp-tit { font-family: var(--ap-fuente-titulo); font-size: 54px; font-weight: 700; color: #ffffff; }
+        .cap12-esp-sub { font-size: 32px; color: var(--ap-texto-2); line-height: 1.35; }
+      </style>
+
+      <div data-hf-id="hf-puxe" id="cap12-raiz" class="ap-escena" data-composition-id="cap12" data-width="1920" data-height="1080"></div>
+
+      <script>
+        (function () {
+          const ID = "cap12";
+          const cap = AP.capitulo(ID);
+          const raiz = document.getElementById(ID + "-raiz");
+          const tl = gsap.timeline({ paused: true });
+
+          const f1 = AP.t(ID, "f1", 0.6);
+          const f2 = AP.t(ID, "f2", 7.5);
+          const f3 = AP.t(ID, "f3", 12.4);
+          const f4 = AP.t(ID, "f4", 20.5);
+          const f5 = AP.t(ID, "f5", 28.7);
+          const f6 = AP.t(ID, "f6", 34.4);
+          const f7 = AP.t(ID, "f7", 41.1);
+
+          AP.ambiente(tl, raiz, { duracion: cap.duracion, semilla: 12 });
+
+          // f1: macOS Sonoma 14+ · Intel y Apple Silicon
+          AP.tituloCapitulo(tl, raiz, {
+            id: ID + "-titulo",
+            numero: 12,
+            titulo: "AdaptaPE en macOS",
+            sub: "Control accesible en tu Mac",
+            entrada: f1,
+            salida: f1 + 1.2,
+          });
+
+          const sec1 = document.createElement("div");
+          sec1.id = ID + "-sec1";
+          sec1.className = "cap12-sec";
+          sec1.innerHTML = `
+            <div class="cap12-menubar">
+              <div class="cap12-menubar-left">
+                <svg class="cap12-apple-icon" viewBox="0 0 170 170"><path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.08-7.73-7.93-12.13-14.54-6.85-10.22-12.06-21.78-15.63-34.69-3.57-12.91-5.36-24.97-5.36-36.18 0-14.37 3.63-26.4 10.89-36.08 7.26-9.68 16.59-14.63 27.99-14.86 4.7 0 9.87 1.25 15.52 3.75 5.65 2.5 9.77 3.81 12.36 3.93 2.13-.12 6.47-1.49 13.03-4.11 6.56-2.62 12.04-3.81 16.44-3.58 12.57.8 22.84 5.38 30.82 13.74-11.04 6.72-16.42 16.14-16.14 28.27.28 9.53 4.11 17.5 11.48 23.91 7.37 6.41 15.93 10.02 25.68 10.83-2.35 7.15-5.18 14.56-8.49 22.23zM119.22 33.15c0-7.22 2.66-14.07 7.98-20.55 5.32-6.48 11.96-10.96 19.92-13.44-.13 1.24-.26 2.37-.39 3.39-.77 6.94-3.48 13.49-8.13 19.65-4.65 6.16-10.93 10.42-18.84 12.79-.17-.61-.35-1.22-.54-1.84z"/></svg>
+                <span>Finder</span><span>Archivo</span><span>Edición</span><span>Ver</span><span>Ventana</span><span>Ayuda</span>
+              </div>
+              <div class="cap12-menubar-right">
+                <div class="cap12-menu-adaptape-icon"><img src="assets/marca/adapta-icon.webp" style="width:18px;height:18px;" alt=""></div>
+                <span>100%</span><span>Lun 10:30</span>
+              </div>
+            </div>
+            <div id="cap12-escritorio">
+              <div class="cap12-compat-card">
+                <div class="cap12-compat-titulo">macOS 14 Sonoma o posterior</div>
+                <div class="cap12-compat-chips">
+                  <div class="cap12-chip-proc">${AP.iconos.check}<span>Intel (x86_64)</span></div>
+                  <div class="cap12-chip-proc">${AP.iconos.check}<span>Apple Silicon</span></div>
+                </div>
+              </div>
+            </div>
+          `;
+          raiz.appendChild(sec1);
+          tl.fromTo(sec1, { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.6, ease: "power3.out" }, f1 + 1.4);
+          AP.rotulo(tl, raiz, { id: ID + "-rot-f1", texto: "macOS 14 Sonoma o posterior · Intel y Apple Silicon", entrada: f1 + 1.8, salida: f2 - 0.4 });
+          AP.salir(tl, sec1, f2 - 0.4);
+
+          // f2: DMG arrastrando a Aplicaciones
+          const sec2 = document.createElement("div");
+          sec2.id = ID + "-sec2";
+          sec2.className = "cap12-sec";
+          sec2.innerHTML = `
+            <div id="cap12-dmg-lienzo">
+              <div class="cap12-dmg-barra">
+                <div class="cap12-dmg-semaforo"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
+                <span>AdaptaPE-Base-macOS-1.0.dmg</span>
+              </div>
+              <div class="cap12-dmg-cuerpo">
+                <div class="cap12-dmg-icono-caja" id="cap12-drag-app">
+                  <img src="assets/marca/adapta-base-transparent.webp" class="cap12-dmg-app-img" alt="">
+                  <span>AdaptaPE.app</span>
+                </div>
+                <svg width="160" height="50" viewBox="0 0 160 50" fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"><path d="M10 25h130M115 12l25 13-25 13"/></svg>
+                <div class="cap12-dmg-icono-caja">
+                  <div class="cap12-dmg-folder-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  </div>
+                  <span>Aplicaciones</span>
+                </div>
+              </div>
+            </div>
+          `;
+          raiz.appendChild(sec2);
+          tl.fromTo(sec2, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, f2 + 0.3);
+
+          const elDrag = sec2.querySelector("#cap12-drag-app");
+          const curF2 = AP.cursor(tl, raiz, { id: ID + "-cur-f2", x: 500, y: 550, entrada: f2 + 0.8 });
+          curF2.mover(f2 + 1.0, 520, 480, 0.6).clic(f2 + 1.6);
+          tl.to(elDrag, { x: 440, duration: 1.2, ease: "power2.inOut" }, f2 + 1.8);
+          curF2.mover(f2 + 1.8, 960, 480, 1.2, "power2.inOut").clic(f2 + 3.0).ocultar(f3 - 0.4);
+
+          AP.rotulo(tl, raiz, { id: ID + "-rot-f2", texto: "Abre el DMG y arrastra a Aplicaciones", entrada: f2 + 0.6, salida: f3 - 0.4 });
+          AP.salir(tl, sec2, f3 - 0.4);
+
+          // f3: Ajustes del Sistema → «Abrir de todos modos»
+          const sec3 = document.createElement("div");
+          sec3.id = ID + "-sec3";
+          sec3.className = "cap12-sec";
+          sec3.innerHTML = `
+            <div id="cap12-ajustes-seg">
+              <div class="cap12-ajustes-sidebar">
+                <div style="font-size:24px;font-weight:700;padding:0 8px 12px;color:#f1f5f9;">Ajustes del Sistema</div>
+                <div class="cap12-ajustes-item-side">${AP.iconos.monitor}<span>General</span></div>
+                <div class="cap12-ajustes-item-side">${AP.iconos.cabeza}<span>Accesibilidad</span></div>
+                <div class="cap12-ajustes-item-side activo">${AP.iconos.candado}<span>Privacidad y seguridad</span></div>
+              </div>
+              <div class="cap12-ajustes-main">
+                <div style="font-family:var(--ap-fuente-titulo);font-size:38px;font-weight:700;">Seguridad</div>
+                <div class="cap12-aviso-bloqueo">
+                  <div style="font-size:30px;font-weight:700;color:#fca5a5;">Se bloqueó el uso de «AdaptaPE»</div>
+                  <div style="font-size:24px;line-height:1.35;color:#f1f5f9;">La aplicación no proviene de un desarrollador identificado de la App Store. Si confías en esta copia, pulsa abrir.</div>
+                  <button class="cap12-btn-abrir-modos">Abrir de todos modos</button>
+                </div>
+                <div style="font-size:22px;color:var(--ap-texto-2);">Solo necesario la primera vez que abres la app descargada.</div>
+              </div>
+            </div>
+          `;
+          raiz.appendChild(sec3);
+          tl.fromTo(sec3, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" }, f3 + 0.3);
+
+          const curF3 = AP.cursor(tl, raiz, { id: ID + "-cur-f3", x: 960, y: 640, entrada: f3 + 0.8 });
+          curF3.mover(f3 + 1.2, 850, 420, 0.8).clic(f3 + 2.2).ocultar(f4 - 0.4);
+
+          AP.rotulo(tl, raiz, { id: ID + "-rot-f3", texto: "Privacidad y seguridad → «Abrir de todos modos»", entrada: f3 + 0.6, salida: f4 - 0.4 });
+          AP.salir(tl, sec3, f4 - 0.4);
+
+          // f4: Permisos: Micrófono, Reconocimiento, Accesibilidad
+          const sec4 = document.createElement("div");
+          sec4.id = ID + "-sec4";
+          sec4.className = "cap12-sec";
+          sec4.innerHTML = `
+            <div id="cap12-permisos-lista">
+              <div style="font-family:var(--ap-fuente-titulo);font-size:34px;font-weight:700;">Permisos de macOS</div>
+              <div class="cap12-perm-fila">
+                <div class="cap12-perm-info">
+                  <div class="cap12-perm-icono">${AP.iconos.mic}</div>
+                  <div><div style="font-size:26px;font-weight:700;">Micrófono</div><div style="font-size:20px;color:var(--ap-texto-2);">Para capturar tu voz al dar órdenes</div></div>
+                </div>
+                <span class="ap-interruptor-pista"><span class="ap-interruptor-relleno" style="opacity:1;"></span><span class="ap-interruptor-perilla" style="transform:translateX(44px);background:var(--ap-tinta);"></span></span>
+              </div>
+              <div class="cap12-perm-fila">
+                <div class="cap12-perm-info">
+                  <div class="cap12-perm-icono">${AP.iconos.altavoz}</div>
+                  <div><div style="font-size:26px;font-weight:700;">Reconocimiento de voz</div><div style="font-size:20px;color:var(--ap-texto-2);">Para transcribir tus comandos localmente</div></div>
+                </div>
+                <span class="ap-interruptor-pista"><span class="ap-interruptor-relleno" style="opacity:1;"></span><span class="ap-interruptor-perilla" style="transform:translateX(44px);background:var(--ap-tinta);"></span></span>
+              </div>
+              <div class="cap12-perm-fila">
+                <div class="cap12-perm-info">
+                  <div class="cap12-perm-icono">${AP.iconos.cursor}</div>
+                  <div><div style="font-size:26px;font-weight:700;">Accesibilidad</div><div style="font-size:20px;color:var(--ap-texto-2);">Para pulsar botones, escribir y leer controles</div></div>
+                </div>
+                <span class="ap-interruptor-pista"><span class="ap-interruptor-relleno" style="opacity:1;"></span><span class="ap-interruptor-perilla" style="transform:translateX(44px);background:var(--ap-tinta);"></span></span>
+              </div>
+              <div style="display:flex;justify-content:center;margin-top:8px;">
+                <button class="cap12-btn-control-esc">${AP.iconos.check}<span>Permitir control del escritorio</span></button>
+              </div>
+            </div>
+          `;
+          raiz.appendChild(sec4);
+          tl.fromTo(sec4, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, f4 + 0.3);
+
+          const curF4 = AP.cursor(tl, raiz, { id: ID + "-cur-f4", x: 960, y: 680, entrada: f4 + 1.0 });
+          curF4.mover(f4 + 1.4, 960, 461, 0.7).clic(f4 + 2.2).ocultar(f5 - 0.4);
+
+          AP.rotulo(tl, raiz, { id: ID + "-rot-f4", texto: "Micrófono, Reconocimiento y Accesibilidad", entrada: f4 + 0.6, salida: f5 - 0.4 });
+          AP.salir(tl, sec4, f5 - 0.4);
+
+          // f5: Grabación de pantalla (Base y Lite) y Cámara (Sólo Base)
+          const sec5 = document.createElement("div");
+          sec5.id = ID + "-sec5";
+          sec5.className = "cap12-sec";
+          sec5.innerHTML = `
+            <div id="cap12-perm-especiales">
+              <div class="cap12-tarjeta-esp">
+                <div style="display:flex;align-items:center;gap:20px;">
+                  <div class="cap12-perm-icono" style="width:60px;height:60px;">${AP.iconos.monitor}</div>
+                  <div>
+                    <div style="font-family:var(--ap-fuente-titulo);font-size:32px;font-weight:700;display:flex;align-items:center;gap:16px;">
+                      <span>Grabación de pantalla</span><span class="ap-chip" style="position:static;height:36px;font-size:20px;padding:0 14px;">Base y Lite</span>
+                    </div>
+                    <div style="font-size:22px;color:var(--ap-texto-2);margin-top:4px;">Necesario para aplicar filtros de color a toda la pantalla (ScreenCaptureKit)</div>
+                  </div>
+                </div>
+                <span class="ap-interruptor-pista"><span class="ap-interruptor-relleno" style="opacity:1;"></span><span class="ap-interruptor-perilla" style="transform:translateX(44px);background:var(--ap-tinta);"></span></span>
+              </div>
+
+              <div class="cap12-tarjeta-esp camara">
+                <div style="display:flex;align-items:center;gap:20px;">
+                  <div class="cap12-perm-icono" style="width:60px;height:60px;background:rgba(147,197,253,0.18);color:var(--ap-azul-base);">${AP.iconos.cabeza}</div>
+                  <div>
+                    <div style="font-family:var(--ap-fuente-titulo);font-size:32px;font-weight:700;display:flex;align-items:center;gap:16px;">
+                      <span>Cámara</span><span class="ap-chip base" style="position:static;height:36px;font-size:20px;padding:0 14px;">Sólo Base</span>
+                    </div>
+                    <div style="font-size:22px;color:var(--ap-texto-2);margin-top:4px;">Para mover el cursor con la cabeza o extremidades. Lite no pide cámara.</div>
+                  </div>
+                </div>
+                <span class="ap-interruptor-pista"><span class="ap-interruptor-relleno" style="opacity:1;"></span><span class="ap-interruptor-perilla" style="transform:translateX(44px);background:var(--ap-tinta);"></span></span>
+              </div>
+            </div>
+          `;
+          raiz.appendChild(sec5);
+          tl.fromTo(sec5, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" }, f5 + 0.3);
+
+          AP.rotulo(tl, raiz, { id: ID + "-rot-f5", texto: "Grabación para filtros · Cámara sólo en Base", entrada: f5 + 0.6, salida: f6 - 0.4 });
+          AP.salir(tl, sec5, f6 - 0.4);
+
+          // f6: Menú superior + «Activar voz» + Safari
+          const sec6 = document.createElement("div");
+          sec6.id = ID + "-sec6";
+          sec6.className = "cap12-sec";
+          sec6.innerHTML = `
+            <div class="cap12-menubar">
+              <div class="cap12-menubar-left">
+                <svg class="cap12-apple-icon" viewBox="0 0 170 170"><path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.08-7.73-7.93-12.13-14.54-6.85-10.22-12.06-21.78-15.63-34.69-3.57-12.91-5.36-24.97-5.36-36.18 0-14.37 3.63-26.4 10.89-36.08 7.26-9.68 16.59-14.63 27.99-14.86 4.7 0 9.87 1.25 15.52 3.75 5.65 2.5 9.77 3.81 12.36 3.93 2.13-.12 6.47-1.49 13.03-4.11 6.56-2.62 12.04-3.81 16.44-3.58 12.57.8 22.84 5.38 30.82 13.74-11.04 6.72-16.42 16.14-16.14 28.27.28 9.53 4.11 17.5 11.48 23.91 7.37 6.41 15.93 10.02 25.68 10.83-2.35 7.15-5.18 14.56-8.49 22.23zM119.22 33.15c0-7.22 2.66-14.07 7.98-20.55 5.32-6.48 11.96-10.96 19.92-13.44-.13 1.24-.26 2.37-.39 3.39-.77 6.94-3.48 13.49-8.13 19.65-4.65 6.16-10.93 10.42-18.84 12.79-.17-.61-.35-1.22-.54-1.84z"/></svg>
+                <span>Finder</span><span>Archivo</span><span>Edición</span><span>Ver</span><span>Ventana</span><span>Ayuda</span>
+              </div>
+              <div class="cap12-menubar-right">
+                <div class="cap12-menu-adaptape-icon" id="cap12-icon-mac-menu">
+                  <img src="assets/marca/adapta-icon.webp" style="width:18px;height:18px;" alt="">
+                </div>
+                <span>100%</span><span>Lun 10:30</span>
+              </div>
+            </div>
+
+            <div id="cap12-menu-desplegable">
+              <div class="cap12-menu-opcion"><span>Abrir ajustes</span></div>
+              <div class="cap12-menu-opcion activo" id="cap12-opt-voz">
+                <span>Activar voz</span>
+                ${AP.iconos.check}
+              </div>
+              <div class="cap12-menu-opcion"><span>Mostrar panel flotante</span></div>
+              <div class="cap12-menu-opcion" style="color:#f87171;"><span>Detener todo</span></div>
+            </div>
+
+            <div id="cap12-safari-win">
+              <div class="cap12-safari-bar">
+                <div style="display:flex;gap:8px;">
+                  <i style="width:14px;height:14px;border-radius:50%;background:#ff5f57;display:block;"></i>
+                  <i style="width:14px;height:14px;border-radius:50%;background:#febc2e;display:block;"></i>
+                  <i style="width:14px;height:14px;border-radius:50%;background:#28c840;display:block;"></i>
+                </div>
+                <div class="cap12-safari-url">
+                  ${AP.iconos.candado}
+                  <span style="margin-left:8px;color:#1e293b;font-weight:700;">apple.com/es/safari</span>
+                </div>
+              </div>
+              <div style="flex:1;background:#f8fafc;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:#1e293b;">
+                <div style="font-family:var(--ap-fuente-titulo);font-size:48px;font-weight:700;">Safari</div>
+                <div style="font-size:28px;color:#334155;font-weight:600;">Página de inicio · Navegación activa por voz</div>
+              </div>
+            </div>
+          `;
+          raiz.appendChild(sec6);
+          tl.fromTo(sec6, { opacity: 0 }, { opacity: 1, duration: 0.4 }, f6);
+
+          const elMenu = sec6.querySelector("#cap12-menu-desplegable");
+          const curF6 = AP.cursor(tl, raiz, { id: ID + "-cur-f6", x: 1600, y: 300, entrada: f6 + 0.3 });
+          curF6.mover(f6 + 0.5, 1710, 130, 0.5).clic(f6 + 1.0);
+          tl.to(elMenu, { opacity: 1, duration: 0.25 }, f6 + 1.0);
+
+          curF6.mover(f6 + 1.2, 1600, 200, 0.5).clic(f6 + 1.7).ocultar(f6 + 2.3);
+          tl.to(elMenu, { opacity: 0, duration: 0.25 }, f6 + 2.0);
+
+          AP.comandoVoz(tl, raiz, {
+            id: ID + "-voz-safari",
+            texto: "Computadora, abre Safari",
+            x: 180,
+            y: 520,
+            entrada: f6 + 1.8,
+            duracion: 2.0,
+            salida: f7 - 0.4,
+          });
+
+          const elSafari = sec6.querySelector("#cap12-safari-win");
+          tl.fromTo(elSafari, { opacity: 0, scale: 0.94, y: 20 }, { opacity: 1, scale: 1, y: 0, duration: 0.5, ease: "power3.out" }, f6 + 2.8);
+
+          AP.rotulo(tl, raiz, { id: ID + "-rot-f6", texto: "Activa voz en la barra de menú y pide abrir Safari", entrada: f6 + 0.6, salida: f7 - 0.4 });
+          AP.salir(tl, sec6, f7 - 0.4);
+
+          // f7: Escritorio órdenes en español
+          const sec7 = document.createElement("div");
+          sec7.id = ID + "-sec7";
+          sec7.className = "cap12-sec";
+          sec7.innerHTML = `
+            <div id="cap12-esp-banner">
+              <div style="width:72px;height:72px;border-radius:50%;background:rgba(134,239,172,0.18);color:var(--ap-verde);display:grid;place-items:center;">
+                <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4"/><path d="M8 21h8"/></svg>
+              </div>
+              <div class="cap12-esp-tit">Escritorio: órdenes en español</div>
+              <div class="cap12-esp-sub">Reconocimiento de voz en español</div>
+              <div style="display:flex;gap:20px;margin-top:6px;">
+                <span class="ap-chip" style="position:static;height:42px;font-size:22px;padding:0 20px;">Español</span>
+                <span class="ap-chip plataforma" style="position:static;height:42px;font-size:22px;padding:0 20px;">Windows y macOS</span>
+              </div>
+            </div>
+          `;
+          raiz.appendChild(sec7);
+          tl.fromTo(sec7, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" }, f7 + 0.3);
+
+          AP.rotulo(tl, raiz, { id: ID + "-rot-f7", texto: "Las aplicaciones de escritorio entienden órdenes en español", entrada: f7 + 0.6 });
+
+          window.__timelines[ID] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

@@ -9,7 +9,7 @@ class TalkBack {
         this.activo = false;
         this.elementoActual = null;
         this.temporizador = null;
-        this.validTags = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'A', 'BUTTON', 'SPAN', 'LI', 'LABEL', 'IMG', 'SVG'];
+        this.validTags = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'A', 'BUTTON', 'SPAN', 'LI', 'LABEL', 'IMG', 'SVG', 'INPUT', 'TEXTAREA', 'SELECT'];
 
         this.onMouseOver = this.onMouseOver.bind(this);
         this.onMouseOut = this.onMouseOut.bind(this);
@@ -29,12 +29,16 @@ class TalkBack {
     inicializarEventos() {
         document.addEventListener("mouseover", this.onMouseOver);
         document.addEventListener("mouseout", this.onMouseOut);
+        document.addEventListener('focusin', this.onMouseOver);
+        document.addEventListener('focusout', this.onMouseOut);
     }
 
     destruir() {
         this.setEstado(false);
         document.removeEventListener('mouseover', this.onMouseOver);
         document.removeEventListener('mouseout', this.onMouseOut);
+        document.removeEventListener('focusin', this.onMouseOver);
+        document.removeEventListener('focusout', this.onMouseOut);
     }
 
     enviar(peticion) {
@@ -62,7 +66,7 @@ class TalkBack {
         // Idioma del contenido según la página; sin atributo, el de AdaptaPE (undefined: es-ES del worker).
         let lang = finalEl.closest('[lang]')?.lang;
         if (!/^[a-z]{2,3}(-[a-z0-9]{2,8})*$/i.test(lang || '')) lang = this.langTTS; // Atributo ajeno: sólo códigos BCP 47 simples.
-        let texto = finalEl.getAttribute('aria-label') || finalEl.getAttribute('alt') || finalEl.innerText || finalEl.textContent;
+        let texto = finalEl.getAttribute('aria-label') || finalEl.labels?.[0]?.textContent || finalEl.getAttribute('alt') || finalEl.innerText || finalEl.textContent;
         if (!texto || texto.trim() === "") {
             if (finalEl.querySelector('svg')) { texto = t('talkback.boton'); lang = this.langTTS; }
         }

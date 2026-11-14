@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Plantilla de escena</title>
+  </head>
+  <body>
+    <!--
+      PLANTILLA DE ESCENA · cópiala a scenes/capNN-slug.html (el nombre exacto
+      está en index.html, atributo data-composition-src) y reemplaza TODAS las
+      apariciones de «capXX» por tu id (p. ej. cap05).
+
+      Reglas en CONTRATO-ESCENAS.md. Lo esencial:
+        - Todo (style, markup, script) va DENTRO de <template>.
+        - Ids con prefijo capNN-… ; la raíz es #capNN-raiz con
+          data-composition-id="capNN".
+        - Un único gsap.timeline({ paused: true }) registrado al final en
+          window.__timelines["capNN"].
+        - Tiempos en segundos RELATIVOS a la escena; sácalos de las frases:
+          AP.t("capNN", "f2")  ≡  TIEMPOS.capitulos.find(c => c.id === "capNN").frases[1].inicio
+        - No dibujar texto en y < 96 (barra de progreso) ni y > 840 (subtítulos).
+        - Cada frase narrada → un cambio visual que la ilustre. Una idea a la vez.
+          Rótulos ≤ 7 palabras.
+        - Imágenes: rutas relativas a este archivo en el HTML (../assets/…);
+          en strings de JS, relativas a la raíz (assets/…).
+    -->
+    <template>
+      <style>
+        /* La raíz se estiliza por id, nunca por clase. */
+        #capXX-raiz {
+          position: absolute;
+          inset: 0;
+        }
+        /* Estilos propios de la escena: siempre con el prefijo #capXX-… */
+        #capXX-captura {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: top center;
+        }
+      </style>
+
+      <div data-hf-id="hf-dj92" id="capXX-raiz" class="ap-escena" data-composition-id="capXX" data-width="1920" data-height="1080"></div>
+
+      <script>
+        (function () {
+          const ID = "capXX";
+          const cap = AP.capitulo(ID); // { titulo, duracion, frases: [{ id, texto, inicio, fin, visual }] }
+          const raiz = document.getElementById(ID + "-raiz");
+          const tl = gsap.timeline({ paused: true });
+
+          // Inicio de cada frase (con respaldo por si el guion cambia de longitud).
+          const f1 = AP.t(ID, "f1", 0.6);
+          const f2 = AP.t(ID, "f2", 4);
+          const f3 = AP.t(ID, "f3", 8);
+          const f4 = AP.t(ID, "f4", 12);
+
+          // 1) Fondo compartido: SIEMPRE primero.
+          AP.ambiente(tl, raiz, { duracion: cap.duracion, semilla: 7 });
+
+          // f1 → título del capítulo; se va antes de la siguiente frase.
+          AP.tituloCapitulo(tl, raiz, { id: ID + "-titulo", numero: 1, titulo: cap.titulo, entrada: f1, salida: f2 - 0.5 });
+
+          // f2 → la ventana del navegador con una captura real dentro.
+          const nav = AP.navegador(tl, raiz, {
+            id: ID + "-nav",
+            x: 96,
+            y: 120,
+            ancho: 1400,
+            alto: 700,
+            pestana: "Wikipedia",
+            url: "es.wikipedia.org",
+            extension: "base",
+            entrada: f2,
+          });
+          const img = document.createElement("img");
+          img.id = ID + "-captura";
+          img.src = "assets/capturas/base-wikipedia-filtro-deuteranopia.png"; // string JS → ruta desde la raíz
+          img.alt = "";
+          nav.cuerpo.appendChild(img);
+          AP.chip(tl, raiz, { id: ID + "-chip", tipo: "ambos", x: 1540, y: 150, entrada: f2 + 0.6 });
+
+          // f3 → orden de voz y resaltado de la zona que cambia.
+          AP.comandoVoz(tl, raiz, { id: ID + "-voz", texto: "Computadora, baja", x: 360, y: 540, entrada: f3, duracion: 1.4, salida: f4 - 0.4 });
+          AP.foco(tl, raiz, { id: ID + "-foco", x: 96, y: 260, ancho: 1400, alto: 560, entrada: f3 + 1.6, salida: f4 - 0.3 });
+
+          // f4 → el cursor llega a un botón y hace clic por permanencia (1 s).
+          const cur = AP.cursor(tl, raiz, { id: ID + "-cursor", x: 1500, y: 700, entrada: f4 });
+          cur.mover(f4 + 0.3, 900, 420, 0.9).dwell(f4 + 1.3, 1);
+          AP.flecha(tl, raiz, { id: ID + "-flecha", desde: [520, 700], hasta: [860, 450], texto: "Quieto 1 segundo", entrada: f4 + 0.6 });
+          AP.rotulo(tl, raiz, { id: ID + "-rotulo", texto: "Clic sin manos", entrada: f4 + 2.4 });
+
+          // Registrar AL FINAL, con el mismo id que data-composition-id.
+          window.__timelines[ID] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

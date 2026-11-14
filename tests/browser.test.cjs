@@ -81,6 +81,7 @@ async function conectar(url) {
                 const estado = await conexion.pedir('Runtime.evaluate', { expression: 'typeof chrome!=="undefined" && typeof chrome.tts?.speak==="function"', returnByValue: true });
                 return estado.result?.value === true;
             }, 'API TTS preparada antes de sustituirla en el perfil de prueba');
+            // El TTS simulado nunca emite «end»; las frases inyectadas en offscreen vacían antes ttsActivos (fin de locución).
             const resultado=await conexion.pedir('Runtime.evaluate',{expression:`chrome.tts.stop();
                 globalThis.avisosPrueba=[];
                 globalThis.locucionPrueba=null;
@@ -98,7 +99,7 @@ async function conectar(url) {
         await esperar(async()=> (await pagina.pedir('Runtime.evaluate',{expression:"document.readyState==='complete'",returnByValue:true})).result?.value,'Página previa cargada');
         const origenPrevio=(await pagina.pedir('Runtime.evaluate',{expression:'performance.timeOrigin',returnByValue:true})).result.value;
         const completa = await navegador.pedir('Extensions.loadUnpacked', { path: raiz });
-        const ligera = await navegador.pedir('Extensions.loadUnpacked', { path: path.resolve(raiz, '../extensiónLite') });
+        const ligera = await navegador.pedir('Extensions.loadUnpacked', { path: path.resolve(raiz, '../lite') });
         assert.ok(completa.id && ligera.id);
         await silenciarPruebas(completa.id);await silenciarPruebas(ligera.id);
         console.log('✓ Ambos manifests cargan en Chrome');
@@ -129,7 +130,7 @@ async function conectar(url) {
                         fs.writeFileSync(path.join(carpetaCapturas, (id === completa.id ? 'base' : 'lite') + '-idioma-en.png'), Buffer.from(imagen.data, 'base64'));
                     }
                 }
-                assert.equal((await evaluar('document.querySelector("option[value=deuteranomalia]").textContent')).result.value, 'Deuteranomaly');
+                assert.equal((await evaluar('document.querySelector("input[value=deuteranomalia]").closest("label").querySelector("strong").textContent')).result.value, 'Deuteranomaly');
                 assert.equal((await evaluar('document.querySelector("[data-i18n=\\"popup.configurarMicro\\"]").textContent')).result.value, 'Set up microphone');
                 await panel.pedir('Page.reload');
                 await esperar(async () => (await evaluar('document.documentElement.lang==="en" && document.getElementById("selectIdiomaVoz")?.value==="en-US"')).result?.value, 'Idioma manual persiste al abrir el panel');
@@ -166,13 +167,13 @@ async function conectar(url) {
                 await evaluar('globalThis.guardarOriginalMascota=chrome.storage.local.set;chrome.storage.local.set=async()=>{throw new Error("Fallo simulado")};document.getElementById("selectMascota").value="tinku";document.getElementById("selectMascota").dispatchEvent(new Event("change"))');
                 await esperar(async () => (await evaluar('document.getElementById("estadoMascota").textContent.startsWith("No se guardó")')).result?.value, 'Error de mascota ofrece reintento');
                 await evaluar('chrome.storage.local.set=guardarOriginalMascota;document.getElementById("selectMascota").value="ninguna";document.getElementById("selectMascota").dispatchEvent(new Event("change"))');
-                assert.equal((await evaluar('Array.from(document.querySelectorAll("input[type=checkbox]"), control=>control.getBoundingClientRect().height>=44).every(Boolean)')).result.value, true, 'Interruptores de al menos 44 px');
+                assert.equal((await evaluar('Array.from(document.querySelectorAll("input[type=checkbox]"), control=>control.closest("[hidden]")||control.getBoundingClientRect().height>=44).every(Boolean)')).result.value, true, 'Interruptores de al menos 44 px');
                 await evaluar('document.querySelector("#hintVoz summary").click()');
                 assert.equal((await evaluar('document.querySelector("#hintVoz details").open')).result.value, true);
                 await evaluar('document.querySelector("#hintVoz summary").click()');
-                await evaluar('globalThis.guardarOriginal=chrome.storage.local.set;chrome.storage.local.set=async()=>{throw new Error("Fallo simulado")};document.getElementById("selectDaltonismo").value="protanopia";document.getElementById("selectDaltonismo").dispatchEvent(new Event("change"))');
+                await evaluar('globalThis.guardarOriginal=chrome.storage.local.set;chrome.storage.local.set=async()=>{throw new Error("Fallo simulado")};document.querySelector("input[name=daltonismo][value=protanopia]").click()');
                 await esperar(async () => (await evaluar('document.getElementById("estadoPanel").dataset.error==="true"')).result?.value, 'Error de guardado explica cómo reintentar');
-                await evaluar('chrome.storage.local.set=guardarOriginal;document.getElementById("selectDaltonismo").value="ninguno";document.getElementById("selectDaltonismo").dispatchEvent(new Event("change"))');
+                await evaluar('chrome.storage.local.set=guardarOriginal;document.querySelector("input[name=daltonismo][value=ninguno]").click()');
                 await esperar(async () => (await evaluar('document.getElementById("estadoPanel").textContent==="Ajustes guardados."')).result?.value, 'Reintento guarda el ajuste');
                 for (const ancho of [390, 320, 195]) {
                     await panel.pedir('Emulation.setDeviceMetricsOverride', { width: ancho, height: 850, deviceScaleFactor: 1, mobile: false });
@@ -195,7 +196,21 @@ async function conectar(url) {
                         await esperar(async () => (await evaluar(`chrome.storage.local.get('ajustesCineticos').then(estado=>estado.ajustesCineticos.modo==='${nuevo}' && document.getElementById('adapta-pe-modo-control').value==='${nuevo}')`)).result?.value, 'Preferencia anterior migrada');
                     }
                     await evaluar("chrome.storage.local.remove('ajustesCineticos')");
-                    await evaluar('document.getElementById("hintGestos").hidden=false;document.querySelector("#hintGestos summary").click()');
+                    // T-08: tiempo de dwell (500–1500 ms) y atracción, guardados dentro de ajustesCineticos sin tocar lo demás.
+                    await evaluar('document.getElementById("hintGestos").hidden=false');
+                    assert.equal((await evaluar('document.getElementById("adapta-pe-dwell").getBoundingClientRect().height>=44 && document.getElementById("adapta-pe-atraccion").getBoundingClientRect().height>=44')).result.value, true, 'Dwell y atracción de al menos 44 px');
+                    assert.deepEqual((await evaluar('(r=>[r.min,r.max,r.value,document.getElementById("adapta-pe-atraccion").checked])(document.getElementById("adapta-pe-dwell"))')).result.value.map(String), ['500', '1500', '1000', 'true']);
+                    await evaluar("chrome.storage.local.set({ajustesCineticos:{modo:'manos',temblor:true,velocidad:0.8,amplitud:0.55}})");
+                    await evaluar('(r=>{r.value="700";r.dispatchEvent(new Event("change"))})(document.getElementById("adapta-pe-dwell"))');
+                    await esperar(async () => (await evaluar("chrome.storage.local.get('ajustesCineticos').then(e=>e.ajustesCineticos.dwell===700)")).result?.value, 'Dwell guardado');
+                    await evaluar('document.getElementById("adapta-pe-atraccion").click()');
+                    await esperar(async () => (await evaluar("chrome.storage.local.get('ajustesCineticos').then(e=>e.ajustesCineticos.dwell===700 && e.ajustesCineticos.atraccion===false)")).result?.value, 'Dwell y atracción guardados');
+                    assert.deepEqual((await evaluar("chrome.storage.local.get('ajustesCineticos').then(e=>e.ajustesCineticos)")).result.value, { modo: 'manos', temblor: true, velocidad: 0.8, amplitud: 0.55, dwell: 700, atraccion: false });
+                    assert.match((await evaluar('document.getElementById("adapta-pe-dwell").getAttribute("aria-valuetext")')).result.value, /0[,.]7/);
+                    await evaluar("chrome.storage.local.set({ajustesCineticos:{modo:'cabeza',dwell:1400,atraccion:true}})");
+                    await esperar(async () => (await evaluar('document.getElementById("adapta-pe-dwell").value==="1400" && document.getElementById("adapta-pe-atraccion").checked')).result?.value, 'Cambios externos del dwell visibles');
+                    await evaluar("chrome.storage.local.remove('ajustesCineticos')");
+                    await evaluar('document.querySelector("#hintGestos summary").click()');
                     assert.equal((await evaluar('document.querySelector("#hintGestos details").open')).result.value, true);
                     assert.match((await evaluar('document.querySelector("#hintGestos details").textContent')).result.value, /uno o varios dedos alineados, incluida la palma entera/);
                     for (const ancho of [390, 195]) {
@@ -207,10 +222,10 @@ async function conectar(url) {
                 }
                 await evaluar("chrome.storage.local.set({daltonismo:'ninguno'})");
                 await esperar(async () => (await evaluar('document.getElementById("quitarDaltonismo").hidden')).result?.value, 'Filtro desactivado');
-                const opciones = (await evaluar('Array.from(document.getElementById("selectDaltonismo").options, opcion => opcion.value).slice(1)')).result.value;
+                const opciones = (await evaluar('Array.from(document.querySelectorAll("input[name=daltonismo]"), opcion => opcion.value).slice(1)')).result.value;
                 const coloresFiltro = new Set();
                 for (const filtro of opciones) {
-                    await evaluar(`document.getElementById("selectDaltonismo").value=${JSON.stringify(filtro)};document.getElementById("selectDaltonismo").dispatchEvent(new Event("change"))`);
+                    await evaluar(`document.querySelector(${JSON.stringify('input[name=daltonismo][value=' + filtro + ']')}).click()`);
                     await esperar(async () => (await evaluar(`chrome.storage.local.get('daltonismo').then(estado => estado.daltonismo===${JSON.stringify(filtro)})`)).result?.value, 'Selección guardada: ' + filtro);
                     assert.equal((await evaluar('document.getElementById("quitarDaltonismo").hidden')).result.value, false);
                     assert.match((await evaluar('document.getElementById("estadoDaltonismo").textContent')).result.value, /^Activo: /);
@@ -231,7 +246,7 @@ async function conectar(url) {
                 await evaluar('document.getElementById("quitarDaltonismo").focus()');
                 await panel.pedir('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', text: '\r', windowsVirtualKeyCode: 13 });
                 await panel.pedir('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
-                await esperar(async () => (await evaluar('chrome.storage.local.get("daltonismo").then(estado => estado.daltonismo==="ninguno" && document.getElementById("quitarDaltonismo").hidden && document.activeElement.id==="selectDaltonismo")')).result?.value, 'Quitar filtro con teclado devuelve foco al selector');
+                await esperar(async () => (await evaluar('chrome.storage.local.get("daltonismo").then(estado => estado.daltonismo==="ninguno" && document.getElementById("quitarDaltonismo").hidden && document.activeElement.name==="daltonismo" && document.activeElement.value==="ninguno")')).result?.value, 'Quitar filtro con teclado devuelve foco a «Sin filtro»');
                 assert.equal((await evaluar('document.getElementById("estadoDaltonismo").textContent')).result.value, 'Sin filtro activo');
                 assert.equal((await evaluar('getComputedStyle(document.querySelector(".select-box")).outlineStyle')).result.value, 'none', 'Quitar filtro retira el contorno');
                 await evaluar('document.querySelector("#ayudaMascota").closest("details").open=true');
@@ -250,6 +265,105 @@ async function conectar(url) {
             }
         }
         console.log('✓ Paneles Base y Lite: siete filtros, persistencia, cambios externos y retirada con teclado');
+        // T-01 / T-10: tutorial práctico (misma secuencia; el cursor sólo en Base), ejercicios reales con el controlador de la página,
+        // grupo de filtros con flechas, un solo tutorial abierto desde el panel y la orden de voz.
+        for (const id of [completa.id, ligera.id]) {
+            const esBase = id === completa.id;
+            const nueva = await navegador.pedir('Target.createTarget', { url: `chrome-extension://${id}/bienvenida.html#tutorial` });
+            const lista = await (await fetch('http://127.0.0.1:' + puertoChrome + '/json')).json();
+            const ventana = await conectar(lista.find(datos => datos.id === nueva.targetId).webSocketDebuggerUrl);
+            await ventana.pedir('Runtime.enable');
+            const ev = async expression => {
+                const resultado = await ventana.pedir('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
+                assert.equal(resultado.exceptionDetails, undefined, resultado.exceptionDetails?.exception?.description);
+                return resultado.result.value;
+            };
+            const hecho = paso => ev(`document.querySelector('[data-paso="${paso}"]').dataset.hecho==='true' && document.querySelector('[data-paso="${paso}"] .tutorial-estado').textContent`);
+            try {
+                await esperar(() => ev('document.readyState==="complete" && Boolean(globalThis.adaptaPEControlador?.vigente()) && document.documentElement.lang==="es"'), 'Tutorial con el controlador de la variante');
+                assert.deepEqual(await ev(`[...document.querySelectorAll('[data-paso]')].map(paso => paso.dataset.paso)`),
+                    ['voz', 'nombre', 'baja', 'selecciona', 'clic', 'filtro', ...(esBase ? ['cursor'] : []), 'reabrir']);
+                assert.equal(await ev(`document.querySelector('[data-paso="voz"] .tutorial-estado').textContent`), 'Pendiente');
+                assert.equal(await ev(`[...document.querySelectorAll('#tutorial button, #tutorial .filtro-opcion')].every(control => control.getBoundingClientRect().height >= 44)`), true, 'Objetivos de al menos 44 px');
+                assert.equal(await ev(`document.querySelector('#tutorial-filtros').getAttribute('role')`), 'radiogroup');
+                assert.equal(await ev(`document.querySelectorAll('#tutorial-filtros input[type=radio]').length`), 8);
+                assert.equal(await ev(`document.querySelectorAll('#tutorial-filtros .filtro-muestra').length`), 8);
+                assert.equal(await ev(`document.querySelectorAll('.tutorial-dwell').length`), esBase ? 3 : 0);
+                assert.equal(await ev(`document.querySelector('[data-paso="reabrir"] [data-i18n]:not(h3)').textContent.includes('«Computadora, tutorial»')`), true);
+                if (carpetaCapturas) {
+                    const medidas = await ventana.pedir('Page.getLayoutMetrics');
+                    const imagen = await ventana.pedir('Page.captureScreenshot', { captureBeyondViewport: true, clip: { ...medidas.cssContentSize, scale: 1 } });
+                    fs.writeFileSync(path.join(carpetaCapturas, (esBase ? 'base' : 'lite') + '-tutorial.png'), Buffer.from(imagen.data, 'base64'));
+                }
+                // Botones que sólo guardan una preferencia (sin disparar permisos en esta prueba).
+                await ev(`globalThis.guardados = []; globalThis.setOriginal = chrome.storage.local.set; chrome.storage.local.set = async datos => { guardados.push(datos); }; true`);
+                await ev(`document.getElementById('tutorial-activar-voz').click(); document.getElementById('tutorial-activar-cursor')?.click(); true`);
+                assert.equal(JSON.stringify(await ev('guardados')), JSON.stringify(esBase ? [{ voz: true }, { ojos: true }] : [{ voz: true }]));
+                await ev(`chrome.storage.local.set = setOriginal; true`);
+                // «Probar nombre» sin voz activa lo explica, sin ejecutar nada.
+                await ev(`document.getElementById('tutorial-probar-nombre').click(); true`);
+                await esperar(() => ev(`document.getElementById('tutorial-nombre-resultado').textContent.includes('Control por voz')`), 'Probar nombre pide activar la voz');
+                // Ejercicios con las mismas órdenes de voz: baja, selecciona Siguiente y dale clic.
+                assert.equal(await hecho('baja'), false, 'El salto automático a #tutorial no completa «baja»');
+                await pausa(1600);
+                await ev(`adaptaPEControlador.voz.ejecutarComando('baja'); true`);
+                await esperar(async () => (await hecho('baja')) === 'Hecho', 'Ejercicio «baja»');
+                assert.equal(await hecho('selecciona'), false);
+                await ev(`adaptaPEControlador.voz.ejecutarComando('dale clic'); true`);
+                assert.equal(await hecho('clic'), false, 'Sin selección previa «dale clic» no completa el ejercicio');
+                await ev(`adaptaPEControlador.voz.ejecutarComando('selecciona Siguiente'); true`);
+                await esperar(async () => (await hecho('selecciona')) === 'Hecho', 'Ejercicio «selecciona Siguiente»');
+                assert.equal(await hecho('clic'), false);
+                await ev(`adaptaPEControlador.voz.ejecutarComando('dale clic'); true`);
+                await esperar(async () => (await hecho('clic')) === 'Hecho', 'Ejercicio «dale clic»');
+                // Filtro de color: flechas, un solo valor a la vez y la clave `daltonismo` del panel.
+                await ventana.pedir('Page.bringToFront');
+                await ev(`document.querySelector('#tutorial-filtros input[value="ninguno"]').focus(); true`);
+                await ventana.pedir('Input.dispatchKeyEvent', { type: 'keyDown', key: 'ArrowDown', code: 'ArrowDown', windowsVirtualKeyCode: 40 });
+                await ventana.pedir('Input.dispatchKeyEvent', { type: 'keyUp', key: 'ArrowDown', code: 'ArrowDown', windowsVirtualKeyCode: 40 });
+                await esperar(async () => (await ev(`chrome.storage.local.get('daltonismo').then(estado => estado.daltonismo)`)) === 'deuteranomalia', 'Flecha abajo elige el siguiente filtro');
+                assert.equal(await ev(`document.querySelectorAll('#tutorial-filtros input:checked').length`), 1);
+                assert.equal(await hecho('filtro'), 'Hecho');
+                await esperar(() => ev(`adaptaPEControlador.filtros.filtroActual === 'deuteranomalia'`), 'El filtro se aplica a la propia página');
+                await ev(`document.querySelector('#tutorial-filtros input[value="ninguno"]').click(); true`);
+                await esperar(async () => (await ev(`chrome.storage.local.get('daltonismo').then(estado => estado.daltonismo)`)) === 'ninguno', 'Vuelve a Sin filtro');
+                if (esBase) {
+                    assert.equal(await ev(`document.querySelector('.tutorial-dwell').textContent`), 'Botón 1');
+                    assert.equal(await hecho('cursor'), false);
+                    await ev(`document.querySelectorAll('.tutorial-dwell').forEach(boton => boton.click()); true`);
+                    assert.equal(await hecho('cursor'), 'Hecho', 'Tres botones de práctica completan el paso del cursor');
+                    assert.match(await ev(`document.querySelector('[data-paso="cursor"]').textContent`), /no usa el parpadeo/);
+                }
+                // Idioma en vivo: el objetivo y los botones de práctica se traducen.
+                await ev(`chrome.storage.local.set({ idiomaVoz: 'en-US' })`);
+                await esperar(() => ev(`document.getElementById('tutorial-objetivo').textContent === 'Next' && document.documentElement.lang === 'en'`), 'Tutorial en inglés sin recargar');
+                if (esBase) assert.equal(await ev(`document.querySelector('.tutorial-dwell').textContent`), 'Button 1');
+                await ev(`chrome.storage.local.set({ idiomaVoz: 'es-PE' })`);
+                await esperar(() => ev(`document.documentElement.lang === 'es'`), 'Español restaurado');
+                // El botón «Tutorial» del panel enfoca la pestaña existente en lugar de abrir otra.
+                const panelTutorial = await navegador.pedir('Target.createTarget', { url: 'chrome-extension://' + id + '/popup.html' });
+                const listaPanel = await (await fetch('http://127.0.0.1:' + puertoChrome + '/json')).json();
+                const conexionPanel = await conectar(listaPanel.find(datos => datos.id === panelTutorial.targetId).webSocketDebuggerUrl);
+                await conexionPanel.pedir('Runtime.enable');
+                try {
+                    await esperar(async () => (await conexionPanel.pedir('Runtime.evaluate', { expression: 'document.readyState==="complete" && Boolean(document.getElementById("abrirTutorial"))', returnByValue: true })).result?.value, 'Panel con botón Tutorial');
+                    const contarTutoriales = async () => (await (await fetch('http://127.0.0.1:' + puertoChrome + '/json')).json()).filter(datos => datos.type === 'page' && datos.url.startsWith(`chrome-extension://${id}/bienvenida.html`)).length;
+                    const antes = await contarTutoriales(); // La instalación abre su propia bienvenida.
+                    assert.ok(antes >= 1);
+                    await conexionPanel.pedir('Runtime.evaluate', { expression: 'document.getElementById("abrirTutorial").click()' });
+                    await pausa(500);
+                    assert.equal(await contarTutoriales(), antes, 'El botón Tutorial enfoca una pestaña existente y no abre otra');
+                    // Sin ninguna pestaña de tutorial, el botón debe abrir una (antes fallaba en silencio).
+                    for (const datos of (await (await fetch('http://127.0.0.1:' + puertoChrome + '/json')).json()).filter(datos => datos.type === 'page' && datos.url.startsWith(`chrome-extension://${id}/bienvenida`) && datos.id !== nueva.targetId)) await navegador.pedir('Target.closeTarget', { targetId: datos.id });
+                    await ventana.pedir('Page.navigate', { url: 'about:blank' });
+                    await esperar(async () => await contarTutoriales() === 0, 'Tutoriales cerrados');
+                    await conexionPanel.pedir('Runtime.evaluate', { expression: 'document.getElementById("abrirTutorial").click()' });
+                    await esperar(async () => (await (await fetch('http://127.0.0.1:' + puertoChrome + '/json')).json()).some(datos => datos.type === 'page' && datos.url === `chrome-extension://${id}/bienvenida.html#tutorial`), 'El botón Tutorial abre bienvenida.html#tutorial');
+                    assert.equal(ventana.errores.length, 0, 'Tutorial sin excepciones');
+                } finally { conexionPanel.socket.close(); await navegador.pedir('Target.closeTarget', { targetId: panelTutorial.targetId }); }
+            } finally { ventana.socket.close(); await navegador.pedir('Target.closeTarget', { targetId: nueva.targetId }); }
+        }
+        console.log('✓ Tutorial Base/Lite: pasos, ejercicios por voz, filtros con flechas, cursor sólo en Base y un solo tutorial abierto');
         const contextoDe=(conexion,id)=> {
             const principal=[...conexion.contextos.values()].find(contexto=>contexto.auxData?.isDefault)?.auxData.frameId;
             return [...conexion.contextos.values()].findLast(contexto=>contexto.origin==='chrome-extension://'+id&&contexto.auxData?.isDefault===false&&contexto.auxData.frameId===principal);
@@ -482,14 +596,14 @@ async function conectar(url) {
         await esperar(async () => (await evaluarEn(pagina, completa.id, 'TextosAdapta.idioma==="en" && document.getElementById("adapta-pe-voz-indicador-"+chrome.runtime.id)?.textContent.includes("Voice")')).result?.value, 'Indicador de voz traducido sin recargar');
         await fondo.pedir('Runtime.evaluate', { expression: 'chrome.storage.local.set({idiomaVoz:"es-PE"})', awaitPromise: true });
         await esperar(async () => (await central.pedir('Runtime.evaluate', { expression: 'vozCentral.reconocimientoVoz?.lang==="es-PE" && TextosAdapta.idioma==="es"', returnByValue: true })).result?.value, 'Voz central vuelve al español');
-        await central.pedir('Runtime.evaluate', { expression: "vozCentral.textoReconocido='Computadora busca validación local';vozCentral.procesarFraseContinua();" });
+        await central.pedir('Runtime.evaluate', { expression: "vozCentral.ttsActivos.clear();vozCentral.textoReconocido='Computadora busca validación local';vozCentral.procesarFraseContinua();" });
         await pausa(300);
         const campoLocal = (await pagina.pedir('Runtime.evaluate', { expression: "document.getElementById('buscador').value", returnByValue: true })).result.value;
         assert.equal(campoLocal, 'validación local', 'Los comandos DOM llegan al content script de la pestaña activa');
         await pagina.pedir('Runtime.enable');
         await navegador.pedir('Browser.setPermission', { permission: { name: 'camera' }, setting: 'denied', origin: `http://127.0.0.1:${puerto}` });
         await central.pedir('Runtime.evaluate', { expression: `window.solicitudesCamara=0; const obtenerFlujo=navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices); navigator.mediaDevices.getUserMedia=(datos)=>{window.solicitudesCamara++;return obtenerFlujo(datos);};` });
-        await central.pedir('Runtime.evaluate', { expression: "vozCentral.textoReconocido='Computadora activar cursor';vozCentral.procesarFraseContinua();" });
+        await central.pedir('Runtime.evaluate', { expression: "vozCentral.ttsActivos.clear();vozCentral.textoReconocido='Computadora activar cursor';vozCentral.procesarFraseContinua();" });
         let permisoCamara;
         for (let intento=0;intento<50;intento++) {
             destinosVoz=await (await fetch('http://127.0.0.1:'+puertoChrome+'/json')).json();
@@ -571,11 +685,11 @@ async function conectar(url) {
         console.log('✓ Extremidades: centro fijo y avisos de voz sin calibración al ajustar o reanudar');
         const flujoInicial=(await central.pedir('Runtime.evaluate',{expression:'camaraCentral.flujo.id',returnByValue:true})).result.value;
         for (const comando of ['activar temblor', 'movimientos pequeños', 'control brazos']) {
-            await central.pedir('Runtime.evaluate', { expression: `vozCentral.textoReconocido=${JSON.stringify('Computadora ' + comando)};vozCentral.procesarFraseContinua();` });
+            await central.pedir('Runtime.evaluate', { expression: `vozCentral.ttsActivos.clear();vozCentral.textoReconocido=${JSON.stringify('Computadora ' + comando)};vozCentral.procesarFraseContinua();` });
             await pausa(100);
         }
         const ajustes = (await fondo.pedir('Runtime.evaluate', { expression: "chrome.storage.local.get('ajustesCineticos').then(d=>d.ajustesCineticos)", awaitPromise: true, returnByValue: true })).result.value;
-        assert.deepEqual(ajustes, { modo: 'manos', temblor: true, velocidad: 1, amplitud: 0.55 });
+        assert.deepEqual(ajustes, { modo: 'manos', temblor: true, velocidad: 1, amplitud: 0.55, dwell: 1000, atraccion: true });
         await pagina.pedir('Page.reload');
         for (let intento = 0; intento < 50; intento++) {
             contextoCinetico = [...pagina.contextos.values()].find(contexto => contexto.origin === 'chrome-extension://' + completa.id && contexto.auxData?.isDefault === false);
@@ -594,9 +708,9 @@ async function conectar(url) {
         assert.deepEqual(restaurado, { activo: true, modo: 'manos', temblor: 0.07, amplitud: 0.55, botones: 0, centro: { x: 80, y: 60 }, listo: true });
         const otroFondoDestino=(await (await fetch('http://127.0.0.1:'+puertoChrome+'/json')).json()).find(destino=>destino.type==='service_worker'&&destino.url.includes(ligera.id));
         const fondoLite=await conectar(otroFondoDestino.webSocketDebuggerUrl);
-        await central.pedir('Runtime.evaluate',{expression:"vozCentral.textoReconocido='Computadora mascota Y Atti';vozCentral.procesarFraseContinua();"});
+        await central.pedir('Runtime.evaluate',{expression:"vozCentral.ttsActivos.clear();vozCentral.textoReconocido='Computadora mascota Y Atti';vozCentral.procesarFraseContinua();"});
         await esperar(async()=>(await evaluarEn(pagina,completa.id,'adaptaPEControlador.mascota.nombre==="yati" && Boolean(adaptaPEControlador.mascota.motor)')).result?.value,'Transcripción separada Y Atti elige Yati');
-        await central.pedir('Runtime.evaluate',{expression:"vozCentral.textoReconocido='Computadora mascota Tinku';vozCentral.procesarFraseContinua();"});
+        await central.pedir('Runtime.evaluate',{expression:"vozCentral.ttsActivos.clear();vozCentral.textoReconocido='Computadora mascota Tinku';vozCentral.procesarFraseContinua();"});
         await esperar(async()=>(await evaluarEn(pagina,completa.id,'adaptaPEControlador.mascota.nombre==="tinku" && Boolean(adaptaPEControlador.mascota.motor)')).result?.value,'Voz central elige mascota en página actual');
         const posicionPersistente=(await evaluarEn(pagina,completa.id,'adaptaPEControlador.mascota.posicion')).result.value;
         await fondo.pedir('Runtime.evaluate',{expression:"chrome.storage.local.set({talkback:true,daltonismo:'acromatopsia'})",awaitPromise:true});
@@ -619,9 +733,9 @@ async function conectar(url) {
         for(const conexion of [pagina,segundaPagina]) for(const id of [completa.id,ligera.id]) {
             await esperar(async()=>contextoDe(conexion,id)&&(await evaluarEn(conexion,id,"adaptaPEControlador.filtros.filtroActual==='acromatopsia'")).result?.value,'Filtro conservado en ambas ventanas y variantes');
         }
-        await central.pedir('Runtime.evaluate',{expression:"vozCentral.textoReconocido='Computadora seleccionar zapatos azules';vozCentral.procesarFraseContinua();"});
+        await central.pedir('Runtime.evaluate',{expression:"vozCentral.ttsActivos.clear();vozCentral.textoReconocido='Computadora seleccionar zapatos azules';vozCentral.procesarFraseContinua();"});
         await esperar(async()=>(await evaluarEn(segundaPagina,completa.id,'Boolean(adaptaPEControlador.voz.elementoSeleccionado)')).result?.value,'Selección por voz en ventana enfocada');
-        await central.pedir('Runtime.evaluate',{expression:"vozCentral.textoReconocido='Computadora dale clic';vozCentral.procesarFraseContinua();"});
+        await central.pedir('Runtime.evaluate',{expression:"vozCentral.ttsActivos.clear();vozCentral.textoReconocido='Computadora dale clic';vozCentral.procesarFraseContinua();"});
         await esperar(async()=>(await segundaPagina.pedir('Runtime.evaluate',{expression:'window.clicsProducto===1',returnByValue:true})).result?.value,'Clic sobre selección en ventana enfocada');
         if(visible) {
             await fondo.pedir('Runtime.evaluate',{expression:`chrome.windows.update(${ventanaOriginal},{focused:true})`,awaitPromise:true});
@@ -653,13 +767,13 @@ async function conectar(url) {
             if(id!==completa.id) origenFondo.socket.close();
         }
         assert.equal((await pagina.pedir('Runtime.evaluate',{expression:'document.querySelectorAll("#adapta-pe-cursor").length',returnByValue:true})).result.value,1);
-        await central.pedir('Runtime.evaluate', { expression: "vozCentral.textoReconocido='Computadora desactivar cursor';vozCentral.procesarFraseContinua();" });
+        await central.pedir('Runtime.evaluate', { expression: "vozCentral.ttsActivos.clear();vozCentral.textoReconocido='Computadora desactivar cursor';vozCentral.procesarFraseContinua();" });
         await pausa(350);
         assert.equal((await evaluarCinetico('adaptaPEControlador.cinetico.activa')).result.value, false);
         console.log('✓ Cinético real: activar/desactivar por voz, sin botones y preferencias tras recarga');
         // Un comando, una ventana. Después la misma instancia permanece disponible.
         const antes = (await fondo.pedir('Runtime.evaluate', { expression: 'chrome.windows.getAll().then(ventanas=>ventanas.length)', awaitPromise: true, returnByValue: true })).result.value;
-        await central.pedir('Runtime.evaluate', { expression: "vozCentral.textoReconocido='Computadora abre una nueva ventana';vozCentral.procesarFraseContinua();" });
+        await central.pedir('Runtime.evaluate', { expression: "vozCentral.ttsActivos.clear();vozCentral.textoReconocido='Computadora abre una nueva ventana';vozCentral.procesarFraseContinua();" });
         await pausa(700);
         const despues = (await fondo.pedir('Runtime.evaluate', { expression: 'chrome.windows.getAll().then(ventanas=>ventanas.length)', awaitPromise: true, returnByValue: true })).result.value;
         assert.equal(despues, antes + 1);
@@ -667,7 +781,7 @@ async function conectar(url) {
         assert.equal(permanece, true);
         // Navegación desde chrome://newtab sin reemplazarlo ni inyectar scripts en su DOM.
         await fondo.pedir('Runtime.evaluate', { expression: "chrome.tabs.create({url:'chrome://newtab/'}).then(p=>chrome.windows.update(p.windowId,{focused:true}))", awaitPromise: true });
-        await central.pedir('Runtime.evaluate', { expression: "vozCentral.textoReconocido='Computadora busca prueba adapta';vozCentral.procesarFraseContinua();" });
+        await central.pedir('Runtime.evaluate', { expression: "vozCentral.ttsActivos.clear();vozCentral.textoReconocido='Computadora busca prueba adapta';vozCentral.procesarFraseContinua();" });
         await pausa(400);
         const busqueda = (await fondo.pedir('Runtime.evaluate', { expression: "chrome.tabs.query({active:true,lastFocusedWindow:true}).then(p=>p[0].pendingUrl||p[0].url)", awaitPromise: true, returnByValue: true })).result.value;
         assert.match(busqueda, /google\.com\/search\?q=prueba%20adapta/);
@@ -685,7 +799,7 @@ async function conectar(url) {
         for(const id of [completa.id,ligera.id]) {
             await evaluarEn(pagina,id,'adaptaPEControlador.marcaPrueba=true');
             if(id===completa.id) await evaluarEn(pagina,id,'adaptaPEControlador.talkback.onMouseOver({target:document.querySelector("button")})');
-            const reinstalada=await navegador.pedir('Extensions.loadUnpacked',{path:id===completa.id?raiz:path.resolve(raiz,'../extensiónLite')});
+            const reinstalada=await navegador.pedir('Extensions.loadUnpacked',{path:id===completa.id?raiz:path.resolve(raiz,'../lite')});
             assert.equal(reinstalada.id,id);
             try { await esperar(async()=>{
                 const contexto=contextoDe(pagina,id);if(!contexto) return false;

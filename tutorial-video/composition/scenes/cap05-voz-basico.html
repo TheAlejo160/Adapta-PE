@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="UTF-8"><title>Habla con AdaptaPE</title></head>
+<body><template>
+<style>
+#cap05-raiz { position:absolute; inset:0; }
+.cap05-pagina { position:absolute; inset:0; padding:30px 48px; background:#fff; color:#182332; }
+.cap05-pagina h2 { font-size:64px; margin:0 0 20px; }
+.cap05-busqueda { border:3px solid #657284; border-radius:20px; padding:14px 28px; font-size:40px; max-width:1060px; }
+.cap05-videos { display:flex; gap:28px; margin-top:24px; }
+.cap05-video { width:290px; height:105px; border-radius:14px; background:#e6ecf2; display:grid; place-items:center; font-size:42px; color:#35465b; }
+#cap05-indicador { position:absolute; left:24px; bottom:18px; padding:14px 24px; border-radius:16px; background:#b30714; color:white; font-size:40px; font-weight:700; z-index:5; }
+#cap05-espera { position:absolute; right:70px; top:20px; width:240px; height:240px; color:#173c66; }
+#cap05-espera svg { position:absolute; inset:0; width:240px; height:240px; }
+#cap05-cuenta { position:absolute; inset:0; display:grid; place-items:center; font-size:66px; font-weight:700; }
+#cap05-ayuda { display:flex; gap:28px; margin-top:24px; }
+.cap05-ejemplo { font-size:40px; border-left:6px solid #186f43; background:#ecf7ee; padding:20px 24px; }
+#cap05-wikipedia p { font-size:42px; max-width:1100px; margin:12px 0; }
+#cap05-wiki-linea { height:12px; width:1020px; background:#dfe5ec; margin-top:30px; }
+</style>
+<div data-hf-id="hf-mfgy" id="cap05-raiz" class="ap-escena" data-composition-id="cap05" data-width="1920" data-height="1080"></div>
+<script>
+(function () {
+  const ID='cap05', cap=AP.capitulo(ID), raiz=document.getElementById(ID+'-raiz');
+  const tl=gsap.timeline({paused:true});
+  const f1=AP.t(ID,'f1',0.6), f2=AP.t(ID,'f2',6.014), f3=AP.t(ID,'f3',10.222), f4=AP.t(ID,'f4',16.797), f5=AP.t(ID,'f5',23.523), f6=AP.t(ID,'f6',29.471);
+  AP.ambiente(tl,raiz,{duracion:cap.duracion,semilla:5});
+  const inicial=AP.comandoVoz(tl,raiz,{id:ID+'-activacion',texto:'Computadora',x:475,y:350,entrada:f1,duracion:3.8,salida:f2-0.3});
+  inicial.el.style.fontSize='80px';
+  inicial.el.querySelector('.ap-voz-texto').style.fontSize='96px';
+  const nav=AP.navegador(tl,raiz,{id:ID+'-nav',x:96,y:330,ancho:1728,alto:490,pestana:'Nueva pestaña',url:'Nueva pestaña',extension:'base',entrada:f2});
+  function pagina(id,html) {
+    const el=document.createElement('div'); el.id=ID+'-'+id; el.className='cap05-pagina'; el.innerHTML=html; nav.cuerpo.appendChild(el); return el;
+  }
+  const nueva=pagina('nueva','<h2>¿A dónde quieres ir?</h2><div class="cap05-busqueda">Busca o abre un sitio con tu voz</div>');
+  const youtube=pagina('youtube','<h2>YouTube</h2><div class="cap05-busqueda">Buscar en YouTube</div><div class="cap05-videos"><div class="cap05-video">▶</div><div class="cap05-video">▶</div><div class="cap05-video">▶</div></div>');
+  const wikipedia=pagina('wikipedia','<h2>Wikipedia</h2><p>La enciclopedia libre</p><div class="cap05-busqueda">Buscar en Wikipedia</div><div id="cap05-wiki-linea"></div>');
+  const ayuda=pagina('ayuda-pagina','<h2>Prueba estas órdenes</h2><div id="cap05-ayuda"><div class="cap05-ejemplo">Abre YouTube</div><div class="cap05-ejemplo">Baja</div><div class="cap05-ejemplo">Selecciona Contacto</div></div>');
+  tl.set([youtube,wikipedia,ayuda],{opacity:0},0);
+  function texto(el,contenido,t,escribir) {
+    if (!el.dataset.cap05Capas) {
+      const inicial=document.createElement('span'); inicial.textContent=el.textContent;
+      el.replaceChildren(inicial); el.style.display='grid'; inicial.style.gridArea='1 / 1'; el.dataset.cap05Capas='si';
+    }
+    const anterior=el.lastElementChild, siguiente=document.createElement('span');
+    siguiente.style.gridArea='1 / 1'; siguiente.style.opacity='0'; el.appendChild(siguiente);
+    tl.set(anterior,{opacity:0},t); tl.set(siguiente,{opacity:1},t);
+    if(escribir) AP.escribir(tl,siguiente,t,contenido,0.6); else siguiente.textContent=contenido;
+  }
+  function mostrar(anterior,siguiente,t) { tl.set(anterior,{opacity:0},t); tl.fromTo(siguiente,{opacity:0},{opacity:1,duration:0.35},t); }
+  function orden(id,texto,t,hasta,duracion) {
+    return AP.comandoVoz(tl,raiz,{id:ID+'-'+id,texto,x:150,y:108,entrada:t,duracion:duracion||1.8,salida:hasta});
+  }
+  orden('abre','Computadora, abre YouTube',f2,f3-0.3);
+  mostrar(nueva,youtube,f2+2.3);
+  texto(nav.el.querySelector('.ap-nav-url-texto'),'youtube.com',f2+2.3,true);
+  const pestana=nav.el.querySelector('.ap-nav-pestana > span:last-child');
+  texto(pestana,'YouTube',f2+2.3);
+  orden('dos-pasos','Computadora',f3,f3+3.5,0.8);
+  const espera=document.createElement('div'); espera.id=ID+'-espera';
+  espera.innerHTML='<svg viewBox="0 0 240 240" aria-hidden="true"><circle cx="120" cy="120" r="100" fill="#edf5ff" stroke="#d5e2f1" stroke-width="12"/><circle id="cap05-anillo" cx="120" cy="120" r="100" fill="none" stroke="#125da5" stroke-width="12" stroke-dasharray="628.319" stroke-dashoffset="0"/></svg><div id="cap05-cuenta">8 s</div>';
+  nav.cuerpo.appendChild(espera);
+  AP.entrar(tl,espera,f3+0.8,'escala',0.3);
+  // La orden llega antes de agotar la ventana: cada segundo mostrado dura un segundo real.
+  tl.fromTo('#cap05-anillo',{strokeDashoffset:0},{strokeDashoffset:628.319*3/8,duration:3,ease:'none'},f3+0.8);
+  for(let n=1;n<=3;n++) texto(espera.querySelector('#cap05-cuenta'),(8-n)+' s',f3+0.8+n);
+  AP.salir(tl,espera,f3+3.8,0.2);
+  orden('orden-separada','Abre YouTube',f3+3.8,f4-0.3,1);
+  const indicador=document.createElement('div'); indicador.id=ID+'-indicador'; indicador.textContent='Voz activa. Di «Computadora».'; nav.cuerpo.appendChild(indicador);
+  tl.set(youtube.querySelector('.cap05-videos'),{opacity:0},f4);
+  AP.entrar(tl,indicador,f4,'subir',0.35);
+  tl.to(indicador,{backgroundColor:'#0961a8',duration:0.3},f4+3.2);
+  texto(indicador,'Di tu comando.',f4+3.2);
+  AP.foco(tl,nav.cuerpo,{id:ID+'-foco-aviso',x:18,y:252,ancho:710,alto:82,radio:16,oscurecer:false,entrada:f4+0.4,salida:f5-0.3});
+  orden('cortesia','Computadora, por favor, ábreme Wikipedia',f5,f6-0.3,3.5);
+  mostrar(youtube,wikipedia,f5+3.8);
+  texto(nav.el.querySelector('.ap-nav-url-texto'),'es.wikipedia.org',f5+3.8,true);
+  texto(pestana,'Wikipedia',f5+3.8);
+  tl.set(indicador,{opacity:0},f5);
+  orden('pide-ayuda','Computadora, ayuda',f6,null,1.6);
+  mostrar(wikipedia,ayuda,f6+1.9);
+  window.__timelines[ID]=tl;
+})();
+</script>
+</template></body></html>

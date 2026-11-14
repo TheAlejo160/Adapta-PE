@@ -4,7 +4,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const raiz = path.resolve(__dirname, '..');
-const lite = path.resolve(raiz, '../extensiónLite');
+const lite = path.resolve(raiz, '../lite');
+const soloBase = process.argv.includes('--solo-base');
+if (soloBase) console.log('Sólo Base: identidad con Lite pendiente del orquestador.');
 let comprobaciones = 0;
 function comprobar(nombre, prueba) { prueba(); comprobaciones++; console.log('✓ ' + nombre); }
 
@@ -42,6 +44,39 @@ function entorno() {
 }
 
 const entornoVoz = entorno();
+comprobar('TalkBack lee al enfocar, respeta 300 ms y retira los eventos al destruirse', () => {
+    const prueba = entorno(), oyentes = new Map();
+    prueba.contexto.document.addEventListener = (tipo, accion) => oyentes.set(tipo, accion);
+    prueba.contexto.document.removeEventListener = (tipo, accion) => { if (oyentes.get(tipo) === accion) oyentes.delete(tipo); };
+    prueba.cargar(path.join(raiz, 'classes/TalkBack.js'));
+    const lector = new prueba.contexto.TalkBack(); lector.setEstado(true);
+    const campo = { tagName: 'INPUT', labels: [{ textContent: 'Tu nombre' }], style: {},
+        closest: () => null, hasAttribute: () => false, getAttribute: () => null };
+    assert.equal(typeof oyentes.get('focusin'), 'function');
+    oyentes.get('focusin')({ target: campo }); prueba.avanzar(299);
+    assert.equal(prueba.mensajes.length, 0);
+    prueba.avanzar(1);
+    assert.equal(prueba.mensajes.at(-1).texto, 'Tu nombre');
+    assert.equal(prueba.mensajes.at(-1).origen, 'lectura');
+    oyentes.get('focusout')({ target: campo });
+    assert.equal(prueba.mensajes.at(-1).accion, 'callar');
+    lector.destruir(); assert.equal(oyentes.size, 0);
+});
+comprobar('Filtros UI: valores desconocidos o con comillas vuelven a Sin filtro sin romper el panel', () => {
+    const contexto = vm.createContext({});
+    vm.runInContext(fs.readFileSync(path.join(raiz, 'filtros_ui.js'), 'utf8'), contexto);
+    const radios = ['ninguno', 'protanopia'].map(value => ({ value, checked: false }));
+    contexto.grupo = { querySelectorAll: () => radios, querySelector: selector => {
+        const coincidencia = /^input\[value="([^"]*)"\]$/.exec(selector);
+        if (!coincidencia) throw new Error('Selector dinámico inválido');
+        return radios.find(radio => radio.value === coincidencia[1]) || null;
+    } };
+    for (const valor of ['desconocido', '"]', null, {}, 'protanopia']) {
+        radios.forEach(radio => { radio.checked = false; }); contexto.valor = valor;
+        vm.runInContext('FiltrosUI.poner(grupo, valor)', contexto);
+        assert.equal(radios[valor === 'protanopia' ? 1 : 0].checked, true);
+    }
+});
 comprobar('Filtros conservan Docs fuera de la raíz y se retiran en ambas variantes', () => {
     for (const archivo of [path.join(raiz, 'classes/FiltrosDaltonismo.js'), path.join(lite, 'clases/FiltrosDaltonismo.js')]) {
         const prueba = entorno(), nodos = new Map();
@@ -160,7 +195,7 @@ comprobar('Reconocimiento espera frases estables, evita duplicados y respeta el 
     };
     const asistente = new entornoReconocimiento.contexto.Voz();
     const ordenes = [];
-    asistente.ejecutarComando = texto => ordenes.push(texto);
+    asistente.alComando = texto => ordenes.push(texto);
     asistente.setEstado(true);
     const motor = motores[0];
     const resultado = (texto, final) => Object.assign([{ transcript: texto }], { isFinal: final });
@@ -194,7 +229,7 @@ comprobar('Voz recupera intermedios estables, ignora repeticiones y admite wake 
     const asistente = new prueba.contexto.Voz();
     asistente.reproducirBeep = () => {};
     const ordenes = [];
-    asistente.ejecutarComando = texto => ordenes.push(texto);
+    asistente.alComando = texto => ordenes.push(texto);
     asistente.setEstado(true);
     const resultado = (texto, final = false) => Object.assign([{ transcript: texto }], { isFinal: final });
     motor.onresult({ resultIndex: 0, results: [resultado('Computadora abre YouTube')] });
@@ -433,7 +468,8 @@ comprobar('Preferencias cinéticas sobreviven al cambio de página y no guardan 
     const siguiente = new prueba.contexto.Cinetico(); siguiente.aplicarAjustes(guardado.ajustesCineticos);
     assert.equal(siguiente.modoControl, 'cabeza'); assert.equal(siguiente.zonaMuerta, 0.07);
     assert.equal(siguiente.amplitudControl, 0.55); assert.equal(siguiente.sensibilidad, 0.8);
-    assert.deepEqual(Object.keys(guardado.ajustesCineticos).sort(), ['amplitud', 'modo', 'temblor', 'velocidad']);
+    assert.deepEqual(Object.keys(guardado.ajustesCineticos).sort(), ['amplitud', 'atraccion', 'dwell', 'modo', 'temblor', 'velocidad']);
+    assert.equal(guardado.ajustesCineticos.dwell, 1000); assert.equal(guardado.ajustesCineticos.atraccion, true);
     siguiente.aplicarAjustes({ modo: 'invalido', velocidad: Infinity, amplitud: -3, temblor: 'si' });
     assert.equal(siguiente.modoControl, 'cabeza'); assert.equal(siguiente.sensibilidad, 0.8); assert.equal(siguiente.amplitudControl, 0.55);
     siguiente.evaluarEstado = () => {}; siguiente.bloqueada = true;
@@ -474,7 +510,8 @@ comprobar('Privacidad e idioma: sprites sólo con URL dinámica, marca sólo en 
 
 comprobar('SDK de mascotas: src/cuy.js es la fuente única de mascotas/motor.js (se omite sin la carpeta del SDK)', () => {
     // ADAPTA_SDK_MASCOTA permite otra ubicación del SDK (ruta a su src/cuy.js).
-    const fuente = [process.env.ADAPTA_SDK_MASCOTA, path.join(require('node:os').homedir(), 'Desktop/Mascota-Modular-Adapta-PE/src/cuy.js')]
+    const fuente = [process.env.ADAPTA_SDK_MASCOTA, path.join(raiz, '../../compartido/mascota-sdk/src/cuy.js'),
+        path.join(require('node:os').homedir(), 'Desktop/Mascota-Modular-Adapta-PE/src/cuy.js')]
         .find(ruta => ruta && fs.existsSync(ruta));
     if (!fuente) { console.log('  (SDK de mascotas ausente: comparación omitida)'); return; }
     assert.ok(fs.readFileSync(fuente).equals(fs.readFileSync(path.join(raiz, 'mascotas/motor.js'))), 'Copia src/cuy.js del SDK a mascotas/motor.js (Base y Lite)');
@@ -1076,6 +1113,9 @@ comprobar('Atracción local evita controles deshabilitados/ocultos y no arma cli
     motor.posX = 100; boton.disabled = true; motor.atraerCursor(33); assert.equal(motor.posX, 100);
     boton.disabled = false; oculto = true; motor.atraerCursor(33); assert.equal(motor.posX, 100);
     oculto = false; motor.posX = 20; motor.atraerCursor(33); assert.equal(motor.posX, 20);
+    // El panel puede apagar la atracción (ajustesCineticos.atraccion) y se aplica en vivo.
+    motor.posX = 100; motor.aplicarAjustes({ atraccion: false }); motor.atraerCursor(33); assert.equal(motor.posX, 100);
+    motor.aplicarAjustes({ atraccion: true }); motor.atraerCursor(33); assert.ok(motor.posX > 100);
 });
 
 async function principal() {
@@ -1284,7 +1324,7 @@ async function principal() {
     });
 
     comprobar('Archivos compartidos idénticos y Lite sin cámara/TalkBack', () => {
-        for (const [completa, ligera] of [['sitios.js', 'sitios.js'], ['textos.js', 'textos.js'], ['classes/VoiceAssistant.js', 'clases/VoiceAssistant.js'], ['background.js', 'background.js'], ['classes/FiltrosDaltonismo.js', 'clases/FiltrosDaltonismo.js'], ['filtros_frames.js','filtros_frames.js'], ['voz/escucha.js','voz/escucha.js'], ['voz/permisos.js','voz/permisos.js'], ['voz/popup.js','voz/popup.js'], ['mascotas/Mascota.js','mascotas/Mascota.js'], ['mascotas/motor.js','mascotas/motor.js'], ['mascotas/popup.js','mascotas/popup.js']]) {
+        for (const [completa, ligera] of soloBase ? [] : [['sitios.js', 'sitios.js'], ['textos.js', 'textos.js'], ['classes/VoiceAssistant.js', 'clases/VoiceAssistant.js'], ['background.js', 'background.js'], ['classes/FiltrosDaltonismo.js', 'clases/FiltrosDaltonismo.js'], ['filtros_frames.js','filtros_frames.js'], ['voz/escucha.js','voz/escucha.js'], ['voz/permisos.js','voz/permisos.js'], ['voz/popup.js','voz/popup.js'], ['mascotas/Mascota.js','mascotas/Mascota.js'], ['mascotas/motor.js','mascotas/motor.js'], ['mascotas/popup.js','mascotas/popup.js']]) {
             const contenidoBase = fs.readFileSync(path.join(raiz, completa), 'utf8');
             const contenidoLite = fs.readFileSync(path.join(lite, ligera), 'utf8');
             assert.equal(contenidoBase, contenidoLite);
@@ -1452,7 +1492,9 @@ async function principal() {
     await enviar({ accion: 'buscar_inteligente', sitio: 'instagram', query: 'arte', destino: 'actual' });
     assert.match(aperturas.at(-1).url, /arte%20site%3Awww.instagram.com/);
     assert.equal((await enviar({ accion: 'abrir_url', url: 'javascript:alert(1)' })).ok, false);
-    await enviar({ accion: 'cerrar_ventana' }); assert.equal(aperturas.at(-1).cerrarVentana, 1);
+    chrome.storage.local = { get: async () => ({}) };
+    assert.equal((await enviar({ accion: 'cerrar_ventana' })).resultado, 'confirmando');
+    assert.notEqual(aperturas.at(-1).cerrarVentana, 1, 'No cerrar antes de confirmar');
     await enviar({ accion: 'cambiar_pestana', direccion: -1 }); assert.equal(aperturas.at(-1).id, 20);
     comprobaciones++; console.log('✓ Service worker: portadas, búsqueda, validación, ventanas y pestañas');
     const notificaciones = [], guardadosMascota = [], locuciones = [];

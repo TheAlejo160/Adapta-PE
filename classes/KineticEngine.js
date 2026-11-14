@@ -4,6 +4,8 @@ const textos = {
     es: {
         'cinetico.camara': 'Cámara: cabeza y torso calibran postura; extremidades usan centro fijo y gestos suaves. Pinza pulgar-índice o boca abierta: clic al soltar. Controles por voz: Computadora, pausar cursor; clic derecho.',
         'cinetico.cargando': 'Cargando detección local…',
+        'cinetico.permiso': 'Autoriza la cámara en la pestaña de permisos',
+        'cinetico.sinImagen': 'Sin imágenes de la cámara. Causas probables: falta el permiso, el modelo local aún carga o la página está protegida. Di «activa el cursor» para reintentar.',
         'cinetico.ayuda': 'Computadora: recalibrar · clic derecho · activar temblor',
         'cinetico.buscandoTextura': 'Mueve ligeramente la extremidad visible · buscando textura',
         'cinetico.texturaNoVisible': 'Textura no visible · cursor detenido',
@@ -37,6 +39,8 @@ const textos = {
     en: {
         'cinetico.camara': 'Camera: head and torso calibrate posture; limbs use a fixed center and gentle gestures. Thumb-index pinch or open mouth: click on release. Voice controls: Computer, pause cursor; right click.',
         'cinetico.cargando': 'Loading local detection…',
+        'cinetico.permiso': 'Allow the camera in the permission tab',
+        'cinetico.sinImagen': 'No camera images. Likely causes: missing permission, the local model is still loading, or the page is protected. Say “activate the cursor” to retry.',
         'cinetico.ayuda': 'Computer: recalibrate · right click · enable tremor',
         'cinetico.buscandoTextura': 'Move the visible limb slightly · looking for texture',
         'cinetico.texturaNoVisible': 'Texture not visible · cursor stopped',
@@ -70,6 +74,8 @@ const textos = {
     pt: {
         'cinetico.camara': 'Câmera: cabeça e tronco calibram a postura; membros usam centro fixo e gestos suaves. Pinça polegar-indicador ou boca aberta: clique ao soltar. Controles por voz: Computador, pausar cursor; clique direito.',
         'cinetico.cargando': 'Carregando detecção local…',
+        'cinetico.permiso': 'Autorize a câmera na aba de permissões',
+        'cinetico.sinImagen': 'Sem imagens da câmera. Causas prováveis: falta a permissão, o modelo local ainda carrega ou a página é protegida. Diga «ativa o cursor» para tentar de novo.',
         'cinetico.ayuda': 'Computador: recalibrar · clique direito · ativar tremor',
         'cinetico.buscandoTextura': 'Mova levemente o membro visível · buscando textura',
         'cinetico.texturaNoVisible': 'Textura não visível · cursor parado',
@@ -103,6 +109,8 @@ const textos = {
     de: {
         'cinetico.camara': 'Kamera: Kopf und Oberkörper kalibrieren die Haltung; Gliedmaßen nutzen eine feste Mitte und sanfte Gesten. Daumen-Zeigefinger-Griff oder offener Mund: Klick beim Loslassen. Sprachsteuerung: Computer, Cursor pausieren; Rechtsklick.',
         'cinetico.cargando': 'Lokale Erkennung wird geladen…',
+        'cinetico.permiso': 'Erlaube die Kamera im Berechtigungs-Tab',
+        'cinetico.sinImagen': 'Keine Kamerabilder. Wahrscheinliche Ursachen: fehlende Berechtigung, das lokale Modell lädt noch oder die Seite ist geschützt. Sag „aktiviere den Cursor“, um es erneut zu versuchen.',
         'cinetico.ayuda': 'Computer: neu kalibrieren · Rechtsklick · Zittern aktivieren',
         'cinetico.buscandoTextura': 'Bewege die sichtbare Gliedmaße leicht · Textur wird gesucht',
         'cinetico.texturaNoVisible': 'Textur nicht sichtbar · Cursor angehalten',
@@ -136,6 +144,8 @@ const textos = {
     fr: {
         'cinetico.camara': 'Caméra : la tête et le torse calibrent la posture ; les membres utilisent un centre fixe et des gestes doux. Pince pouce-index ou bouche ouverte : clic au relâchement. Commandes vocales : Ordinateur, pause curseur ; clic droit.',
         'cinetico.cargando': 'Chargement de la détection locale…',
+        'cinetico.permiso': 'Autorisez la caméra dans l’onglet des autorisations',
+        'cinetico.sinImagen': 'Aucune image de la caméra. Causes probables : autorisation manquante, modèle local encore en chargement ou page protégée. Dites « active le curseur » pour réessayer.',
         'cinetico.ayuda': 'Ordinateur : recalibrer · clic droit · activer tremblement',
         'cinetico.buscandoTextura': 'Bougez légèrement le membre visible · recherche de texture',
         'cinetico.texturaNoVisible': 'Texture non visible · curseur arrêté',
@@ -169,6 +179,8 @@ const textos = {
     it: {
         'cinetico.camara': 'Fotocamera: testa e busto calibrano la postura; gli arti usano un centro fisso e gesti delicati. Pinza pollice-indice o bocca aperta: clic al rilascio. Comandi vocali: Computer, pausa cursore; clic destro.',
         'cinetico.cargando': 'Caricamento del rilevamento locale…',
+        'cinetico.permiso': 'Consenti la fotocamera nella scheda dei permessi',
+        'cinetico.sinImagen': 'Nessuna immagine dalla fotocamera. Cause probabili: permesso mancante, modello locale ancora in caricamento o pagina protetta. Di’ «attiva il cursore» per riprovare.',
         'cinetico.ayuda': 'Computer: ricalibra · clic destro · attiva tremore',
         'cinetico.buscandoTextura': 'Muovi leggermente l’arto visibile · ricerca della texture',
         'cinetico.texturaNoVisible': 'Texture non visibile · cursore fermo',
@@ -238,7 +250,10 @@ class KineticEngine {
         this.ultimoMovimiento = null;
         this.deteccion = null;
         this.zonaAtraccion = 0.065;
-        this.duracionClick = 1000; // Milisegundos reales, independiente del monitor/cámara.
+        this.duracionClick = 1000; // Milisegundos reales, independiente del monitor/cámara (500–1500 ajustable).
+        this.atraccionControles = true; // Atracción suave a controles cercanos; el panel puede apagarla.
+        this.faltaPermiso = false; // Lo fija el worker: el HUD pide autorizar la cámara en lugar de «Cargando».
+        this.inicioCarga = 0; this.claveCarga = 'cinetico.cargando';
         this.velocidadMaxima = 650; // Píxeles por segundo.
         this.sensibilidad = 1;
         this.amplitudControl = 1;
@@ -286,6 +301,8 @@ class KineticEngine {
         this.zonaAtraccion = this.zonaMuerta + 0.02;
         if (Number.isFinite(ajustes.velocidad)) this.sensibilidad = Math.max(0.3, Math.min(2, ajustes.velocidad));
         if ([0.55, 1].includes(ajustes.amplitud)) this.amplitudControl = ajustes.amplitud;
+        if (Number.isFinite(ajustes.dwell)) this.duracionClick = Math.max(500, Math.min(1500, ajustes.dwell));
+        if (typeof ajustes.atraccion === 'boolean') this.atraccionControles = ajustes.atraccion;
         if (this.activa && (modoAnterior !== this.modoControl || (this.modoControl === 'cabeza' && amplitudAnterior !== this.amplitudControl))) {
             this.fuenteControl = null;
             this.deteccion = null;
@@ -297,7 +314,7 @@ class KineticEngine {
     guardarAjustes() {
         // Guardar preferencias, nunca imágenes ni la postura física de una persona.
         chrome.storage.local.set({ ajustesCineticos: { modo: this.modoControl, temblor: this.zonaMuerta > 0.05,
-            velocidad: this.sensibilidad, amplitud: this.amplitudControl } }).catch(() => {});
+            velocidad: this.sensibilidad, amplitud: this.amplitudControl, dwell: this.duracionClick, atraccion: this.atraccionControles } }).catch(() => {});
     }
 
     iniciarCamara() {
@@ -307,6 +324,7 @@ class KineticEngine {
         this.numeroFotograma = 0; this.ultimoVideo = -1; this.ultimoTiempo = null;
         this.deteccion = null; this.grisesRecibidos = false;
         this.puntoActual = { ...this.puntoBase };
+        this.inicioCarga = performance.now(); this.claveCarga = 'cinetico.cargando';
         this.calibrar(); this.pausada = false; this.tipoClick = 'izquierdo';
         this.modeloEnviado = null; this.solicitarModelo(); this.programarFotograma();
     }
@@ -314,7 +332,7 @@ class KineticEngine {
     recibirFotograma(datos) {
         if (!this.activa || datos?.modo !== this.modoControl || !Number.isFinite(datos.edad) || datos.edad > 500) return;
         this.deteccion = { ...datos, tiempo: performance.now() - Math.max(0, datos.edad) };
-        this.numeroFotograma++;
+        this.numeroFotograma++; this.faltaPermiso = false;
         if (Array.isArray(datos.grises) && datos.grises.length === this.grises.length) {
             this.grises.set(datos.grises); this.grisesRecibidos = true;
         }
@@ -357,7 +375,7 @@ class KineticEngine {
     actualizarTextos() {
         this.canvasEl?.setAttribute('aria-label', t('cinetico.camara'));
         if (this.ayuda) this.ayuda.textContent = t('cinetico.ayuda');
-        if (this.hud && !this.numeroFotograma) this.hud.textContent = t('cinetico.cargando');
+        if (this.hud && !this.numeroFotograma) this.hud.textContent = t(this.claveCarga);
         if (this.aviso?.isConnected && this.claveAviso) this.aviso.textContent = t(this.claveAviso);
         this.menu?.remove();
     }
@@ -1056,6 +1074,7 @@ class KineticEngine {
     }
 
     atraerCursor(intervalo) {
+        if (!this.atraccionControles) return;
         const selector = 'button, a[href], input, textarea, select, summary, [role="button"], [role="link"], [role="checkbox"], [role="radio"], [contenteditable="true"]';
         // Sondeo local acotado: no recorrer todos los controles de una página por imagen.
         let mejor = null;
@@ -1237,12 +1256,20 @@ class KineticEngine {
         this.dibujarCursor(progreso);
     }
 
+    // Antes de la primera imagen el HUD dice qué falta: permiso o, pasados 15 s, las causas probables.
+    mostrarCarga(tiempo) {
+        this.claveCarga = this.faltaPermiso ? 'cinetico.permiso' : tiempo - this.inicioCarga > 15000 ? 'cinetico.sinImagen' : 'cinetico.cargando';
+        const texto = t(this.claveCarga);
+        if (this.hud.textContent !== texto) this.hud.textContent = texto;
+    }
+
     bucleRender(tiempo) {
         if (!this.activa) return;
         try {
             this.solicitarModelo();
             // Una imagen central nueva por paso; no repetir inferencias para completar dwell.
             const imagen = this.numeroFotograma;
+            if (!imagen) this.mostrarCarga(tiempo);
             if (this.deteccion && tiempo - this.deteccion.tiempo > 500) {
                 this.perdidaDesde ??= tiempo; this.fiableDesde = null; this.muestraGesto = null; this.puntoGesto = null;
                 if (this.modoControl !== 'cabeza') { this.ultimoMovimiento = null; this.puntoSuave = { ...this.puntoBase }; }

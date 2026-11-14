@@ -1,0 +1,13 @@
+En Mac, necesitas mac O S Sonoma o más reciente. Funciona en Mac con Intel y con Apple Silicon.
+
+Abre el archivo DMG y arrastra Adapta Pe a la carpeta Aplicaciones.
+
+Si mac O S la bloquea la primera vez, ve a Ajustes del Sistema, Privacidad y seguridad, y pulsa «Abrir de todos modos».
+
+Luego da los permisos: micrófono y reconocimiento de voz para hablar, y Accesibilidad para que pueda pulsar y escribir por ti.
+
+Para los filtros de color, también te pedirá Grabación de pantalla. Y en base, la cámara.
+
+Adapta Pe aparece en la barra de menú, arriba. Enciende la voz y di: «Computadora, abre Safari».
+
+Por ahora, las apps de escritorio entienden órdenes en español.

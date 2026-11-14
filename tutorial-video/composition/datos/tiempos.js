@@ -1,0 +1,681 @@
+/* Generado por tools/generar.mjs desde datos/tiempos.json. No editar a mano. */
+window.TIEMPOS = {
+ "fps": 30,
+ "ancho": 1920,
+ "alto": 1080,
+ "capitulos": [
+  {
+   "id": "cap00",
+   "slug": "intro",
+   "titulo": "Cómo usar AdaptaPE",
+   "inicio": 0,
+   "duracion": 14.973,
+   "audio": "assets/audio/cap00.wav",
+   "frases": [
+    {
+     "id": "f1",
+     "texto": "¡Hola! Qué bueno tenerte aquí.",
+     "inicio": 0.6,
+     "fin": 2.271,
+     "visual": "Partículas que forman una onda de voz; aparece el logo."
+    },
+    {
+     "id": "f2",
+     "texto": "Imagina usar tu computadora sin tocar el ratón ni el teclado.",
+     "inicio": 2.636,
+     "fin": 6.351,
+     "visual": "Ratón y teclado se desvanecen; un cursor se mueve solo, guiado por una cabeza estilizada."
+    },
+    {
+     "id": "f3",
+     "texto": "Solo con tu voz, tu cabeza o tus manos.",
+     "inicio": 6.88,
+     "fin": 9.466,
+     "visual": "Tres iconos: voz, cabeza, mano."
+    },
+    {
+     "id": "f4",
+     "texto": "Eso es AdaptaPE. Y en este video te enseño a usarlo, paso a paso.",
+     "inicio": 9.996,
+     "fin": 14.073,
+     "visual": "Título «Cómo usar AdaptaPE» · «Extensión y escritorio · Base y Lite»."
+    }
+   ]
+  },
+  {
+   "id": "cap01",
+   "slug": "que-es",
+   "titulo": "¿Qué es AdaptaPE?",
+   "inicio": 14.973,
+   "duracion": 31.488,
+   "audio": "assets/audio/cap01.wav",
+   "frases": [
+    {
+     "id": "f1",
+     "texto": "AdaptaPE es una ayuda de accesibilidad gratuita, hecha en Perú.",
+     "inicio": 0.6,
+     "fin": 4.594,
+     "visual": "Logo + rótulo «Accesibilidad sin manos»."
+    },
+    {
+     "id": "f2",
+     "texto": "Está pensada para personas con poca movilidad en las manos, con baja visión o daltonismo, y sus familias.",
+     "inicio": 5.176,
+     "fin": 11.054,
+     "visual": "Tres tarjetas de personas: movilidad, visión/daltonismo, familia."
+    },
+    {
+     "id": "f3",
+     "texto": "Hay dos versiones. Lite es la ligera: voz, filtros de color y mascota. Ideal para computadoras sencillas o sin cámara.",
+     "inicio": 11.54,
+     "fin": 19.732,
+     "visual": "Tarjeta Lite con sus 3 funciones."
+    },
+    {
+     "id": "f4",
+     "texto": "Base lo tiene todo: además suma el cursor con cámara y la lectura en voz alta.",
+     "inicio": 20.452,
+     "fin": 25.023,
+     "visual": "Tarjeta Base: las funciones de Lite + cámara + lectura (chips «Sólo Base»)."
+    },
+    {
+     "id": "f5",
+     "texto": "Y puedes usarlas como extensión del navegador, o como aplicación en Windows y en macOS.",
+     "inicio": 25.696,
+     "fin": 30.588,
+     "visual": "Tres plataformas: navegador Chrome, Windows, macOS."
+    }
+   ]
+  },
+  {
+   "id": "cap02",
+   "slug": "instalar-extension",
+   "titulo": "Instalar la extensión",
+   "inicio": 46.461,
+   "duracion": 31.903,
+   "audio": "assets/audio/cap02.wav",
+   "frases": [
+    {
+     "id": "f1",
+     "texto": "Empecemos por la extensión. Funciona en Google Chrome, Edge o Brave, versión 119 o más reciente.",
+     "inicio": 0.6,
+     "fin": 6.632,
+     "visual": "Ventana de navegador; logos de navegadores; rótulo «Chromium 119+»."
+    },
+    {
+     "id": "f2",
+     "texto": "Lo más fácil es entrar a la Chrome Web Store, buscar AdaptaPE o AdaptaPE Lite, y pulsar «Añadir a Chrome».",
+     "inicio": 6.978,
+     "fin": 13.214,
+     "visual": "Paso 1 de 3: página de tienda falsa con botón «Añadir a Chrome» resaltado."
+    },
+    {
+     "id": "f3",
+     "texto": "Chrome te pedirá confirmar. Pulsa «Añadir extensión».",
+     "inicio": 13.612,
+     "fin": 16.72,
+     "visual": "Paso 2 de 3: diálogo «¿Añadir AdaptaPE?» con botón «Añadir extensión»."
+    },
+    {
+     "id": "f4",
+     "texto": "Luego, toca el ícono de la pieza de rompecabezas y fija AdaptaPE con el alfiler, para tenerlo siempre a mano.",
+     "inicio": 17.18,
+     "fin": 23.172,
+     "visual": "Paso 3 de 3: menú de extensiones; alfiler junto a AdaptaPE; el icono aparece en la barra."
+    },
+    {
+     "id": "f5",
+     "texto": "Si te pasaron la carpeta del proyecto, abre la página de extensiones, activa el modo de desarrollador y elige «Cargar descomprimida».",
+     "inicio": 23.776,
+     "fin": 31.003,
+     "visual": "Alternativa: chrome://extensions, interruptor «Modo de desarrollador», botón «Cargar descomprimida», carpeta con manifest.json."
+    }
+   ]
+  },
+  {
+   "id": "cap03",
+   "slug": "bienvenida-permisos",
+   "titulo": "Bienvenida y permisos",
+   "inicio": 78.364,
+   "duracion": 32.304,
+   "audio": "assets/audio/cap03.wav",
+   "frases": [
+    {
+     "id": "f1",
+     "texto": "Al instalarla se abre una página de bienvenida.",
+     "inicio": 0.6,
+     "fin": 3.215,
+     "visual": "Captura real base-bienvenida.png entrando."
+    },
+    {
+     "id": "f2",
+     "texto": "Ahí verás interruptores grandes. En Base: control por voz, cursor con cámara y lectura en voz alta. En Lite, solo la voz.",
+     "inicio": 3.778,
+     "fin": 9.757,
+     "visual": "Resaltar los interruptores uno a uno; mostrar lite-bienvenida.png al decir Lite."
+    },
+    {
+     "id": "f3",
+     "texto": "Todo empieza apagado. Tú decides qué encender.",
+     "inicio": 10.225,
+     "fin": 13.292,
+     "visual": "Interruptores apagados; uno se enciende con animación."
+    },
+    {
+     "id": "f4",
+     "texto": "Al activar la voz, se abre una página para dar permiso al micrófono. Pulsa «Permitir micrófono», y en el aviso de Chrome, «Permitir».",
+     "inicio": 13.824,
+     "fin": 22.479,
+     "visual": "Captura base-permisos-voz.png; botón «Permitir micrófono»; aviso del navegador con «Permitir»."
+    },
+    {
+     "id": "f5",
+     "texto": "Con la cámara pasa lo mismo, y la imagen se procesa solo en tu equipo. Nunca sale de tu computadora.",
+     "inicio": 23.15,
+     "fin": 28.255,
+     "visual": "Página de permiso de cámara; icono de candado + rótulo «Se procesa en tu equipo»."
+    },
+    {
+     "id": "f6",
+     "texto": "Solo lo haces una vez y sirve para todas las páginas.",
+     "inicio": 28.757,
+     "fin": 31.404,
+     "visual": "Check verde; varias pestañas con el mismo icono."
+    }
+   ]
+  },
+  {
+   "id": "cap04",
+   "slug": "panel",
+   "titulo": "El panel de AdaptaPE",
+   "inicio": 110.668,
+   "duracion": 25.943,
+   "audio": "assets/audio/cap04.wav",
+   "frases": [
+    {
+     "id": "f1",
+     "texto": "Toca el ícono de AdaptaPE y se abre su panel. Aquí está todo.",
+     "inicio": 0.6,
+     "fin": 4.408,
+     "visual": "Clic en el icono fijado; captura real base-popup.png se despliega."
+    },
+    {
+     "id": "f2",
+     "texto": "Arriba, la lectura en voz alta y el control por voz, con su idioma: español, inglés, portugués, alemán, francés o italiano.",
+     "inicio": 4.883,
+     "fin": 12.11,
+     "visual": "Resaltar «Lectura en voz alta», luego «Control por voz» e «Idioma»."
+    },
+    {
+     "id": "f3",
+     "texto": "Más abajo, los filtros de color, el cursor con cámara y tu mascota.",
+     "inicio": 12.817,
+     "fin": 16.964,
+     "visual": "Resaltar «Filtros de color», «Cursor con cámara», «Tu mascota»."
+    },
+    {
+     "id": "f4",
+     "texto": "Los cambios se guardan solos, y se aplican al instante, sin recargar la página.",
+     "inicio": 17.679,
+     "fin": 21.474,
+     "visual": "Rótulo «Se guarda automáticamente»; interruptor cambia y la página detrás reacciona."
+    },
+    {
+     "id": "f5",
+     "texto": "En Lite verás el mismo panel, pero sin cámara ni lectura.",
+     "inicio": 22.208,
+     "fin": 25.043,
+     "visual": "lite-popup.png al lado de base-popup.png; las dos secciones extra marcadas «Sólo Base»."
+    }
+   ]
+  },
+  {
+   "id": "cap05",
+   "slug": "voz-basico",
+   "titulo": "Habla con AdaptaPE",
+   "inicio": 136.611,
+   "duracion": 34.002,
+   "audio": "assets/audio/cap05.wav",
+   "frases": [
+    {
+     "id": "f1",
+     "texto": "Ahora, la magia: la voz. Todo empieza con una palabra: «Computadora».",
+     "inicio": 0.6,
+     "fin": 5.169,
+     "visual": "Gran burbuja «Computadora» con onda de audio."
+    },
+    {
+     "id": "f2",
+     "texto": "Puedes decirlo todo de corrido: «Computadora, abre YouTube».",
+     "inicio": 5.601,
+     "fin": 10.311,
+     "visual": "Burbuja de comando; navegador falso abre YouTube."
+    },
+    {
+     "id": "f3",
+     "texto": "O en dos pasos: di «Computadora», espera el pitido, y tienes ocho segundos para dar tu orden.",
+     "inicio": 10.895,
+     "fin": 16.975,
+     "visual": "Burbuja «Computadora», pitido visual, cuenta regresiva de 8 s, luego orden."
+    },
+    {
+     "id": "f4",
+     "texto": "Abajo a la izquierda verás un aviso. En rojo, está escuchando. En azul, espera tu orden.",
+     "inicio": 17.631,
+     "fin": 23.1,
+     "visual": "Indicador inferior izquierdo rojo «Voz activa. Di «Computadora».» que pasa a azul «Di tu comando.»."
+    },
+    {
+     "id": "f5",
+     "texto": "Y habla con naturalidad. «Computadora, por favor, ábreme Wikipedia» también funciona.",
+     "inicio": 23.865,
+     "fin": 28.995,
+     "visual": "Burbuja con la frase cortés; Wikipedia se abre."
+    },
+    {
+     "id": "f6",
+     "texto": "Si no sabes qué decir, solo pregunta: «Computadora, ayuda».",
+     "inicio": 29.639,
+     "fin": 33.102,
+     "visual": "Burbuja «Computadora, ayuda» y tarjeta de ayuda con ejemplos."
+    }
+   ]
+  },
+  {
+   "id": "cap06",
+   "slug": "voz-ordenes",
+   "titulo": "Órdenes que puedes usar",
+   "inicio": 170.613,
+   "duracion": 36.337,
+   "audio": "assets/audio/cap06.wav",
+   "frases": [
+    {
+     "id": "f1",
+     "texto": "Veamos más órdenes útiles. Para buscar: «busca recetas en YouTube».",
+     "inicio": 0.6,
+     "fin": 5.084,
+     "visual": "Tarjeta de categoría «Buscar» con la frase; resultados animados."
+    },
+    {
+     "id": "f2",
+     "texto": "Para moverte por la página: «baja», «sube un poco» o «ve al final».",
+     "inicio": 5.727,
+     "fin": 9.865,
+     "visual": "Página que se desplaza al ritmo de cada orden."
+    },
+    {
+     "id": "f3",
+     "texto": "Para las pestañas: «nueva pestaña», «siguiente pestaña» o «cierra esta pestaña».",
+     "inicio": 10.647,
+     "fin": 15.507,
+     "visual": "Pestañas que se crean, cambian y cierran."
+    },
+    {
+     "id": "f4",
+     "texto": "Para elegir algo de la pantalla, di «selecciona Contacto». Se marca en amarillo. Luego di «dale clic».",
+     "inicio": 16.125,
+     "fin": 22.233,
+     "visual": "Botón «Contacto» con contorno amarillo; luego efecto de clic."
+    },
+    {
+     "id": "f5",
+     "texto": "Para escribir: «enfoca correo» y luego «escribe hola, cómo estás». Por tu seguridad, no escribe en campos de contraseña.",
+     "inicio": 22.961,
+     "fin": 29.826,
+     "visual": "Formulario; campo Correo enfocado; texto se escribe; candado en campo contraseña."
+    },
+    {
+     "id": "f6",
+     "texto": "Y también: «aumenta zoom», «pantalla completa» o «silencio» para callar la lectura.",
+     "inicio": 30.476,
+     "fin": 35.437,
+     "visual": "Tres chips de comandos con su efecto: zoom, pantalla completa, silencio."
+    }
+   ]
+  },
+  {
+   "id": "cap07",
+   "slug": "camara-modos",
+   "titulo": "Mueve el cursor con tu cuerpo",
+   "inicio": 206.95,
+   "duracion": 47.219,
+   "audio": "assets/audio/cap07.wav",
+   "frases": [
+    {
+     "id": "f1",
+     "texto": "Ahora, el cursor con cámara. Esto es solo de la versión Base.",
+     "inicio": 0.6,
+     "fin": 4.096,
+     "visual": "Chip «Sólo Base»; cámara web estilizada."
+    },
+    {
+     "id": "f2",
+     "texto": "Enciende «Cursor con cámara» en el panel y elige qué usarás para moverlo. Hay tres modos.",
+     "inicio": 4.502,
+     "fin": 10.788,
+     "visual": "Selector «¿Qué quieres usar para moverlo?» con 3 opciones."
+    },
+    {
+     "id": "f3",
+     "texto": "Cabeza y torso: siéntate cómodo y quédate quieto un segundo. AdaptaPE aprende tu postura.",
+     "inicio": 11.423,
+     "fin": 17.069,
+     "visual": "Silueta de cabeza; anillo de calibración que se completa en 1 s."
+    },
+    {
+     "id": "f4",
+     "texto": "Luego, inclina un poco la cabeza y el cursor se mueve. Vuelve al centro y se detiene.",
+     "inicio": 17.872,
+     "fin": 23.536,
+     "visual": "Cabeza inclinada → cursor se desplaza; vuelve → cursor quieto; zona segura verde."
+    },
+    {
+     "id": "f5",
+     "texto": "Brazos, manos o puños: funciona como un joystick invisible. Mueve la mano un poco, sostenla, y el cursor avanza.",
+     "inicio": 24.196,
+     "fin": 32.198,
+     "visual": "Mano estilizada con puntos; línea celeste de dirección; cursor avanza."
+    },
+    {
+     "id": "f6",
+     "texto": "Muñón o mano parcial: sigue una zona con textura, como la piel, una venda o la manga. No necesita dedos.",
+     "inicio": 33.142,
+     "fin": 40.754,
+     "visual": "Parche de textura rastreado con recuadro; cursor responde."
+    },
+    {
+     "id": "f7",
+     "texto": "Consejo: busca buena luz de frente, y evita tener una ventana brillante detrás de ti.",
+     "inicio": 41.586,
+     "fin": 46.319,
+     "visual": "Icono de lámpara frontal ✓ vs ventana a contraluz ✗."
+    }
+   ]
+  },
+  {
+   "id": "cap08",
+   "slug": "clic-sin-manos",
+   "titulo": "Haz clic sin manos",
+   "inicio": 254.169,
+   "duracion": 33.875,
+   "audio": "assets/audio/cap08.wav",
+   "frases": [
+    {
+     "id": "f1",
+     "texto": "¿Y el clic? La forma más simple: deja el cursor quieto sobre un botón durante un segundo. Un anillo se llena, y listo, clic.",
+     "inicio": 0.6,
+     "fin": 8.97,
+     "visual": "Cursor sobre botón; anillo de dwell se llena en 1 s; efecto de clic."
+    },
+    {
+     "id": "f2",
+     "texto": "Con la mano: junta el pulgar y el índice, como una pinza, y suelta. Si mantienes la pinza un momento, es clic derecho.",
+     "inicio": 9.913,
+     "fin": 17.018,
+     "visual": "Mano: pinza corta = clic; pinza sostenida 0,7 s = clic derecho (menú)."
+    },
+    {
+     "id": "f3",
+     "texto": "Con la cabeza: abre la boca y ciérrala. Al cerrar, hace clic. Si bostezas, no cuenta.",
+     "inicio": 17.909,
+     "fin": 22.032,
+     "visual": "Rostro estilizado: boca abre/cierra → clic; bostezo largo → cancelado."
+    },
+    {
+     "id": "f4",
+     "texto": "También puedes cerrar el puño para dejar quieto el cursor y hacer clic al segundo.",
+     "inicio": 22.767,
+     "fin": 28.518,
+     "visual": "Mano abierta → puño; cursor se fija; anillo 1 s; clic."
+    },
+    {
+     "id": "f5",
+     "texto": "Y siempre puedes decir: «Computadora, clic», o «clic derecho».",
+     "inicio": 29.415,
+     "fin": 32.975,
+     "visual": "Burbuja de voz «Computadora, clic»."
+    }
+   ]
+  },
+  {
+   "id": "cap09",
+   "slug": "lectura-filtros",
+   "titulo": "Lectura y filtros de color",
+   "inicio": 288.044,
+   "duracion": 23.234,
+   "audio": "assets/audio/cap09.wav",
+   "frases": [
+    {
+     "id": "f1",
+     "texto": "La lectura en voz alta, en Base, lee lo que señalas. Pasa el cursor sobre un texto o botón y escucharás lo que dice. Para callarla, di «Computadora, silencio».",
+     "inicio": 0.6,
+     "fin": 9.701,
+     "visual": "Cursor sobre botón; contorno rojo; ondas de sonido; rótulo «Sólo Base»."
+    },
+    {
+     "id": "f2",
+     "texto": "Los filtros de color ayudan a las personas con daltonismo a distinguir mejor los colores. Hay siete, y están en Base y Lite.",
+     "inicio": 10.397,
+     "fin": 16.554,
+     "visual": "Página de colores; lista de los 7 filtros."
+    },
+    {
+     "id": "f3",
+     "texto": "Elige uno en el panel y la página cambia al instante. Para volver a la normalidad, pulsa «Quitar filtro».",
+     "inicio": 17.14,
+     "fin": 22.334,
+     "visual": "Misma página pasando por varios filtros (deuteranopía, tritanopía, acromatopsia); botón «Quitar filtro»."
+    }
+   ]
+  },
+  {
+   "id": "cap10",
+   "slug": "mascotas-pestana",
+   "titulo": "Mascotas y Nueva pestaña",
+   "inicio": 311.278,
+   "duracion": 29.644,
+   "audio": "assets/audio/cap10.wav",
+   "frases": [
+    {
+     "id": "f1",
+     "texto": "¿Quieres compañía? Elige una mascota: Tinku, el gallito de las rocas; Cuchu, el cuy; o Yati, la llama.",
+     "inicio": 0.6,
+     "fin": 8.728,
+     "visual": "Las tres mascotas aparecen una a una con su nombre."
+    },
+    {
+     "id": "f2",
+     "texto": "Te mira, reacciona cuando hablas, y puedes decirle «saluda mascota» o «duerme mascota».",
+     "inicio": 9.541,
+     "fin": 14.224,
+     "visual": "Mascota siguiendo el cursor con la mirada; saluda; duerme."
+    },
+    {
+     "id": "f3",
+     "texto": "Además, AdaptaPE cambia tu página de Nueva pestaña, para que la voz y el cursor también funcionen ahí.",
+     "inicio": 14.563,
+     "fin": 21.976,
+     "visual": "Captura base-nueva-pestana.png."
+    },
+    {
+     "id": "f4",
+     "texto": "Puedes buscar, ver tus sitios favoritos y personalizarla con temas de colores, incluso uno de alto contraste.",
+     "inicio": 22.541,
+     "fin": 28.744,
+     "visual": "Panel de temas: Sistema, Claro, Oscuro, Alto contraste, Pacífico, Selva, Cielo."
+    }
+   ]
+  },
+  {
+   "id": "cap11",
+   "slug": "windows",
+   "titulo": "AdaptaPE en Windows",
+   "inicio": 340.922,
+   "duracion": 44.642,
+   "audio": "assets/audio/cap11.wav",
+   "frases": [
+    {
+     "id": "f1",
+     "texto": "¿Quieres controlar toda tu computadora, no solo el navegador? Usa la app de escritorio.",
+     "inicio": 0.6,
+     "fin": 5.197,
+     "visual": "Escritorio Windows 11 estilizado; varias apps."
+    },
+    {
+     "id": "f2",
+     "texto": "En Windows 10 u 11, descarga el instalador de Base o de Lite desde adaptape.cc y ábrelo.",
+     "inicio": 5.403,
+     "fin": 11.207,
+     "visual": "Paso 1: archivo AdaptaPE-Setup-x64.exe; ventana de instalador."
+    },
+    {
+     "id": "f3",
+     "texto": "Si aparece «Windows protegió su PC» y confías en el archivo, pulsa «Más información» y «Ejecutar de todas formas».",
+     "inicio": 11.404,
+     "fin": 18.114,
+     "visual": "Paso 2: aviso SmartScreen con «Más información» → «Ejecutar de todas formas»."
+    },
+    {
+     "id": "f4",
+     "texto": "Sigue los pasos, elige si quieres accesos directos, y al final, «Abrir Adapta PE».",
+     "inicio": 18.58,
+     "fin": 23.463,
+     "visual": "Paso 3: casillas «Crear acceso directo en el escritorio» y «…menú Inicio»; botón «Abrir Adapta PE»."
+    },
+    {
+     "id": "f5",
+     "texto": "La app vive junto al reloj, en la bandeja, y tiene un panel flotante. Enciende «Activar voz» y prueba: «Computadora, abre Bloc de notas».",
+     "inicio": 23.997,
+     "fin": 31.859,
+     "visual": "Bandeja del sistema con el icono; ventana de ajustes con «Activar voz»; burbuja de voz; Bloc de notas se abre."
+    },
+    {
+     "id": "f6",
+     "texto": "En Base, también activas el cursor con cámara y el clic por permanencia. Lite se queda con la voz, los filtros y la mascota.",
+     "inicio": 32.481,
+     "fin": 38.822,
+     "visual": "Pestañas de Base «Control, Lectura y filtros, Mascota» vs Lite «Asistente de voz, Filtros de color, Mascota»."
+    },
+    {
+     "id": "f7",
+     "texto": "Para parar todo, usa «Detener todo», o el atajo Ctrl+Shift+S.",
+     "inicio": 39.367,
+     "fin": 43.742,
+     "visual": "Botón «Detener todo» + teclas Ctrl Shift S."
+    }
+   ]
+  },
+  {
+   "id": "cap12",
+   "slug": "macos",
+   "titulo": "AdaptaPE en macOS",
+   "inicio": 385.564,
+   "duracion": 44.307,
+   "audio": "assets/audio/cap12.wav",
+   "frases": [
+    {
+     "id": "f1",
+     "texto": "En Mac, necesitas macOS Sonoma o más reciente. Funciona en Mac con Intel y con Apple Silicon.",
+     "inicio": 0.6,
+     "fin": 6.359,
+     "visual": "Escritorio macOS estilizado; rótulo «macOS 14+ · Intel y Apple Silicon»."
+    },
+    {
+     "id": "f2",
+     "texto": "Abre el archivo DMG y arrastra AdaptaPE a la carpeta Aplicaciones.",
+     "inicio": 7.362,
+     "fin": 11.464,
+     "visual": "Ventana DMG: icono de la app arrastrándose a Aplicaciones."
+    },
+    {
+     "id": "f3",
+     "texto": "Si macOS la bloquea la primera vez, ve a Ajustes del Sistema, Privacidad y seguridad, y pulsa «Abrir de todos modos».",
+     "inicio": 12.391,
+     "fin": 19.285,
+     "visual": "Ajustes del Sistema → Privacidad y seguridad → botón «Abrir de todos modos»."
+    },
+    {
+     "id": "f4",
+     "texto": "Luego da los permisos: micrófono y reconocimiento de voz para hablar, y Accesibilidad para que pueda pulsar y escribir por ti.",
+     "inicio": 19.946,
+     "fin": 27.114,
+     "visual": "Lista de permisos con interruptores: Micrófono, Reconocimiento de voz, Accesibilidad; botón «Permitir control del escritorio»."
+    },
+    {
+     "id": "f5",
+     "texto": "Para los filtros de color, también te pedirá Grabación de pantalla. Y en Base, la cámara.",
+     "inicio": 28.251,
+     "fin": 32.845,
+     "visual": "Permiso «Grabación de pantalla»; «Cámara» con chip «Sólo Base»."
+    },
+    {
+     "id": "f6",
+     "texto": "AdaptaPE aparece en la barra de menú, arriba. Enciende la voz y di: «Computadora, abre Safari».",
+     "inicio": 34.204,
+     "fin": 39.994,
+     "visual": "Barra de menú con icono; menú «Activar voz»; burbuja; Safari se abre."
+    },
+    {
+     "id": "f7",
+     "texto": "Por ahora, las apps de escritorio entienden órdenes en español.",
+     "inicio": 40.94,
+     "fin": 43.407,
+     "visual": "Rótulo «Escritorio: órdenes en español»."
+    }
+   ]
+  },
+  {
+   "id": "cap13",
+   "slug": "cierre",
+   "titulo": "Consejos y despedida",
+   "inicio": 429.871,
+   "duracion": 26.597,
+   "audio": "assets/audio/cap13.wav",
+   "frases": [
+    {
+     "id": "f1",
+     "texto": "Antes de irte, unos consejos rápidos.",
+     "inicio": 0.6,
+     "fin": 3.01,
+     "visual": "Título «Consejos rápidos»."
+    },
+    {
+     "id": "f2",
+     "texto": "Si tienes Base y Lite a la vez, enciende la voz solo en una.",
+     "inicio": 3.216,
+     "fin": 7.132,
+     "visual": "Dos iconos; uno con voz encendida, otro apagado ✓."
+    },
+    {
+     "id": "f3",
+     "texto": "Si no te escucha, revisa el permiso del micrófono y usa Google Chrome.",
+     "inicio": 7.731,
+     "fin": 11.346,
+     "visual": "Icono micrófono con check; logo Chrome."
+    },
+    {
+     "id": "f4",
+     "texto": "Si el cursor se va de lado, di «Computadora, recalibrar».",
+     "inicio": 11.994,
+     "fin": 15.459,
+     "visual": "Burbuja «Computadora, recalibrar»; anillo de calibración."
+    },
+    {
+     "id": "f5",
+     "texto": "Eso es todo. Ahora te toca a ti. Di «Computadora», y empieza a navegar a tu manera.",
+     "inicio": 16.191,
+     "fin": 21.503,
+     "visual": "Resumen de 4 ideas clave; mascotas despidiéndose."
+    },
+    {
+     "id": "f6",
+     "texto": "Encuentra AdaptaPE en adaptape.cc. ¡Hasta pronto!",
+     "inicio": 21.815,
+     "fin": 25.697,
+     "visual": "Logo + «adaptape.cc»."
+    }
+   ]
+  }
+ ],
+ "fundido": 0.6
+};

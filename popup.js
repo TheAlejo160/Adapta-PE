@@ -4,10 +4,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkTalkBack = document.getElementById("checkTalkBack");
     const checkVoz = document.getElementById("checkVoz");
     const selectIdiomaVoz = document.getElementById("selectIdiomaVoz");
-    const selectDaltonismo = document.getElementById("selectDaltonismo");
+    const grupoFiltros = document.getElementById("grupoDaltonismo");
+    FiltrosUI.montar(grupoFiltros);
+    const radiosFiltro = [...grupoFiltros.querySelectorAll("input")];
     const checkOjos = document.getElementById("checkOjos");
     const hintGestos = document.getElementById("hintGestos");
     const modoControl = document.getElementById("adapta-pe-modo-control");
+    const rangoDwell = document.getElementById("adapta-pe-dwell");
+    const checkAtraccion = document.getElementById("adapta-pe-atraccion");
     const estadoPanel = document.getElementById("estadoPanel");
     function mostrarEstadoPanel(clave, error = false) {
         ponerTexto(estadoPanel, clave);
@@ -18,20 +22,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const anterior = typeof ajustes.modo === "string" ? ajustes.modo : "cabeza";
         const modo = anterior.startsWith("zona") ? "zona" : ["automatico", "brazo_izquierdo", "brazo_derecho"].includes(anterior) ? "manos" : anterior === "manos" ? "manos" : "cabeza";
         modoControl.value = modo;
+        rangoDwell.value = Number.isFinite(ajustes.dwell) ? Math.max(500, Math.min(1500, ajustes.dwell)) : 1000;
+        mostrarDwell();
+        checkAtraccion.checked = ajustes.atraccion !== false;
         if (anterior !== modo) chrome.storage.local.set({ ajustesCineticos: { ...ajustes, modo } }).catch(() => {});
     }
 
+    function mostrarDwell() {
+        const segundos = (rangoDwell.value / 1000).toLocaleString(TextosAdapta.idioma, { minimumFractionDigits: 1 });
+        document.getElementById("ayudaDwell").textContent = TextosAdapta.t("popup.ayudaDwell", { segundos });
+        rangoDwell.setAttribute("aria-valuetext", TextosAdapta.t("popup.dwellValor", { segundos }));
+    }
     // 1. Cargar el estado actual desde Storage al abrir el popup
     chrome.storage.local.get(["talkback", "voz", "daltonismo", "ojos", "ajustesCineticos", "idiomaVoz"], (res) => {
         if (chrome.runtime.lastError) {
             mostrarEstadoPanel("popup.noCargo", true);
-            for (const control of [checkTalkBack, checkVoz, selectIdiomaVoz, selectDaltonismo, checkOjos, modoControl]) control.disabled = true;
+            for (const control of [checkTalkBack, checkVoz, selectIdiomaVoz, ...radiosFiltro, checkOjos, modoControl, rangoDwell, checkAtraccion]) control.disabled = true;
             return;
         }
         checkTalkBack.checked = res.talkback || false;
         checkVoz.checked = res.voz || false;
         mostrarIdioma(res.idiomaVoz);
-        selectDaltonismo.value = res.daltonismo || "ninguno";
+        FiltrosUI.poner(grupoFiltros, res.daltonismo);
         checkOjos.checked = res.ojos || false;
         actualizarModo(res.ajustesCineticos);
         actualizarUI();
@@ -49,23 +61,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Controlar la visibilidad de las cajas de ayuda (hints)
     function actualizarFiltro() {
-        const opcion = selectDaltonismo.selectedOptions[0];
-        const activo = Boolean(opcion && opcion.value !== "ninguno");
-        selectDaltonismo.closest(".select-box").dataset.filtro = activo ? opcion.value : "ninguno";
+        const valor = FiltrosUI.valor(grupoFiltros);
+        const activo = valor !== "ninguno";
+        grupoFiltros.closest(".select-box").dataset.filtro = valor;
         const estado = document.getElementById("estadoDaltonismo");
-        if (activo) { delete estado.dataset.i18n; estado.textContent = TextosAdapta.t("popup.filtroActivo", { filtro: opcion.textContent }); }
+        if (activo) { delete estado.dataset.i18n; estado.textContent = TextosAdapta.t("popup.filtroActivo", { filtro: FiltrosUI.nombre(grupoFiltros) }); }
         else ponerTexto(estado, "popup.sinFiltroActivo");
         document.getElementById("quitarDaltonismo").hidden = !activo;
     }
     document.getElementById("quitarDaltonismo").addEventListener("click", async () => {
-        selectDaltonismo.value = "ninguno";
+        FiltrosUI.poner(grupoFiltros, "ninguno");
         await guardarCambios({ daltonismo: "ninguno" });
-        selectDaltonismo.focus();
+        grupoFiltros.querySelector('input[value="ninguno"]').focus();
     });
     chrome.storage.onChanged.addListener((cambios, area) => {
         if (area !== "local") return;
         if (cambios.ajustesCineticos) actualizarModo(cambios.ajustesCineticos.newValue);
-        if (cambios.daltonismo) selectDaltonismo.value = cambios.daltonismo.newValue || "ninguno";
+        if (cambios.daltonismo) FiltrosUI.poner(grupoFiltros, cambios.daltonismo.newValue);
         if (cambios.idiomaVoz) mostrarIdioma(cambios.idiomaVoz.newValue);
         if (cambios.voz) checkVoz.checked = Boolean(cambios.voz.newValue);
         if (cambios.talkback) checkTalkBack.checked = Boolean(cambios.talkback.newValue);
@@ -73,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         actualizarUI();
     });
     // Otro idioma: rehacer los textos con variables (traducirDocumento ya cambió los demás).
-    document.addEventListener("adapta-pe-idioma", () => { mostrarIdioma(selectIdiomaVoz.value); actualizarFiltro(); });
+    document.addEventListener("adapta-pe-idioma", () => { mostrarIdioma(selectIdiomaVoz.value); actualizarFiltro(); mostrarDwell(); });
     function actualizarUI() {
         actualizarFiltro();
         hintGestos.hidden = !checkOjos.checked;
@@ -105,17 +117,21 @@ document.addEventListener('DOMContentLoaded', () => {
     checkTalkBack.addEventListener("change", () => guardarCambios({ talkback: checkTalkBack.checked }));
     checkVoz.addEventListener("change", () => guardarCambios({ voz: checkVoz.checked }));
     selectIdiomaVoz.addEventListener("change", () => guardarCambios({ idiomaVoz: selectIdiomaVoz.value }));
-    selectDaltonismo.addEventListener("change", () => guardarCambios({ daltonismo: selectDaltonismo.value }));
+    grupoFiltros.addEventListener("change", () => guardarCambios({ daltonismo: FiltrosUI.valor(grupoFiltros) }));
     checkOjos.addEventListener("change", () => guardarCambios({ ojos: checkOjos.checked }));
-    modoControl.addEventListener("change", async () => {
-        const modo = modoControl.value;
+    // Los ajustes del cursor comparten una clave: se guarda sólo el campo que cambió.
+    async function guardarAjusteCinetico(cambio, errorClave) {
         mostrarEstadoPanel("popup.guardando");
         try {
             const res = await chrome.storage.local.get("ajustesCineticos");
-            await chrome.storage.local.set({ ajustesCineticos: { ...res.ajustesCineticos, modo } });
+            await chrome.storage.local.set({ ajustesCineticos: { ...res.ajustesCineticos, ...cambio } });
             mostrarEstadoPanel("popup.guardados");
         } catch (_) {
-            mostrarEstadoPanel("popup.noGuardoModo", true);
+            mostrarEstadoPanel(errorClave, true);
         }
-    });
+    }
+    modoControl.addEventListener("change", () => guardarAjusteCinetico({ modo: modoControl.value }, "popup.noGuardoModo"));
+    rangoDwell.addEventListener("input", mostrarDwell);
+    rangoDwell.addEventListener("change", () => guardarAjusteCinetico({ dwell: Number(rangoDwell.value) }, "popup.noGuardo"));
+    checkAtraccion.addEventListener("change", () => guardarAjusteCinetico({ atraccion: checkAtraccion.checked }, "popup.noGuardo"));
 });

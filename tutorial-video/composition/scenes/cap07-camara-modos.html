@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="UTF-8"><title>Mueve el cursor con tu cuerpo</title></head>
+<body><template>
+<style>
+#cap07-raiz{position:absolute;inset:0;color:#f1f5f9;background:#0f172a}
+#cap07-cabecera{position:absolute;left:96px;top:124px;margin:0;font:700 76px/1.1 var(--ap-fuente-titulo);max-width:1400px}
+.cap07-fase{position:absolute;inset:0}
+#cap07-intro{position:absolute;left:96px;top:300px;width:1100px;font:700 104px/1.08 var(--ap-fuente-titulo)}
+#cap07-webcam{position:absolute;left:1390px;top:335px;width:300px;height:260px;color:var(--ap-azul-base)}
+#cap07-recorte{position:absolute;left:96px;top:245px;width:840px;height:485px;overflow:hidden;border-radius:20px;background:white;color:#17372f}
+#cap07-recorte img{display:block;width:840px;height:auto}
+#cap07-opciones{position:absolute;left:1030px;top:270px;width:790px;display:flex;flex-direction:column;gap:40px}
+.cap07-opcion{padding:22px 28px;border:3px solid var(--ap-borde);border-radius:16px;font-size:48px;font-weight:700}
+#cap07-camara{position:absolute;left:96px;top:255px;width:800px;height:460px;border-radius:24px;background:#182233;overflow:hidden;border:3px solid #475569}
+#cap07-camara svg{position:absolute;inset:0;width:100%;height:100%}
+#cap07-vista{position:absolute;left:124px;top:205px;font-size:36px;font-weight:700;color:var(--ap-texto-2)}
+#cap07-pagina{position:absolute;left:1016px;top:255px;width:808px;height:460px;border-radius:24px;background:#f5f7f5;color:#17372f;overflow:hidden}
+#cap07-pagina h3{margin:36px 40px 30px;font-size:44px}
+.cap07-linea{margin:22px 40px;height:16px;background:#cedbd5;border-radius:8px;width:650px}
+#cap07-objetivo{position:absolute;left:430px;top:288px;padding:22px 50px;border-radius:16px;background:#176b56;color:#fff;font-size:44px;font-weight:700}
+.cap07-estado{position:absolute;left:96px;top:744px;font-size:44px;font-weight:700;color:var(--ap-verde)}
+#cap07-ejemplo{position:absolute;left:1430px;top:748px;color:var(--ap-texto-2);font-size:36px;font-weight:700}
+.cap07-luz{position:absolute;top:265px;width:800px;height:440px;border-radius:24px;background:#182233}
+.cap07-luz svg{display:block;margin:20px auto 0;width:680px;height:295px}
+.cap07-luz p{margin:22px 0 0;text-align:center;font-size:48px;font-weight:700}
+#cap07-frente{left:96px}#cap07-contra{left:1024px}
+</style>
+<div data-hf-id="hf-83gm" id="cap07-raiz" class="ap-escena" data-composition-id="cap07" data-width="1920" data-height="1080">
+<h2 data-hf-id="hf-v11e" id="cap07-cabecera">Mueve el cursor con tu cuerpo</h2>
+<div data-hf-id="hf-vunw" id="cap07-portada" class="cap07-fase"><div data-hf-id="hf-c8gq" id="cap07-intro">Tu movimiento guía el cursor</div><svg data-hf-id="hf-exi6" id="cap07-webcam" viewBox="0 0 300 260" fill="none" stroke="currentColor" stroke-width="12" aria-hidden="true"><rect data-hf-id="hf-vzfr" x="24" y="38" width="252" height="142" rx="38"/><circle data-hf-id="hf-dppn" cx="150" cy="108" r="42"/><path data-hf-id="hf-flc4" d="M150 180v44M88 226h124"/><circle data-hf-id="hf-362f" cx="235" cy="76" r="7" fill="#86efac" stroke="none"/></svg></div>
+<div data-hf-id="hf-38xh" id="cap07-panel" class="cap07-fase"><div data-hf-id="hf-wdyr" id="cap07-recorte"><img data-hf-id="hf-9ssm" data-layout-allow-overflow src="../assets/capturas/popup-cursor.png" alt="Panel real: Cursor con cámara y selector de modos"></div><div data-hf-id="hf-pibb" id="cap07-opciones"><div data-hf-id="hf-y2z4" class="cap07-opcion">Cabeza / torso</div><div data-hf-id="hf-isye" class="cap07-opcion">Brazos, manos o puños</div><div data-hf-id="hf-zs9i" class="cap07-opcion">Muñón / mano parcial</div></div></div>
+<div data-hf-id="hf-6rvg" id="cap07-demo" class="cap07-fase">
+<div data-hf-id="hf-difn" id="cap07-vista">Vista espejada de la cámara</div><div data-hf-id="hf-q7pw" id="cap07-camara">
+<svg data-hf-id="hf-ocvw" id="cap07-cabeza" viewBox="0 0 800 460" fill="none" aria-label="Cabeza y torso con seguimiento ilustrado">
+<path data-hf-id="hf-kstv" d="M205 460v-30q0-90 195-90t195 90v30" fill="#22304a" stroke="#93c5fd" stroke-width="7"/>
+<g data-hf-id="hf-4lwm" id="cap07-rostro"><path data-hf-id="hf-30eq" d="M365 315v35m70-35v35" stroke="#93c5fd" stroke-width="7"/><ellipse data-hf-id="hf-onx1" cx="400" cy="218" rx="85" ry="108" fill="#22304a" stroke="#93c5fd" stroke-width="7"/><path data-hf-id="hf-mbi2" d="M329 180q23-90 116-58l30 55" stroke="#93c5fd" stroke-width="12" stroke-linecap="round"/><path data-hf-id="hf-9cnz" d="M363 215h10m54 0h10M382 268q18 12 36 0" stroke="#f1f5f9" stroke-width="7" stroke-linecap="round"/><circle data-hf-id="hf-68fc" cx="360" cy="205" r="5" fill="#93c5fd"/><circle data-hf-id="hf-8mxh" cx="440" cy="205" r="5" fill="#93c5fd"/></g>
+<circle data-hf-id="hf-o0ow" cx="400" cy="235" r="72" stroke="#86efac" stroke-width="5" stroke-dasharray="10 10"/><circle data-hf-id="hf-4kh3" id="cap07-calibracion" cx="400" cy="235" r="126" stroke="#86efac" stroke-width="9" stroke-dasharray="792" stroke-dashoffset="792" transform="rotate(-90 400 235)"/>
+<line data-hf-id="hf-zk5s" id="cap07-direccion-cabeza" x1="400" y1="235" x2="400" y2="235" stroke="#93c5fd" stroke-width="7"/><circle data-hf-id="hf-30zr" id="cap07-punto-cabeza" cx="400" cy="235" r="10" fill="white"/>
+</svg>
+<svg data-hf-id="hf-77p5" id="cap07-mano" viewBox="0 0 800 460" fill="none" aria-label="Mano que desplaza el joystick invisible">
+<circle data-hf-id="hf-x6bc" cx="400" cy="345" r="72" stroke="#86efac" stroke-width="5" stroke-dasharray="10 10"/>
+<g data-hf-id="hf-3cry" id="cap07-mano-movil"><path data-hf-id="hf-kujr" d="M364 460V345q-38-30-49-71l-28-65q-6-21 14-27 13-3 25 17l31 47V140q0-25 22-25t22 25v88-117q0-24 22-24t22 24v118-94q0-23 21-23t21 23v115-72q0-22 20-22t20 22v104q0 45-50 72v106" fill="#22304a" stroke="#93c5fd" stroke-width="7" stroke-linejoin="round"/><path data-hf-id="hf-jvnd" d="M365 304q43-23 97-1" stroke="#93c5fd" stroke-width="5"/><circle data-hf-id="hf-ki4w" cx="400" cy="345" r="10" fill="white"/><circle data-hf-id="hf-5hom" cx="358" cy="245" r="6" fill="#93c5fd"/><circle data-hf-id="hf-5qy0" cx="403" cy="233" r="6" fill="#93c5fd"/><circle data-hf-id="hf-4iid" cx="447" cy="234" r="6" fill="#93c5fd"/></g>
+<line data-hf-id="hf-fouj" id="cap07-direccion-mano" x1="400" y1="345" x2="400" y2="345" stroke="#93c5fd" stroke-width="7"/>
+</svg>
+<svg data-hf-id="hf-m41h" id="cap07-zona" viewBox="0 0 800 460" fill="none" aria-label="Manga texturizada rastreada, sin dedos">
+<defs data-hf-id="hf-mh0t"><pattern data-hf-id="hf-ll9z" id="cap07-tejido" width="26" height="26" patternUnits="userSpaceOnUse"><rect data-hf-id="hf-55cm" width="26" height="26" fill="#b9c5d5"/><path data-hf-id="hf-d8sh" d="M0 0l26 26M-13 0l26 26M13 0l26 26" stroke="#52645d" stroke-width="5"/></pattern></defs>
+<circle data-hf-id="hf-nydu" cx="400" cy="282" r="72" stroke="#86efac" stroke-width="5" stroke-dasharray="10 10"/>
+<g data-hf-id="hf-wiez" id="cap07-parche" data-layout-allow-overflow><path data-hf-id="hf-debt" d="M320 460V270q0-93 80-93t80 93v190" fill="url(#cap07-tejido)" stroke="#93c5fd" stroke-width="7"/><rect data-hf-id="hf-q8zs" x="346" y="228" width="108" height="108" rx="10" stroke="#86efac" stroke-width="6"/><circle data-hf-id="hf-vgki" cx="400" cy="282" r="10" fill="white"/></g><line data-hf-id="hf-g8h6" id="cap07-direccion-zona" x1="400" y1="282" x2="400" y2="282" stroke="#93c5fd" stroke-width="7"/>
+</svg>
+</div>
+<div data-hf-id="hf-0ic3" id="cap07-pagina"><h3 data-hf-id="hf-lx26">Página de práctica</h3><div data-hf-id="hf-y3sz" class="cap07-linea"></div><div data-hf-id="hf-whki" class="cap07-linea" style="width:520px"></div><div data-hf-id="hf-4vok" class="cap07-linea" style="width:580px"></div><div data-hf-id="hf-ns4f" id="cap07-objetivo">Abrir</div></div>
+<div data-hf-id="hf-oo3m" id="cap07-estados"></div><div data-hf-id="hf-tv3u" id="cap07-ejemplo">Ejemplo ilustrado</div>
+</div>
+<div data-hf-id="hf-4oaq" id="cap07-consejo" class="cap07-fase"><div data-hf-id="hf-nk7b" id="cap07-frente" class="cap07-luz"><svg data-hf-id="hf-qfoe" viewBox="0 0 680 295" fill="none" stroke-width="8" aria-hidden="true"><path data-hf-id="hf-5ud9" d="M95 220h130M160 220V105l70-55 50 58-63 55z" stroke="#b9c5d5"/><path data-hf-id="hf-s8qz" d="M270 133l68 12m-75 20 67 40m-55-98 65-20" stroke="#fcd34d" stroke-linecap="round"/><circle data-hf-id="hf-c66k" cx="440" cy="135" r="66" fill="#22304a" stroke="#93c5fd"/><path data-hf-id="hf-9dp7" d="M350 290v-15q0-58 90-58t90 58v15M416 128h4m40 0h4M420 163q20 15 40 0" stroke="#93c5fd" stroke-linecap="round"/><path data-hf-id="hf-c1sl" d="M556 92l26 26 48-59" stroke="#86efac" stroke-width="12"/></svg><p data-hf-id="hf-jl4e">Luz de frente ✓</p></div><div data-hf-id="hf-ni0w" id="cap07-contra" class="cap07-luz"><svg data-hf-id="hf-560y" viewBox="0 0 680 295" fill="none" stroke-width="8" aria-hidden="true"><rect data-hf-id="hf-kk2g" x="260" y="25" width="280" height="230" rx="8" fill="#fcd34d" stroke="#b9c5d5"/><path data-hf-id="hf-eds9" d="M400 25v230M260 140h280" stroke="#52645d"/><circle data-hf-id="hf-7wpy" cx="395" cy="145" r="65" fill="#0f172a" stroke="#93c5fd"/><path data-hf-id="hf-a50k" d="M298 295v-15q0-68 97-68t97 68v15" fill="#0f172a" stroke="#93c5fd"/><path data-hf-id="hf-hli9" d="M575 65l55 55m0-55-55 55" stroke="#fca5a5" stroke-linecap="round"/></svg><p data-hf-id="hf-9puy">Ventana detrás ✗</p></div></div>
+</div>
+<script>
+(function(){
+const ID='cap07',cap=AP.capitulo(ID),raiz=document.getElementById(ID+'-raiz'),tl=gsap.timeline({paused:true});
+const f1=AP.t(ID,'f1',.6),f2=AP.t(ID,'f2',4.98),f3=AP.t(ID,'f3',10.673),f4=AP.t(ID,'f4',17.002),f5=AP.t(ID,'f5',22.786),f6=AP.t(ID,'f6',31.171),f7=AP.t(ID,'f7',38.616);
+const el=n=>document.getElementById(ID+'-'+n);
+AP.ambiente(tl,raiz,{duracion:cap.duracion,semilla:8,puntos:false});
+function fase(n,desde,hasta){tl.fromTo(el(n),{opacity:0},{opacity:1,duration:.4},desde);if(hasta!=null)tl.to(el(n),{opacity:0,duration:.25},hasta-.25);}
+fase('portada',f1,f2);fase('panel',f2,f3);fase('demo',f3,f7);fase('consejo',f7);
+AP.chip(tl,raiz,{id:ID+'-chip',tipo:'base',x:1570,y:128,entrada:f1});
+AP.foco(tl,el('panel'),{id:ID+'-foco-toggle',x:790,y:315,ancho:132,alto:76,oscurecer:false,entrada:f2+.55,salida:f2+2.1});
+AP.foco(tl,el('panel'),{id:ID+'-foco-modo',x:200,y:596,ancho:704,alto:106,oscurecer:false,entrada:f2+2.25,salida:f3-.4});
+fase('cabeza',f3,f5);fase('mano',f5,f6);fase('zona',f6,f7);
+function estado(texto,desde,hasta){const e=document.createElement('div');e.className='cap07-estado';e.textContent=texto;el('estados').appendChild(e);AP.entrar(tl,e,desde,'subir',.25);if(hasta!=null)tl.to(e,{opacity:0,duration:.18},hasta-.18);}
+estado('Cabeza / torso · Quieto un segundo',f3,f3+3.2);estado('Postura aprendida ✓',f3+3.2,f4);estado('Inclina: avanza · Al centro: se detiene',f4,f5);estado('Brazos, manos o puños · Joystick invisible',f5,f6);estado('Muñón / mano parcial · Sigue la textura',f6,f7);
+tl.to(el('calibracion'),{attr:{'stroke-dashoffset':0},duration:1,ease:'none'},f3+2.2);
+tl.to(el('calibracion'),{opacity:0,duration:.3},f3+3.6);
+const cursor=AP.cursor(tl,el('demo'),{id:ID+'-cursor',x:1150,y:660,tipo:'punto',entrada:f3});
+tl.to(el('rostro'),{rotation:12,svgOrigin:'400 340',duration:.65,ease:'sine.inOut'},f4+.65);
+tl.to(el('punto-cabeza'),{attr:{cx:485,cy:245},duration:.65},f4+.65);tl.to(el('direccion-cabeza'),{attr:{x2:485,y2:245},duration:.65},f4+.65);
+cursor.mover(f4+1.3,1510,660,2,'none');
+tl.to(el('rostro'),{rotation:0,duration:.65,ease:'sine.inOut'},f4+3.3);tl.to(el('punto-cabeza'),{attr:{cx:400,cy:235},duration:.65},f4+3.3);tl.to(el('direccion-cabeza'),{attr:{x2:400,y2:235},duration:.65},f4+3.3);
+tl.to(el('mano-movil'),{x:66,y:-22,duration:.55,ease:'sine.inOut'},f5+2);tl.to(el('direccion-mano'),{attr:{x2:466,y2:323},duration:.55},f5+2);
+cursor.mover(f5+2.55,1700,660,3.1,'none');
+tl.to(el('mano-movil'),{x:0,y:0,duration:.55,ease:'sine.inOut'},f5+5.65);tl.to(el('direccion-mano'),{attr:{x2:400,y2:345},duration:.55},f5+5.65);
+tl.to(el('parche'),{x:-60,rotation:-7,svgOrigin:'400 282',duration:.6,ease:'sine.inOut'},f6+2);tl.to(el('direccion-zona'),{attr:{x2:340,y2:282},duration:.6},f6+2);
+cursor.mover(f6+2.6,1390,660,2.4,'none');
+tl.to(el('parche'),{x:0,rotation:0,duration:.6},f6+5);tl.to(el('direccion-zona'),{attr:{x2:400,y2:282},duration:.6},f6+5);
+window.__timelines[ID]=tl;
+})();
+</script>
+</template></body></html>

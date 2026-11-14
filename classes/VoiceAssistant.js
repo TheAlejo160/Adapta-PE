@@ -2,6 +2,7 @@
 const { SitiosVoz, normalizarVoz, reconocerSitio, IdiomasVoz, TextosAdapta } = globalThis;
 const t = TextosAdapta.t;
 const DICTADO = /^(?:escribe|dicta|introduce|ingresa texto|teclea|tipea)\s+/;
+const CANCELAR = /^(cancelar|cancela|cancela eso|olvidalo|olvida eso|no hagas nada|no importa|dejalo|nada|no|cancelar seleccion|quita(?: la)? seleccion|deselecciona)$/;
 
 // Avisos del asistente; sitios.js traduce las intenciones a las órdenes internas en español.
 TextosAdapta.definir({
@@ -19,6 +20,7 @@ TextosAdapta.definir({
         'voz.cancelado': 'Comando cancelado.', 'voz.sinCampo': 'No encontré ese campo visible.', 'voz.sinMedio': 'No encontré video o audio.',
         'voz.requiereInteraccion': 'La página requiere una interacción para reproducir.', 'voz.dimeBusqueda': 'Dime qué quieres buscar.',
         'voz.noEntendi': 'No entendí. Prueba «abre YouTube», «busca gatos en Google» o di «ayuda».',
+        'voz.corregido': 'Entendí: {orden}.', 'voz.abriendo': 'Abriendo {sitio}.', 'voz.repite': 'No estoy seguro de esa orden. Repítela, por favor.',
         'voz.permitirMicrofono': 'Permite el micrófono de AdaptaPE para usar voz en todo Chrome.',
         'voz.soloPaginas': 'En Chrome usa abre, busca o comandos de pestañas/ventanas. Dictado, clic y desplazamiento necesitan una página web.',
         'voz.cursor.temblor': 'Filtro de temblor activado.', 'voz.cursor.sinTemblor': 'Filtro de temblor desactivado.',
@@ -42,6 +44,7 @@ TextosAdapta.definir({
         'voz.cancelado': 'Command canceled.', 'voz.sinCampo': 'I could not find that visible field.', 'voz.sinMedio': 'I could not find video or audio.',
         'voz.requiereInteraccion': 'The page needs an interaction before it can play.', 'voz.dimeBusqueda': 'Tell me what you want to search for.',
         'voz.noEntendi': 'I did not understand. Try “open YouTube”, “search cats on Google” or say “help”.',
+        'voz.corregido': 'I understood: {orden}.', 'voz.abriendo': 'Opening {sitio}.', 'voz.repite': 'I am not sure about that command. Please repeat it.',
         'voz.permitirMicrofono': 'Allow the AdaptaPE microphone to use voice across Chrome.',
         'voz.soloPaginas': 'In Chrome use open, search or tab/window commands. Dictation, click and scrolling need a web page.',
         'voz.cursor.temblor': 'Tremor filter on.', 'voz.cursor.sinTemblor': 'Tremor filter off.',
@@ -65,6 +68,7 @@ TextosAdapta.definir({
         'voz.cancelado': 'Comando cancelado.', 'voz.sinCampo': 'Não encontrei esse campo visível.', 'voz.sinMedio': 'Não encontrei vídeo ou áudio.',
         'voz.requiereInteraccion': 'A página exige uma interação para reproduzir.', 'voz.dimeBusqueda': 'Diga o que você quer pesquisar.',
         'voz.noEntendi': 'Não entendi. Tente «abre YouTube», «pesquisa gatos no Google» ou diga «ajuda».',
+        'voz.corregido': 'Entendi: {orden}.', 'voz.abriendo': 'Abrindo {sitio}.', 'voz.repite': 'Não tenho certeza dessa ordem. Repita, por favor.',
         'voz.permitirMicrofono': 'Permita o microfone do AdaptaPE para usar a voz em todo o Chrome.',
         'voz.soloPaginas': 'No Chrome use abre, pesquisa ou comandos de abas/janelas. Ditado, clique e rolagem precisam de uma página web.',
         'voz.cursor.temblor': 'Filtro de tremor ativado.', 'voz.cursor.sinTemblor': 'Filtro de tremor desativado.',
@@ -88,6 +92,7 @@ TextosAdapta.definir({
         'voz.cancelado': 'Befehl abgebrochen.', 'voz.sinCampo': 'Ich habe dieses sichtbare Feld nicht gefunden.', 'voz.sinMedio': 'Ich habe kein Video oder Audio gefunden.',
         'voz.requiereInteraccion': 'Die Seite braucht eine Interaktion, um abzuspielen.', 'voz.dimeBusqueda': 'Sag mir, wonach du suchen willst.',
         'voz.noEntendi': 'Nicht verstanden. Versuche „öffne YouTube“, „suche Katzen auf Google“ oder sag „Hilfe“.',
+        'voz.corregido': 'Verstanden: {orden}.', 'voz.abriendo': '{sitio} wird geöffnet.', 'voz.repite': 'Bei diesem Befehl bin ich unsicher. Bitte wiederhole ihn.',
         'voz.permitirMicrofono': 'Erlaube das Mikrofon von AdaptaPE, um Sprache in ganz Chrome zu nutzen.',
         'voz.soloPaginas': 'In Chrome nutze öffne, suche oder Tab- und Fensterbefehle. Diktat, Klick und Scrollen brauchen eine Webseite.',
         'voz.cursor.temblor': 'Zitterfilter aktiviert.', 'voz.cursor.sinTemblor': 'Zitterfilter deaktiviert.',
@@ -111,6 +116,7 @@ TextosAdapta.definir({
         'voz.cancelado': 'Commande annulée.', 'voz.sinCampo': "Je n'ai pas trouvé ce champ visible.", 'voz.sinMedio': "Je n'ai trouvé ni vidéo ni audio.",
         'voz.requiereInteraccion': 'La page exige une interaction pour lancer la lecture.', 'voz.dimeBusqueda': 'Dites-moi ce que vous voulez chercher.',
         'voz.noEntendi': "Je n'ai pas compris. Essayez « ouvre YouTube », « cherche chats sur Google » ou dites « aide ».",
+        'voz.corregido': 'Compris : {orden}.', 'voz.abriendo': 'Ouverture de {sitio}.', 'voz.repite': 'Je ne suis pas sûr de cet ordre. Répétez-le, s’il vous plaît.',
         'voz.permitirMicrofono': "Autorisez le micro d'AdaptaPE pour utiliser la voix dans tout Chrome.",
         'voz.soloPaginas': "Dans Chrome, utilisez ouvre, cherche ou les commandes d'onglets et de fenêtres. Dictée, clic et défilement nécessitent une page web.",
         'voz.cursor.temblor': 'Filtre de tremblement activé.', 'voz.cursor.sinTemblor': 'Filtre de tremblement désactivé.',
@@ -134,6 +140,7 @@ TextosAdapta.definir({
         'voz.cancelado': 'Comando annullato.', 'voz.sinCampo': 'Non ho trovato quel campo visibile.', 'voz.sinMedio': 'Non ho trovato video o audio.',
         'voz.requiereInteraccion': "La pagina richiede un'interazione per riprodurre.", 'voz.dimeBusqueda': 'Dimmi cosa vuoi cercare.',
         'voz.noEntendi': 'Non ho capito. Prova «apri YouTube», «cerca gatti su Google» o di «aiuto».',
+        'voz.corregido': 'Ho capito: {orden}.', 'voz.abriendo': 'Apro {sitio}.', 'voz.repite': 'Non sono sicuro di questo comando. Ripetilo, per favore.',
         'voz.permitirMicrofono': 'Consenti il microfono di AdaptaPE per usare la voce in tutto Chrome.',
         'voz.soloPaginas': 'In Chrome usa apri, cerca o i comandi di schede e finestre. Dettatura, clic e scorrimento richiedono una pagina web.',
         'voz.cursor.temblor': 'Filtro tremore attivato.', 'voz.cursor.sinTemblor': 'Filtro tremore disattivato.',
@@ -212,6 +219,85 @@ class VoiceAssistant {
         this.elementoSeleccionado = null;
         this.idSeleccion = 'adapta-pe-seleccion-' + (chrome.runtime.id || 'local');
         this.idioma = 'es-PE';
+        this.nombreActivacion = ''; // Vacío: «Computadora» y la palabra del idioma.
+        this.aliasActivacion = [];
+        this.tambienComputadora = false;
+        this.modoConversacion = false;
+        this.estadoConversacion = 'inactivo';
+        this.ttsActivos = new Set();
+        this.resultadosDuranteTTS = new Set();
+        this.indicesPendientes = [];
+        this.turnoConversacion = 0;
+    }
+
+    // Nombre de activación personalizado (`nombreActivacion`); no reinicia el reconocedor.
+    setNombreActivacion(nombre) {
+        const validado = validarNombreActivacion(nombre);
+        const vigente = validado.ok ? validado.nombre : '';
+        if (vigente === this.nombreActivacion) return;
+        this.nombreActivacion = vigente;
+        if (this.microfonoIniciado && !this.esperandoComando) this.mostrarEstado();
+    }
+
+    configurarActivacion(preferencias) {
+        this.setNombreActivacion(preferencias.nombreActivacion);
+        this.aliasActivacion = validarAliasActivacion(preferencias.aliasActivacion || [], this.nombreActivacion).alias;
+        this.tambienComputadora = preferencias.tambienComputadora === true;
+        const modo = preferencias.modoConversacion === true;
+        if (this.modoConversacion !== modo) { this.cancelarEspera(); this.turnoConversacion++; }
+        this.modoConversacion = modo;
+    }
+
+    abrirEspera() {
+        this.cancelarEspera();
+        this.esperandoComando = true; this.estadoConversacion = 'esperando';
+        this.mostrarEstado(t('voz.espera'), 'espera');
+        this.temporizadorEspera = setTimeout(() => { this.cancelarEspera(); this.mostrarEstado(); }, ParidadVoz.comportamiento.ventanaMs);
+    }
+
+    recibirResultado(respuesta) {
+        this.resultadoConversacion = respuesta?.resultado || (respuesta?.ok ? 'ok' : 'fallo');
+        if (this.resultadoConversacion === 'confirmando') this.confirmacionPendiente = true;
+        this.renovarConversacion();
+    }
+
+    renovarConversacion() {
+        if (this.ttsActivos.size) { this.estadoConversacion = 'hablando'; return; }
+        if (this.confirmacionPendiente) {
+            // Los 8 s para responder empiezan al terminar la pregunta, como en el worker.
+            this.estadoConversacion = 'confirmando'; clearTimeout(this.temporizadorConfirmacion);
+            this.temporizadorConfirmacion = setTimeout(() => { this.confirmacionPendiente = false; this.estadoConversacion = 'inactivo'; }, ParidadVoz.comportamiento.confirmacionMs);
+            return;
+        }
+        if (this.modoConversacion && this.resultadoConversacion === 'ok' && !this.errorTTS && this.microfonoIniciado && this.permitidoPorUsuario) {
+            this.resultadoConversacion = null; this.abrirEspera();
+        } else this.estadoConversacion = 'inactivo';
+    }
+
+    eventoTTS(id, evento) {
+        if (evento === 'inicio') {
+            this.ttsActivos.add(id); this.cancelarEspera(); this.estadoConversacion = 'hablando';
+            // Como la mascota: si el fin nunca llega (worker reiniciado), no quedar sordo más de 60 s.
+            setTimeout(() => this.eventoTTS(id, 'error'), 60000);
+            for (const indice of this.indicesPendientes) this.resultadosDuranteTTS.add(indice);
+            clearTimeout(this.temporizadorSilencio); this.textoReconocido = '';
+        } else if (this.ttsActivos.delete(id)) {
+            // Una pregunta de confirmación interrumpida o fallida cancela la confirmación.
+            if (evento !== 'fin') { this.errorTTS = true; this.resultadoConversacion = null; this.confirmacionPendiente = false; clearTimeout(this.temporizadorConfirmacion); }
+            this.renovarConversacion();
+        }
+    }
+
+    // «Probar nombre»: la siguiente frase se entrega sin ejecutar. Al caducar (15 s) se descartan las
+    // frases empezadas durante la prueba para que no se ejecuten como órdenes.
+    probarNombre(alCapturar) {
+        this.cancelarEspera(); this.textoReconocido = '';
+        clearTimeout(this.temporizadorPrueba);
+        this.alProbarNombre = alCapturar;
+        this.temporizadorPrueba = setTimeout(() => {
+            this.alProbarNombre = null; this.textoReconocido = ''; clearTimeout(this.temporizadorSilencio);
+            for (const indice of this.indicesPendientes) this.resultadosDuranteTTS.add(indice);
+        }, 15000);
     }
 
     setIdioma(idioma) {
@@ -240,7 +326,8 @@ class VoiceAssistant {
 
     // tipo: 'error' | 'espera' (tras la palabra de activación) | 'escucha' | 'activa' | undefined.
     mostrarEstado(texto, tipo) {
-        if (texto === undefined) { texto = t('voz.activa', { palabra: IdiomasVoz[TextosAdapta.idioma].palabra }); tipo = 'activa'; }
+        if (tipo === 'error' && this.ejecucion) this.ejecucion.resultado = 'fallo';
+        if (texto === undefined) { texto = t('voz.activa', { palabra: palabraActivacion(this.nombreActivacion, TextosAdapta.idioma) }); tipo = 'activa'; }
         this.alEstado?.(texto, tipo);
         if (this.ui) {
             this.ui.textContent = texto;
@@ -268,9 +355,14 @@ class VoiceAssistant {
     cancelarEspera() {
         clearTimeout(this.temporizadorEspera);
         this.esperandoComando = false;
+        this.estadoConversacion = 'inactivo';
     }
 
     detener() {
+        this.turnoConversacion++;
+        this.resultadoConversacion = null; this.confirmacionPendiente = false;
+        clearTimeout(this.temporizadorConfirmacion); clearTimeout(this.temporizadorPrueba);
+        this.alProbarNombre = null;
         this.microfonoIniciado = false;
         clearTimeout(this.temporizadorSilencio);
         clearTimeout(this.temporizadorReinicio);
@@ -312,6 +404,7 @@ class VoiceAssistant {
             if (this.reconocimientoVoz !== reconocimiento) return;
             this.indiceResultado = 0;
             this.resultadosConsumidos.clear();
+            this.resultadosDuranteTTS.clear(); this.indicesPendientes = []; this.fraseDuranteTTS = false;
             this.textoReconocido = '';
             if (this.esperandoComando) this.mostrarEstado(t('voz.espera'), 'espera'); else this.mostrarEstado();
         };
@@ -320,16 +413,27 @@ class VoiceAssistant {
             // Algunos navegadores tardan en cerrar los resultados finales. Esperar una
             // transcripción estable también permite recuperar el comportamiento anterior.
             const pendientes = [];
+            this.indicesPendientes = [];
             let todosFinales = true;
             for (let indice = 0; indice < evento.results.length; indice++) {
                 const resultado = evento.results[indice];
                 const frase = resultado[0].transcript.trim();
+                if (this.ttsActivos.size || this.fraseDuranteTTS) this.resultadosDuranteTTS.add(indice);
+                if (this.resultadosDuranteTTS.has(indice)) {
+                    const interrupciones = ParidadVoz.activacion.interrupciones[this.idioma.slice(0, 2)] || [];
+                    if (resultado.isFinal && this.resultadosConsumidos.get(indice) !== frase && interrupciones.includes(normalizarVoz(frase).replace(/[.!?]+$/, '')) && this.ttsActivos.size) {
+                        this.resultadosConsumidos.set(indice, frase); this.resultadoConversacion = null; this.enviar({ accion: 'callar' });
+                    }
+                    continue;
+                }
                 const consumido = this.resultadosConsumidos.get(indice) || '';
                 const normalizarPrefijo = texto => normalizarVoz(texto).replace(/[.,!?;:]/g, '');
                 const continua = consumido && normalizarPrefijo(frase).startsWith(normalizarPrefijo(consumido));
                 const restante = continua ? frase.split(/\s+/).slice(consumido.split(/\s+/).length).join(' ') : consumido ? '' : frase;
-                if (restante) { pendientes.push(restante); todosFinales &&= resultado.isFinal; }
+                if (restante) { pendientes.push(restante); this.indicesPendientes.push(indice); todosFinales &&= resultado.isFinal; }
             }
+            // En modo continuo speechstart llega una vez por sesión: tras el TTS no descartar las frases nuevas.
+            if (!this.ttsActivos.size) this.fraseDuranteTTS = false;
             const texto = pendientes.join(' ');
             if (!texto || texto === this.textoReconocido) return;
             this.textoReconocido = texto;
@@ -345,6 +449,7 @@ class VoiceAssistant {
                 this.procesarFraseContinua();
             }, todosFinales ? 550 : 1200);
         };
+        reconocimiento.onspeechstart = () => { this.fraseDuranteTTS = this.ttsActivos.size > 0; };
         reconocimiento.onerror = evento => {
             if (this.reconocimientoVoz !== reconocimiento || evento.error === 'aborted') return;
             if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(evento.error)) {
@@ -388,32 +493,61 @@ class VoiceAssistant {
         let texto = this.textoReconocido.trim();
         this.textoReconocido = '';
         if (!texto) return;
-        // «Computadora» siempre activa; además la palabra del idioma elegido (Computer, Ordinateur…).
-        const palabras = [IdiomasVoz.es.activacion, IdiomasVoz[this.idioma.slice(0, 2).toLowerCase()]?.activacion].filter(Boolean).join('|');
-        const activacion = new RegExp((this.esperandoComando ? '^' : '\\b') + '(?:' + palabras + ')\\b', 'i').exec(texto);
-        if (activacion) texto = texto.slice(activacion.index + activacion[0].length).replace(/^[\s,.:;!?]+/, '');
-        else if (!this.esperandoComando) return;
+        if (this.ttsActivos.size) { this.mostrarEstado(); return; }
+        // «Computadora» y la palabra del idioma (Computer, Ordinateur…) o, en su lugar, el nombre elegido.
+        if (this.alProbarNombre) { const capturar = this.alProbarNombre; this.alProbarNombre = null; clearTimeout(this.temporizadorPrueba); this.cancelarEspera(); capturar(texto); return; }
+        const fin = buscarActivacion(texto, this.nombreActivacion, this.idioma, this);
+        if (fin >= 0) texto = texto.slice(fin).replace(/^[\s,.:;!?]+/, '');
+        // Confirmación pendiente: sin nombre sólo «confirmo …» o una cancelación exacta.
+        else if (!this.esperandoComando && !(this.confirmacionPendiente &&
+            (esConfirmacionVoz(texto) || CANCELAR.test(normalizarVoz(prepararComando(texto, this.idioma)))))) return;
+        const cierres = ParidadVoz.activacion.cierres[this.idioma.slice(0, 2)] || ParidadVoz.activacion.cierres.es;
+        if (this.modoConversacion && cierres.includes(normalizarVoz(texto).replace(/[.!?]+$/, ''))) {
+            this.cancelarEspera(); this.resultadoConversacion = null; this.confirmacionPendiente = false;
+            clearTimeout(this.temporizadorConfirmacion); this.turnoConversacion++;
+            this.enviar({ accion: 'cancelar_voz' }); return;
+        }
         texto = prepararComando(texto, this.idioma);
         if (texto) {
             this.cancelarEspera();
-            if (this.alComando) this.alComando(texto);
-            else this.ejecutarComando(texto);
+            this.confirmacionPendiente = false; clearTimeout(this.temporizadorConfirmacion);
+            this.estadoConversacion = 'ejecutando'; this.resultadoConversacion = null; this.errorTTS = false;
+            const turno = ++this.turnoConversacion;
+            Promise.resolve(this.alComando ? this.alComando(texto) : this.ejecutarConResultado(texto)).then(respuesta => {
+                if (turno === this.turnoConversacion) this.recibirResultado(respuesta);
+            }).catch(() => { if (turno === this.turnoConversacion) this.recibirResultado({ resultado: 'fallo' }); });
         } else {
             this.reproducirBeep();
-            this.esperandoComando = true;
-            this.mostrarEstado(t('voz.espera'), 'espera');
-            clearTimeout(this.temporizadorEspera);
-            this.temporizadorEspera = setTimeout(() => { this.cancelarEspera(); this.mostrarEstado(); }, 8000);
+            this.abrirEspera();
         }
     }
 
     enviar(peticion, alResponder) {
+        const ejecucion = this.ejecucion;
+        const pendiente = new Promise(resolver => {
+            try {
+                chrome.runtime.sendMessage(peticion, respuesta => {
+                    const resultado = chrome.runtime.lastError || respuesta?.ok === false ? 'fallo' : respuesta?.resultado || 'ok';
+                    if (ejecucion && resultado !== 'ok') ejecucion.resultado = resultado;
+                    if (resultado === 'fallo') this.mostrarEstado(t('voz.accionFallida'), 'error');
+                    else if (typeof respuesta?.texto === 'string') alResponder?.(respuesta.texto);
+                    resolver({ ok: resultado === 'ok', resultado });
+                });
+            } catch (_) { if (ejecucion) ejecucion.resultado = 'fallo'; this.mostrarEstado(t('voz.reconectandoExtension'), 'error'); resolver({ ok: false, resultado: 'fallo' }); }
+        });
+        ejecucion?.pendientes.push(pendiente);
+        return pendiente;
+    }
+
+    async ejecutarConResultado(texto) {
+        if (this.ejecucion) return { ok: false, resultado: 'fallo' };
+        const ejecucion = this.ejecucion = { resultado: 'ok', pendientes: [] };
         try {
-            chrome.runtime.sendMessage(peticion, respuesta => {
-                if (chrome.runtime.lastError || respuesta?.ok === false) this.mostrarEstado(t('voz.accionFallida'), 'error');
-                else if (typeof respuesta?.texto === 'string') alResponder?.(respuesta.texto);
-            });
-        } catch (_) { this.mostrarEstado(t('voz.reconectandoExtension'), 'error'); }
+            this.ejecutarComando(texto);
+            await Promise.all(ejecucion.pendientes);
+            return { ok: ejecucion.resultado === 'ok', resultado: ejecucion.resultado };
+        } catch (_) { return { ok: false, resultado: 'fallo' }; }
+        finally { this.ejecucion = null; }
     }
 
     esEditable(campo) {
@@ -532,6 +666,9 @@ class VoiceAssistant {
         let original = prepararComando(texto);
         let comando = normalizarVoz(original);
         this.mostrarEstado();
+        if (esConfirmacionVoz(comando)) {
+            this.enviar({ accion: 'confirmar_voz', texto: original }); return;
+        }
         const dictado = DICTADO.exec(comando);
         if (dictado) { this.escribirEnCampo(document.activeElement, original.slice(dictado[0].length)); return; }
         const mascota = /^(?:(?:elige|cambia a)(?: la)? )?mascota ([a-z\s.-]+)$/.exec(comando);
@@ -547,8 +684,9 @@ class VoiceAssistant {
         if (/^(?:ayuda|ayudame|que puedo decir|que (?:comandos|ordenes) (?:hay|tienes|existen|puedo (?:usar|decir))|(?:lista de )?comandos|que puedes hacer|como (?:te uso|funcionas))$/.test(comando)) {
             this.enviar({ accion: 'ayuda' }, texto => this.mostrarEstado(texto)); return;
         }
+        if (/^(?:(?:abre|muestra|inicia|empieza)(?: el)? )?tutorial$/.test(comando)) { this.enviar({ accion: 'tutorial' }); return; }
         if (/^(?:calla|silencio|basta|detente|deja de (?:hablar|leer)|para de (?:hablar|leer)|no (?:hables|leas) mas)$/.test(comando)) { this.enviar({ accion: 'callar' }); return; }
-        if (/^(cancelar|cancela|cancela eso|olvidalo|olvida eso|no hagas nada|no importa|dejalo|nada|no|cancelar seleccion|quita(?: la)? seleccion|deselecciona)$/.test(comando)) { this.cancelarEspera(); this.limpiarSeleccion(); this.mostrarEstado(t('voz.cancelado')); return; }
+        if (CANCELAR.test(comando)) { this.enviar({ accion: 'cancelar_voz' }); this.cancelarEspera(); this.limpiarSeleccion(); this.mostrarEstado(t('voz.cancelado')); return; }
         const seleccionar = /^(?:selecciona(?:r)?|resalta(?:r)?)(?:\s+|$)/.exec(comando);
         if (seleccionar) {
             const nombre = original.slice(seleccionar[0].length).replace(/^(?:(?:el|la) )?(?:producto|articulo|item|elemento)(?: llamado)?\s+/i, '').trim();
@@ -644,7 +782,10 @@ class VoiceAssistant {
         if (/^(?:reproduce|continuar video|continua|reanuda|play|dale play|pon play|pausa|pausar|pon pausa)(?: (?:el |la )?(?:video|audio|musica|cancion))?$|^(?:deten|para) (?:el |la )?(?:video|audio|musica|cancion)$/.test(comando)) {
             const medio = document.querySelector('video:not([id^="adapta-pe-"]), audio');
             if (!medio) { this.mostrarEstado(t('voz.sinMedio'), 'error'); return; }
-            if (/^(?:paus|pon pausa|deten|para)/.test(comando)) medio.pause(); else medio.play().catch(() => this.mostrarEstado(t('voz.requiereInteraccion'), 'error'));
+            if (/^(?:paus|pon pausa|deten|para)/.test(comando)) medio.pause(); else {
+                const pendiente = medio.play().catch(() => this.mostrarEstado(t('voz.requiereInteraccion'), 'error'));
+                this.ejecucion?.pendientes.push(pendiente);
+            }
             return;
         }
 
@@ -660,7 +801,14 @@ class VoiceAssistant {
             if (/^(?:https?:\/\/)?(?:[a-z0-9-]+\.)+[a-z]{2,}(?:[/:?#][^\s]*)?$/i.test(objetivo)) {
                 this.enviar({ accion: 'abrir_url', url: /^https?:\/\//i.test(objetivo) ? objetivo : 'https://' + objetivo, destino }); return;
             }
-            this.pulsarElemento(this.encontrarElemento(objetivo, 'a, button, [role="button"], summary')); return;
+            const elemento = this.encontrarElemento(objetivo, 'a, button, [role="button"], summary');
+            // Tolerancia: sin enlace con ese nombre, un sitio por tabla cerrada o perfil español («yutub»).
+            const aproximado = !elemento && sitioTolerante(objetivo, TextosAdapta.idioma);
+            if (aproximado) {
+                this.enviar({ accion: 'hablar', texto: t('voz.abriendo', { sitio: new URL(SitiosVoz[aproximado].inicio).hostname.replace(/^www\./, '') }) });
+                this.enviar({ accion: 'buscar_inteligente', query: '', sitio: aproximado, destino }); return;
+            }
+            this.pulsarElemento(elemento); return;
         }
         const buscar = /^(?:busca|busqueda(?: de)?|(?:haz|realiza|ejecuta)(?: una)? busqueda(?: de)?|encuentra|consulta|investiga|averigua|googlea)\s+/.exec(comando);
         if (buscar) {
@@ -676,7 +824,7 @@ class VoiceAssistant {
                 if (sitio) break;
             }
             // «busca en YouTube» sin consulta: antes buscaba literalmente «en YouTube» en Google.
-            if (!consulta || (!sitio && /^en /.test(normalizada) && reconocerSitio(normalizada.slice(3)))) { this.mostrarEstado(t('voz.dimeBusqueda')); return; }
+            if (!consulta || (!sitio && /^en /.test(normalizada) && reconocerSitio(normalizada.slice(3)))) { if (this.ejecucion) this.ejecucion.resultado = 'fallo'; this.mostrarEstado(t('voz.dimeBusqueda')); return; }
             if (!sitio && destino === 'actual') {
                 sitio = Object.keys(SitiosVoz).find(clave => {
                     const dominio = new URL(SitiosVoz[clave].inicio).hostname.replace(/^www\./, '');
@@ -696,7 +844,16 @@ class VoiceAssistant {
         }
         const pulsar = /^(?:(?:(?:haz|hacer|da|dale|hazle|un)\s+)?cli(?:c|ck)\s+(?:en|sobre|a)|(?:pulsa|presiona)(?:\s+(?:en|sobre))?)\s+/.exec(comando);
         if (pulsar) { this.pulsarElemento(this.encontrarElemento(original.slice(pulsar[0].length), 'a, button, [role="button"], summary, input[type="submit"], input[type="button"]')); return; }
-        this.mostrarEstado(t('voz.noEntendi'), 'error');
+        // Respaldo tolerante (una sola vez): anuncia la orden corregida antes de ejecutarla; ambigua no ejecuta.
+        const correccion = this.corrigiendo ? null : corregirOrden(texto, TextosAdapta.idioma);
+        if (correccion?.texto) {
+            this.enviar({ accion: 'hablar', texto: t('voz.corregido', { orden: correccion.texto }) });
+            this.corrigiendo = true;
+            try { this.ejecutarComando(prepararComando(correccion.texto, TextosAdapta.idioma)); } finally { this.corrigiendo = false; }
+            return;
+        }
+        this.mostrarEstado(t(correccion?.repetir ? 'voz.repite' : 'voz.noEntendi'), 'error');
+        if (this.ejecucion) this.ejecucion.resultado = 'desconocida';
     }
 }
 VoiceAssistant.prepararComando = prepararComando;

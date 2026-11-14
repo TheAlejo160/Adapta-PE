@@ -71,3 +71,9 @@ Desktop.ini
 # Skills y ajustes locales de agentes de IA
 /.claude/
 /.agents/
+
+# Vídeo del tutorial: cachés y render (el MP4 supera 100 MB)
+tutorial-video/**/.hyperframes/
+tutorial-video/**/.thumbnails/
+tutorial-video/**/.waveform-cache/
+tutorial-video/*.mp4

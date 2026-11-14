@@ -684,5 +684,44 @@ function objetoZona(x0, y0 = 45) {
         }
     });
 
+    await comprobar('HUD: sin imagen explica el permiso de cámara y, a los 15 s, las causas probables y cómo reintentar', () => {
+        const prueba = entorno();
+        prueba.cargar('textos.js'); prueba.cargar('classes/KineticEngine.js');
+        const motor = new prueba.contexto.KineticEngine();
+        motor.hud = { textContent: '' }; motor.inicioCarga = 1000;
+        motor.mostrarCarga(1500);
+        assert.equal(motor.hud.textContent, 'Cargando detección local…');
+        motor.faltaPermiso = true; motor.mostrarCarga(1600);
+        assert.equal(motor.hud.textContent, 'Autoriza la cámara en la pestaña de permisos');
+        motor.faltaPermiso = false; motor.mostrarCarga(16000);
+        assert.equal(motor.hud.textContent, 'Cargando detección local…', 'A los 15 s exactos aún carga');
+        motor.mostrarCarga(16001);
+        assert.match(motor.hud.textContent, /permiso.*modelo.*protegida.*«activa el cursor»/);
+        vm.runInContext("TextosAdapta.fijarIdioma('en')", prueba.contexto);
+        motor.actualizarTextos();
+        assert.match(motor.hud.textContent, /missing permission.*local model.*protected.*“activate the cursor”/);
+        motor.recibirFotograma({ modo: 'cabeza', edad: 10 }); // La primera imagen apaga el aviso de permiso; el HUD vuelve a dibujarse por imagen.
+        assert.equal(motor.faltaPermiso, false);
+    });
+
+    await comprobar('Ajustes: el tiempo de dwell se limita a 500–1500 ms y la atracción se apaga en vivo sin cambiar velocidades', () => {
+        const prueba = entorno(); let guardado;
+        prueba.cargar('textos.js'); prueba.cargar('classes/KineticEngine.js');
+        prueba.contexto.chrome.storage.local.set = async ajustes => { guardado = ajustes; };
+        const motor = new prueba.contexto.KineticEngine();
+        assert.equal(motor.duracionClick, 1000); assert.equal(motor.atraccionControles, true);
+        assert.equal(motor.velocidadMaxima, 650); assert.equal(motor.sensibilidad, 1);
+        for (const [dato, esperado] of [[500, 500], [1500, 1500], [100, 500], [9000, 1500], [800, 800], [NaN, 800], ['x', 800], [null, 800]]) {
+            motor.aplicarAjustes({ dwell: dato }); assert.equal(motor.duracionClick, esperado, String(dato));
+        }
+        motor.aplicarAjustes({ atraccion: false }); assert.equal(motor.atraccionControles, false);
+        motor.aplicarAjustes({ atraccion: 'no' }); assert.equal(motor.atraccionControles, false, 'Sólo booleanos');
+        motor.aplicarAjustes({ atraccion: true }); assert.equal(motor.atraccionControles, true);
+        motor.aplicarAjustes({ dwell: 600, atraccion: false }); motor.guardarAjustes();
+        assert.deepEqual(JSON.parse(JSON.stringify(guardado.ajustesCineticos)), { modo: 'cabeza', temblor: false, velocidad: 1, amplitud: 1, dwell: 600, atraccion: false },
+            'Los ajustes nuevos viajan dentro de ajustesCineticos y no se pierden al guardar otros');
+        assert.equal(motor.velocidadMaxima, 650);
+    });
+
     console.log(comprobaciones + ' grupos de regresiones cinéticas correctos.');
 })().catch(error => { console.error(error); process.exit(1); });

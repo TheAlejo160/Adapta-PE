@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AdaptaPE en Windows</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #cap11-raiz { position: absolute; inset: 0; font-family: var(--ap-fuente-texto); color: var(--ap-texto); }
+        .cap11-sec { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+
+        /* f1: Escritorio Windows 11 */
+        #cap11-escritorio { position: absolute; left: 96px; top: 110px; width: 1728px; height: 710px; border-radius: var(--r-m); border: 2px solid #334155; background: radial-gradient(circle at 60% 40%, #1e293b 0%, #0f172a 70%, #020617 100%); box-shadow: var(--sombra-2); overflow: hidden; }
+        .cap11-win-grid { position: absolute; left: 28px; top: 28px; display: flex; flex-direction: column; gap: 24px; }
+        .cap11-win-item { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100px; color: #f1f5f9; font-size: 16px; font-weight: 600; text-align: center; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .cap11-win-item svg { width: 44px; height: 44px; }
+        #cap11-win-app-fondo { position: absolute; left: 200px; top: 40px; width: 880px; height: 500px; border-radius: 10px; border: 1px solid #475569; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); box-shadow: 0 20px 40px rgba(0,0,0,0.6); overflow: hidden; display: flex; flex-direction: column; }
+        .cap11-win-tb { height: 40px; background: rgba(30, 41, 59, 0.9); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; font-size: 15px; font-weight: 600; color: #cbd5e1; border-bottom: 1px solid #334155; }
+        .cap11-win-body { flex: 1; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+        .cap11-win-line { height: 16px; border-radius: 8px; background: #334155; opacity: 0.6; }
+        #cap11-win-taskbar { position: absolute; left: 0; right: 0; bottom: 0; height: 60px; background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+        .cap11-taskbar-center { position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; }
+        .cap11-tb-icon { width: 40px; height: 40px; border-radius: 8px; display: grid; place-items: center; color: #94a3b8; background: rgba(255, 255, 255, 0.04); }
+        .cap11-tb-icon.activo { background: rgba(255, 255, 255, 0.12); color: #f1f5f9; }
+        .cap11-tb-icon.adaptape { background: rgba(134, 239, 172, 0.18); border: 1px solid var(--ap-verde); }
+        .cap11-taskbar-tray { display: flex; align-items: center; gap: 14px; color: #cbd5e1; font-size: 15px; font-weight: 600; }
+        .cap11-tray-badge { display: flex; align-items: center; gap: 10px; padding: 4px 10px; border-radius: 6px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1); }
+
+        /* f2: Descargas */
+        #cap11-descargas { position: absolute; left: 96px; top: 250px; right: 96px; display: flex; justify-content: center; gap: 48px; }
+        .cap11-tarjeta-descarga { width: 620px; padding: 32px; border-radius: var(--r-l); background: var(--ap-superficie); border: var(--borde-grueso) solid var(--ap-borde); box-shadow: var(--sombra-2); display: flex; flex-direction: column; gap: 18px; }
+        .cap11-tarjeta-descarga.base { border-color: var(--ap-azul-base); }
+        .cap11-tarjeta-descarga.lite { border-color: var(--ap-amarillo-lite); }
+        .cap11-descarga-cabecera { display: flex; align-items: center; gap: 20px; }
+        .cap11-descarga-cabecera img { width: 68px; height: 68px; border-radius: 50%; }
+        .cap11-descarga-titulo { font-family: var(--ap-fuente-titulo); font-size: 38px; font-weight: 700; }
+        .cap11-descarga-archivo { font-family: ui-monospace, monospace; font-size: 24px; font-weight: 600; color: var(--ap-texto-2); padding: 12px 18px; background: var(--ap-superficie-2); border-radius: var(--r-s); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .cap11-descarga-detalles { font-size: 26px; color: var(--ap-texto-2); line-height: 1.4; }
+        .cap11-descarga-btn { margin-top: 6px; height: 56px; border-radius: var(--r-s); background: var(--ap-verde); color: var(--ap-tinta); font-family: var(--ap-fuente-titulo); font-size: 26px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer; }
+        .cap11-descarga-btn svg { width: 26px; height: 26px; flex: none; stroke-width: 2.5; }
+
+        /* f3: SmartScreen */
+        #cap11-smartscreen { position: absolute; left: 360px; top: 260px; width: 1200px; border-radius: var(--r-m); background: #004275; box-shadow: var(--sombra-2); border: 2px solid #0284c7; overflow: hidden; color: #ffffff; }
+        .cap11-ss-header { display: flex; align-items: center; gap: 20px; padding: 24px 36px; border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
+        .cap11-ss-shield { width: 50px; height: 50px; color: #38bdf8; flex: none; }
+        .cap11-ss-titulo { font-family: var(--ap-fuente-titulo); font-size: 44px; font-weight: 700; }
+        .cap11-ss-body { padding: 24px 36px; display: flex; flex-direction: column; gap: 16px; font-size: 28px; line-height: 1.35; }
+        .cap11-ss-link { color: #38bdf8; text-decoration: underline; font-weight: 700; font-size: 30px; }
+        .cap11-ss-extra { background: rgba(0, 0, 0, 0.25); border-radius: var(--r-s); padding: 16px 20px; font-size: 24px; display: flex; flex-direction: column; gap: 6px; }
+        .cap11-ss-acciones { display: flex; justify-content: flex-end; gap: 20px; margin-top: 8px; }
+        .cap11-ss-btn { padding: 14px 32px; border-radius: 8px; font-family: var(--ap-fuente-titulo); font-size: 26px; font-weight: 700; cursor: pointer; }
+        .cap11-ss-btn.ejecutar { background: var(--ap-verde); color: var(--ap-tinta); border: none; display: inline-flex; align-items: center; justify-content: center; }
+        .cap11-ss-btn.cancelar { background: transparent; color: #ffffff; border: 2px solid rgba(255, 255, 255, 0.4); }
+
+        /* f4: Instalador casillas */
+        #cap11-instalador { position: absolute; left: 410px; top: 260px; width: 1100px; border-radius: var(--r-m); background: var(--ap-claro-superficie); color: var(--ap-claro-texto); border: 2px solid var(--ap-claro-borde); box-shadow: var(--sombra-2); overflow: hidden; display: flex; flex-direction: column; }
+        .cap11-inst-bar { height: 48px; background: #e2e8f0; display: flex; align-items: center; padding: 0 20px; gap: 12px; font-size: 22px; font-weight: 700; color: #334155; border-bottom: 1px solid #cbd5e1; }
+        .cap11-inst-bar img { width: 28px; height: 28px; border-radius: 50%; }
+        .cap11-inst-cuerpo { padding: 32px 44px; display: flex; flex-direction: column; gap: 24px; }
+        .cap11-inst-encabezado { font-family: var(--ap-fuente-titulo); font-size: 38px; font-weight: 700; color: var(--ap-claro-texto); }
+        .cap11-inst-casilla { display: flex; align-items: center; gap: 18px; font-size: 32px; font-weight: 600; color: #1e293b; }
+        .cap11-inst-check { width: 36px; height: 36px; border-radius: 8px; border: 3px solid #16a34a; background: #dcfce7; display: grid; place-items: center; color: #16a34a; flex: none; }
+        .cap11-inst-check svg { width: 24px; height: 24px; flex: none; stroke-width: 2.5; }
+        .cap11-inst-pie { display: flex; justify-content: flex-end; padding: 20px 44px 28px; border-top: 1px solid #e2e8f0; }
+        .cap11-inst-btn-abrir { padding: 16px 48px; border-radius: 10px; background: #15803d; color: #ffffff; font-family: var(--ap-fuente-titulo); font-size: 30px; font-weight: 700; border: none; display: inline-flex; align-items: center; gap: 16px; white-space: nowrap; cursor: pointer; }
+        .cap11-inst-btn-abrir svg { width: 28px; height: 28px; flex: none; stroke-width: 2.5; }
+
+        /* f5: Bloc de notas */
+        #cap11-notepad { position: absolute; left: 920px; top: 150px; width: 880px; height: 530px; border-radius: 12px; border: 2px solid #475569; background: #ffffff; color: #0f172a; box-shadow: var(--sombra-2); overflow: hidden; display: flex; flex-direction: column; }
+        .cap11-notepad-bar { height: 48px; background: #f1f5f9; border-bottom: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; font-size: 20px; font-weight: 700; color: #334155; }
+        .cap11-notepad-menu { height: 36px; background: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; padding: 0 16px; gap: 20px; font-size: 18px; color: #64748b; }
+        .cap11-notepad-texto { flex: 1; padding: 28px; font-size: 42px; font-weight: 600; line-height: 1.3; color: #0f172a; }
+        .cap11-notepad-dialogo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 400px; background: #ffffff; border-radius: 12px; border: 2px solid #cbd5e1; box-shadow: var(--sombra-1); padding: 20px; display: flex; flex-direction: column; gap: 18px; align-items: center; }
+        .cap11-notepad-dialogo-texto { font-size: 26px; font-weight: 700; color: #1e293b; }
+        .cap11-notepad-btn-aceptar { padding: 10px 32px; border-radius: 8px; background: #0284c7; color: #ffffff; font-family: var(--ap-fuente-titulo); font-size: 24px; font-weight: 700; border: none; cursor: pointer; }
+
+        /* f6: Comparativa Base vs Lite */
+        #cap11-comparativa { position: absolute; left: 96px; top: 110px; right: 96px; display: flex; justify-content: center; gap: 40px; }
+        .cap11-col-app { width: 840px; border-radius: var(--r-m); background: var(--ap-superficie); border: var(--borde-grueso) solid var(--ap-borde); box-shadow: var(--sombra-2); overflow: hidden; display: flex; flex-direction: column; }
+        .cap11-col-app.base { border-color: var(--ap-azul-base); }
+        .cap11-col-app.lite { border-color: var(--ap-amarillo-lite); }
+        .cap11-tabs-header { background: var(--ap-superficie-2); padding: 10px 18px; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--ap-borde); overflow-x: auto; }
+        .cap11-tab-btn { padding: 6px 14px; border-radius: 8px; font-size: 18px; font-weight: 700; color: var(--ap-texto-2); background: rgba(255, 255, 255, 0.04); white-space: nowrap; }
+        .cap11-tab-btn.activo { background: rgba(134, 239, 172, 0.2); color: var(--ap-verde); border: 1px solid var(--ap-verde); }
+        .cap11-col-cuerpo { padding: 18px 24px; display: flex; flex-direction: column; gap: 12px; }
+        .cap11-item-funcion { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; background: var(--ap-superficie-2); border-radius: var(--r-s); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .cap11-item-nombre { font-size: 24px; font-weight: 700; display: flex; align-items: center; gap: 14px; }
+        .cap11-item-nombre svg { width: 34px; height: 34px; flex: none; stroke-width: 2.2; }
+        .cap11-item-nombre span { white-space: nowrap; }
+        .cap11-camara-preview { height: 110px; border-radius: var(--r-s); background: #020617; border: 2px solid #334155; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .cap11-cam-target { width: 40px; height: 40px; border-radius: 50%; border: 3px solid var(--ap-verde); display: grid; place-items: center; }
+        .cap11-cam-punto { width: 10px; height: 10px; border-radius: 50%; background: #ffffff; }
+        .cap11-cam-dwell-anillo { position: absolute; width: 64px; height: 64px; border-radius: 50%; border: 3px dashed #f59e0b; }
+
+        /* f7: Detener todo */
+        #cap11-detener-todo { position: absolute; left: 360px; top: 220px; width: 1200px; display: flex; flex-direction: column; align-items: center; gap: 36px; text-align: center; }
+        .cap11-btn-detener-grande { display: inline-flex; align-items: center; gap: 24px; padding: 24px 64px; border-radius: var(--r-pastilla); background: #dc2626; color: #ffffff; font-family: var(--ap-fuente-titulo); font-size: 56px; font-weight: 700; box-shadow: 0 16px 48px rgba(220, 38, 38, 0.5); border: 4px solid #fca5a5; }
+        .cap11-btn-detener-grande svg { width: 52px; height: 52px; flex: none; stroke-width: 2.5; }
+        .cap11-atajo-caja { display: flex; align-items: center; gap: 20px; }
+        .cap11-tecla { padding: 14px 32px; border-radius: 12px; background: #1e293b; border: 3px solid #64748b; box-shadow: 0 6px 0 #0f172a, 0 10px 20px rgba(0,0,0,0.4); font-family: var(--ap-fuente-titulo); font-size: 44px; font-weight: 700; color: #f8fafc; }
+        .cap11-tecla-mas { font-size: 40px; font-weight: 700; color: #94a3b8; }
+      </style>
+
+      <div data-hf-id="hf-6ubm" id="cap11-raiz" class="ap-escena" data-composition-id="cap11" data-width="1920" data-height="1080"></div>
+
+      <script>
+        (function () {
+          const ID = "cap11";
+          const cap = AP.capitulo(ID);
+          const raiz = document.getElementById(ID + "-raiz");
+          const tl = gsap.timeline({ paused: true });
+
+          const f1 = AP.t(ID, "f1", 0.6);
+          const f2 = AP.t(ID, "f2", 6.3);
+          const f3 = AP.t(ID, "f3", 12.9);
+          const f4 = AP.t(ID, "f4", 20.4);
+          const f5 = AP.t(ID, "f5", 26.4);
+          const f6 = AP.t(ID, "f6", 35.8);
+          const f7 = AP.t(ID, "f7", 44.0);
+
+          AP.ambiente(tl, raiz, { duracion: cap.duracion, semilla: 11 });
+
+          // f1: Escritorio Windows 11
+          AP.tituloCapitulo(tl, raiz, {
+            id: ID + "-titulo",
+            numero: 11,
+            titulo: "AdaptaPE en Windows",
+            sub: "Control total del sistema operativo",
+            entrada: f1,
+            salida: f1 + 2.4,
+          });
+
+          const sec1 = document.createElement("div");
+          sec1.id = ID + "-sec1";
+          sec1.className = "cap11-sec";
+          sec1.innerHTML = `
+            <div id="cap11-escritorio">
+              <div class="cap11-win-grid">
+                <div class="cap11-win-item">${AP.iconos.monitor}<span>Este equipo</span></div>
+                <div class="cap11-win-item">${AP.iconos.pieza}<span>Bloc de notas</span></div>
+                <div class="cap11-win-item">${AP.iconos.navegador}<span>Navegador</span></div>
+              </div>
+              <div id="cap11-win-app-fondo">
+                <div class="cap11-win-tb">
+                  <span>Explorador de archivos · Windows 11</span>
+                  <div style="display:flex;gap:10px;"><span style="width:12px;height:12px;border-radius:50%;background:#475569;display:block;"></span></div>
+                </div>
+                <div class="cap11-win-body">
+                  <div class="cap11-win-line" style="width:45%;"></div>
+                  <div class="cap11-win-line" style="width:80%;"></div>
+                  <div class="cap11-win-line" style="width:65%;"></div>
+                </div>
+              </div>
+              <div id="cap11-win-taskbar">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div class="cap11-tb-icon activo">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/></svg>
+                  </div>
+                  <span style="font-size:15px;color:#94a3b8;font-weight:600;">Buscar en Windows</span>
+                </div>
+                <div class="cap11-taskbar-center">
+                  <div class="cap11-tb-icon">${AP.iconos.navegador}</div>
+                  <div class="cap11-tb-icon activo adaptape">
+                    <img src="assets/marca/adapta-icon.webp" style="width:24px;height:24px;" alt="">
+                  </div>
+                </div>
+                <div class="cap11-taskbar-tray">
+                  <div class="cap11-tray-badge">
+                    <img src="assets/marca/adapta-icon.webp" style="width:20px;height:20px;" alt="">
+                    <span>AdaptaPE</span>
+                  </div>
+                  <span>10:30 AM</span>
+                </div>
+              </div>
+            </div>
+          `;
+          raiz.appendChild(sec1);
+          tl.fromTo(sec1, { opacity: 0, scale: 0.94 }, { opacity: 1, scale: 1, duration: 0.6, ease: "power3.out" }, f1 + 1.8);
+          AP.chip(tl, raiz, { id: ID + "-chip-win", tipo: "windows", texto: "Windows 10 y 11 x64", x: 1380, y: 110, entrada: f1 + 2.0, salida: f2 - 0.4 });
+          AP.salir(tl, sec1, f2 - 0.4);
+
+          // f2: Descarga de instaladores Base y Lite
+          AP.paso(tl, raiz, { id: ID + "-paso1", n: 1, total: 3, texto: "Descarga desde adaptape.cc", x: 96, y: 110, entrada: f2, salida: f3 - 0.4 });
+
+          const sec2 = document.createElement("div");
+          sec2.id = ID + "-sec2";
+          sec2.className = "cap11-sec";
+          sec2.innerHTML = `
+            <div id="cap11-descargas">
+              <div class="cap11-tarjeta-descarga base">
+                <div class="cap11-descarga-cabecera">
+                  <img src="assets/marca/adapta-base-transparent.webp" alt="">
+                  <div>
+                    <div class="cap11-descarga-titulo">AdaptaPE Base</div>
+                    <span class="ap-chip base" style="position:static;height:36px;font-size:20px;padding:0 14px;">Base</span>
+                  </div>
+                </div>
+                <div class="cap11-descarga-archivo">AdaptaPE-1.0-Setup-x64.exe</div>
+                <div class="cap11-descarga-detalles">✓ Asistente de voz y dictado<br>✓ Cursor con cámara y dwell<br>✓ 7 Filtros de color y mascotas</div>
+                <div class="cap11-descarga-btn">${AP.iconos.check}<span>Instalador oficial</span></div>
+              </div>
+
+              <div class="cap11-tarjeta-descarga lite">
+                <div class="cap11-descarga-cabecera">
+                  <img src="assets/marca/adapta-lite.webp" alt="">
+                  <div>
+                    <div class="cap11-descarga-titulo">AdaptaPE Lite</div>
+                    <span class="ap-chip lite" style="position:static;height:36px;font-size:20px;padding:0 14px;">Lite</span>
+                  </div>
+                </div>
+                <div class="cap11-descarga-archivo">AdaptaPELite-1.0-Setup-x64.exe</div>
+                <div class="cap11-descarga-detalles">✓ Asistente de voz y dictado<br>✓ 7 Filtros de color y mascotas<br>✓ Ultra ligero · Sin cámara</div>
+                <div class="cap11-descarga-btn" style="background:var(--ap-amarillo-lite);">${AP.iconos.check}<span>Instalador oficial</span></div>
+              </div>
+            </div>
+          `;
+          raiz.appendChild(sec2);
+          tl.fromTo(sec2, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, f2 + 0.3);
+
+          const curF2 = AP.cursor(tl, raiz, { id: ID + "-cur-f2", x: 1200, y: 700, entrada: f2 + 1.4 });
+          curF2.mover(f2 + 1.6, 626, 615, 0.8).clic(f2 + 2.5).ocultar(f3 - 0.4);
+
+          AP.rotulo(tl, raiz, { id: ID + "-rot-f2", texto: "Elige Base para cámara o Lite para voz sola", entrada: f2 + 0.8, salida: f3 - 0.4 });
+          AP.salir(tl, sec2, f3 - 0.4);
+
+          // f3: SmartScreen «Más información» → «Ejecutar de todas formas»
+          AP.paso(tl, raiz, { id: ID + "-paso2", n: 2, total: 3, texto: "Aviso de SmartScreen", x: 96, y: 110, entrada: f3, salida: f4 - 0.4 });
+
+          const sec3 = document.createElement("div");
+          sec3.id = ID + "-sec3";
+          sec3.className = "cap11-sec";
+          sec3.innerHTML = `
+            <div id="cap11-smartscreen">
+              <div class="cap11-ss-header">
+                <svg class="cap11-ss-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <div class="cap11-ss-titulo">Windows protegió su PC</div>
+              </div>
+              <div class="cap11-ss-body">
+                <div>Microsoft Defender SmartScreen evitó el inicio de una aplicación no reconocida.</div>
+                <div><span class="cap11-ss-link">Más información</span></div>
+                <div id="cap11-ss-detalle" class="cap11-ss-extra" style="display: none; opacity: 0;">
+                  <div><strong>Aplicación:</strong> AdaptaPE-1.0-Setup-x64.exe</div>
+                  <div><strong>Editor:</strong> Editor desconocido</div>
+                </div>
+                <div class="cap11-ss-acciones">
+                  <button id="cap11-btn-ejecutar" class="cap11-ss-btn ejecutar" style="display: none; opacity: 0;">Ejecutar de todas formas</button>
+                  <button class="cap11-ss-btn cancelar">No ejecutar</button>
+                </div>
+              </div>
+            </div>
+          `;
+          raiz.appendChild(sec3);
+          tl.fromTo(sec3, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" }, f3 + 0.3);
+
+          const curF3 = AP.cursor(tl, raiz, { id: ID + "-cur-f3", x: 960, y: 640, entrada: f3 + 0.8 });
+          curF3.mover(f3 + 1.0, 560, 430, 0.7).clic(f3 + 1.8);
+
+          const elDetalle = sec3.querySelector("#cap11-ss-detalle");
+          const elBtnEjecutar = sec3.querySelector("#cap11-btn-ejecutar");
+          tl.set(elDetalle, { display: "flex" }, f3 + 2.0);
+          tl.set(elBtnEjecutar, { display: "inline-flex" }, f3 + 2.0);
+          tl.to([elDetalle, elBtnEjecutar], { opacity: 1, duration: 0.25 }, f3 + 2.0);
+          curF3.mover(f3 + 2.3, 1150, 570, 0.8).clic(f3 + 3.2).ocultar(f4 - 0.4);
+
+          AP.rotulo(tl, raiz, { id: ID + "-rot-f3", texto: "«Más información» → «Ejecutar de todas formas»", entrada: f3 + 0.6, salida: f4 - 0.4 });
+          AP.salir(tl, sec3, f4 - 0.4);
+
+          // f4: Paso 3: Casillas y «Abrir Adapta PE»
+          AP.paso(tl, raiz, { id: ID + "-paso3", n: 3, total: 3, texto: "Accesos directos e inicio", x: 96, y: 110, entrada: f4, salida: f5 - 0.4 });
+
+          const sec4 = document.createElement("div");
+          sec4.id = ID + "-sec4";
+          sec4.className = "cap11-sec";
+          sec4.innerHTML = `
+            <div id="cap11-instalador">
+              <div class="cap11-inst-bar">
+                <img src="assets/marca/adapta-icon.webp" alt="">
+                <span>Instalación de Adapta PE</span>
+              </div>
+              <div class="cap11-inst-cuerpo">
+                <div class="cap11-inst-encabezado">Instalación completada con éxito</div>
+                <div class="cap11-inst-casilla"><span class="cap11-inst-check">${AP.iconos.check}</span><span>Crear acceso directo en el escritorio</span></div>
+                <div class="cap11-inst-casilla"><span class="cap11-inst-check">${AP.iconos.check}</span><span>Crear acceso directo en el menú Inicio</span></div>
+              </div>
+              <div class="cap11-inst-pie">
+                <button class="cap11-inst-btn-abrir"><span>Abrir Adapta PE</span>${AP.iconos.adelante}</button>
+              </div>
+            </div>
+          `;
+          raiz.appendChild(sec4);
+          tl.fromTo(sec4, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, f4 + 0.3);
+
+          const curF4 = AP.cursor(tl, raiz, { id: ID + "-cur-f4", x: 700, y: 650, entrada: f4 + 0.8 });
+          curF4.mover(f4 + 1.2, 1260, 560, 0.8).clic(f4 + 2.2).ocultar(f5 - 0.4);
+
+          AP.rotulo(tl, raiz, { id: ID + "-rot-f4", texto: "Elige tus accesos y pulsa «Abrir Adapta PE»", entrada: f4 + 0.8, salida: f5 - 0.4 });
+          AP.salir(tl, sec4, f5 - 0.4);
+
+          // f5: Bandeja + Ajustes con «Activar voz» + Bloc de notas
+          const appWin = AP.ventanaApp(tl, raiz, {
+            id: ID + "-app-ajustes",
+            estilo: "windows",
+            titulo: "AdaptaPE · Ajustes de escritorio",
+            edicion: "base",
+            x: 96,
+            y: 110,
+            ancho: 780,
+            alto: 460,
+            entrada: f5,
+          });
+
+          appWin.cuerpo.innerHTML = `
+            <div style="padding: 20px 24px; display:flex; flex-direction:column; gap:16px;">
+              <div class="ap-interruptor" style="background:#f1f5f9;border:1px solid #cbd5e1;color:#0f172a;min-height:68px;">
+                <span style="font-size:32px;font-weight:700;color:#0f172a;">Activar voz</span>
+                <span style="display:flex;align-items:center;gap:16px;">
+                  <span class="ap-interruptor-estado" style="color:#15803d;min-width:140px;font-weight:700;font-size:26px;">Activado</span>
+                  <span class="ap-interruptor-pista" style="background:#16a34a;">
+                    <span class="ap-interruptor-relleno" style="opacity:1;background:#16a34a;"></span>
+                    <span class="ap-interruptor-perilla" style="transform:translateX(44px);background:#ffffff;"></span>
+                  </span>
+                </span>
+              </div>
+              <div style="background:var(--ap-claro-superficie);padding:16px 20px;border-radius:12px;border:1px solid var(--ap-claro-borde);font-size:22px;color:var(--ap-claro-texto-2);line-height:1.4;">
+                <strong style="color:var(--ap-claro-texto);">Dispositivos y reconocimiento:</strong><br>
+                • Micrófono: Predeterminado del sistema<br>
+                • Motor: Automático · Local incluido (español)<br>
+                • Llamada: «Computadora»
+              </div>
+              <div style="display:flex;align-items:center;gap:14px;background:#e2e8f0;padding:10px 16px;border-radius:8px;font-size:20px;color:#334155;font-weight:600;">
+                <span style="display:block;width:12px;height:12px;border-radius:50%;background:#16a34a;flex:none;"></span>
+                <span>En bandeja junto al reloj · Panel activo</span>
+              </div>
+            </div>
+          `;
+
+          AP.comandoVoz(tl, raiz, {
+            id: ID + "-voz-notepad",
+            texto: "Computadora, abre Bloc de notas",
+            x: 140,
+            y: 570,
+            entrada: f5 + 0.8,
+            duracion: 2.2,
+            salida: f5 + 3.8,
+          });
+
+          const secNotepad = document.createElement("div");
+          secNotepad.id = ID + "-notepad-sec";
+          secNotepad.className = "cap11-sec";
+          secNotepad.innerHTML = `
+            <div id="cap11-notepad">
+              <div class="cap11-notepad-bar">
+                <span>Sin título: Bloc de notas</span>
+                <div style="display:flex;gap:16px;"><span>—</span><span>□</span><span>✕</span></div>
+              </div>
+              <div class="cap11-notepad-menu"><span>Archivo</span><span>Edición</span><span>Ver</span></div>
+              <div class="cap11-notepad-texto" id="cap11-notepad-escrito"></div>
+              <div id="cap11-notepad-modal" class="cap11-notepad-dialogo" style="opacity:0;">
+                <div class="cap11-notepad-dialogo-texto">¿Desea continuar?</div>
+                <button class="cap11-notepad-btn-aceptar">Aceptar</button>
+              </div>
+            </div>
+          `;
+          raiz.appendChild(secNotepad);
+          tl.fromTo(secNotepad, { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, f5 + 1.8);
+
+          const elTextoNota = secNotepad.querySelector("#cap11-notepad-escrito");
+          AP.escribir(tl, elTextoNota, f5 + 2.6, "Hola, José", 1.2);
+
+          const elModalNota = secNotepad.querySelector("#cap11-notepad-modal");
+          tl.to(elModalNota, { opacity: 1, duration: 0.25 }, f5 + 4.2);
+
+          AP.comandoVoz(tl, raiz, {
+            id: ID + "-voz-aceptar",
+            texto: "pulsa Aceptar",
+            x: 940,
+            y: 520,
+            entrada: f5 + 4.6,
+            duracion: 1.5,
+            salida: f6 - 0.4,
+          });
+
+          const curAceptar = AP.cursor(tl, raiz, { id: ID + "-cur-aceptar", x: 1200, y: 640, entrada: f5 + 4.8 });
+          curAceptar.mover(f5 + 5.0, 1360, 460, 0.6).clic(f5 + 5.8).ocultar(f6 - 0.4);
+
+          AP.salir(tl, appWin.el, f6 - 0.4);
+          AP.salir(tl, secNotepad, f6 - 0.4);
+
+          // f6: Pestañas Base vs Lite · Cámara y dwell sin gestos
+          const sec6 = document.createElement("div");
+          sec6.id = ID + "-sec6";
+          sec6.className = "cap11-sec";
+          sec6.innerHTML = `
+            <div id="cap11-comparativa">
+              <div class="cap11-col-app base">
+                <div style="padding:12px 20px;background:rgba(147,197,253,0.15);display:flex;align-items:center;justify-content:space-between;">
+                  <strong style="font-size:26px;color:var(--ap-azul-base);">AdaptaPE Base</strong>
+                  <span class="ap-chip base" style="position:static;height:34px;font-size:19px;padding:0 12px;">Base</span>
+                </div>
+                <div class="cap11-tabs-header">
+                  <span class="cap11-tab-btn activo">Control</span>
+                  <span class="cap11-tab-btn">Lectura y filtros</span>
+                  <span class="cap11-tab-btn">Mascota</span>
+                  <span class="cap11-tab-btn">IA opcional</span>
+                  <span class="cap11-tab-btn">Ayuda</span>
+                </div>
+                <div class="cap11-col-cuerpo">
+                  <div class="cap11-item-funcion">
+                    <span class="cap11-item-nombre">${AP.iconos.cabeza}<span>Activar cursor con cámara</span></span>
+                    <span style="color:var(--ap-verde);font-weight:700;font-size:24px;">Activo</span>
+                  </div>
+                  <div class="cap11-item-funcion">
+                    <span class="cap11-item-nombre">${AP.iconos.cursor}<span>Clic por permanencia · dwell</span></span>
+                    <span style="color:var(--ap-verde);font-weight:700;font-size:24px;">1.0 s</span>
+                  </div>
+                  <div class="cap11-camara-preview">
+                    <div class="cap11-cam-target"><div class="cap11-cam-punto"></div></div>
+                    <div class="cap11-cam-dwell-anillo"></div>
+                    <span style="position:absolute;bottom:8px;left:14px;font-size:17px;color:#94a3b8;">Seguimiento activo · Reposo</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cap11-col-app lite">
+                <div style="padding:12px 20px;background:rgba(252,211,77,0.15);display:flex;align-items:center;justify-content:space-between;">
+                  <strong style="font-size:26px;color:var(--ap-amarillo-lite);">AdaptaPE Lite</strong>
+                  <span class="ap-chip lite" style="position:static;height:34px;font-size:19px;padding:0 12px;">Lite</span>
+                </div>
+                <div class="cap11-tabs-header">
+                  <span class="cap11-tab-btn activo">Asistente de voz</span>
+                  <span class="cap11-tab-btn">Filtros de color</span>
+                  <span class="cap11-tab-btn">Mascota</span>
+                  <span class="cap11-tab-btn">Ayuda</span>
+                </div>
+                <div class="cap11-col-cuerpo">
+                  <div class="cap11-item-funcion">
+                    <span class="cap11-item-nombre">${AP.iconos.mic}<span>Asistente de voz y dictado</span></span>
+                    <span style="color:var(--ap-verde);font-weight:700;font-size:24px;">Activo</span>
+                  </div>
+                  <div class="cap11-item-funcion">
+                    <span class="cap11-item-nombre">${AP.iconos.paleta}<span>Filtros de color</span></span>
+                    <span style="color:var(--ap-verde);font-weight:700;font-size:24px;">7 filtros de color</span>
+                  </div>
+                  <div class="cap11-item-funcion">
+                    <span class="cap11-item-nombre">${AP.iconos.estrella}<span>Mascota y panel flotante</span></span>
+                    <span style="color:#cbd5e1;font-size:22px;font-weight:600;">Tinku / Cuchu / Yati</span>
+                  </div>
+                  <div style="background:rgba(255,255,255,0.04);padding:10px 16px;border-radius:10px;font-size:20px;color:var(--ap-texto-2);line-height:1.35;">
+                    Sin cámara · Menor consumo · Clic por voz
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          raiz.appendChild(sec6);
+          tl.fromTo(sec6, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1, duration: 0.5, ease: "power2.out" }, f6 + 0.3);
+
+          AP.rotulo(tl, raiz, { id: ID + "-rot-f6", texto: "Base: cámara y dwell · Lite: voz y filtros", entrada: f6 + 1.0, salida: f7 - 0.4 });
+          AP.salir(tl, sec6, f7 - 0.4);
+
+          // f7: Botón «Detener todo» y teclas Ctrl + Shift + S
+          const sec7 = document.createElement("div");
+          sec7.id = ID + "-sec7";
+          sec7.className = "cap11-sec";
+          sec7.innerHTML = `
+            <div id="cap11-detener-todo">
+              <div class="cap11-btn-detener-grande" id="cap11-btn-stop">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><rect x="9" y="9" width="6" height="6"/></svg>
+                <span>Detener todo</span>
+              </div>
+              <div style="font-size:32px;color:var(--ap-texto-2);font-weight:600;">O presiona en cualquier momento:</div>
+              <div class="cap11-atajo-caja">
+                <div class="cap11-tecla">Ctrl</div>
+                <div class="cap11-tecla-mas">+</div>
+                <div class="cap11-tecla">Shift</div>
+                <div class="cap11-tecla-mas">+</div>
+                <div class="cap11-tecla" style="color:var(--ap-verde);border-color:var(--ap-verde);">S</div>
+              </div>
+            </div>
+          `;
+          raiz.appendChild(sec7);
+          tl.fromTo(sec7, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, f7 + 0.3);
+
+          const elBtnStop = sec7.querySelector("#cap11-btn-stop");
+          tl.fromTo(elBtnStop, { scale: 0.95 }, { scale: 1.05, duration: 0.3, yoyo: true, repeat: 1, ease: "power2.out" }, f7 + 1.2);
+
+          AP.rotulo(tl, raiz, { id: ID + "-rot-f7", texto: "Parada rápida en bandeja o con Ctrl+Shift+S", entrada: f7 + 0.8 });
+
+          window.__timelines[ID] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

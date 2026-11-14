@@ -6,11 +6,12 @@
     "base": "13.0",
     "lite": "3.0",
     "sha256": {
-      "sitios.js": "f06113c931b3d72c0f553b133069b0921630afba5d80382cbc9b8d198e9b1959",
-      "asistente/VoiceAssistant.js": "a19689dc45b608efaa3a8b2c82b33714f783d232cb4e3b889034e97ac2293943",
-      "textos_paginas.js": "13d682c70e409d59729dcf4006ea48a377122187c06ae44e08c5dad5dbacdcd3",
+      "sitios.js": "86b56de48678f116770f4482b0f78e0db21565e8fedcd3fc51dde55bd6cb2c90",
+      "asistente/VoiceAssistant.js": "c6302da7257a849757184991ca7b18058ec30e9c00b06562b35d775a5f89eb9f",
+      "textos_paginas.js": "efe14c81532f33f8e5dc98347dc7829054e65749776f92ca91e9d65b2eca193f",
       "mascotas/Mascota.js": "be81d438f3496d668784ba936cf780c312bf70fe75e7626f1294573da548b33b",
-      "tests/fixtures/voz-paridad.json": "1b766dcbdced228535eb092236b43dfed0894c4120ed6412555af8b86728aaa4"
+      "tests/fixtures/voz-paridad.json": "1b766dcbdced228535eb092236b43dfed0894c4120ed6412555af8b86728aaa4",
+      "tests/fixtures/activacion-paridad.json": "5673be6137974e273409bfa56b871ecbdbca25fad8a75e572db669de0d3520d7"
     }
   },
   "codigos": [
@@ -268,7 +269,51 @@
             "flags": ""
           },
           "clic derecho"
+        ],
+        [
+          {
+            "patron": "^(?:(?:abre|muestra|inicia|empieza)(?: el)? )?tutorial$",
+            "flags": ""
+          },
+          "tutorial"
         ]
+      ],
+      "reglas": [
+        {
+          "patron": "^(?:activa|enciende|prende|activar)(?: el| la)? (?:cursor|mouse(?: cinetico)?|raton|camara)$",
+          "flags": "",
+          "reemplazo": "activar cursor"
+        },
+        {
+          "patron": "^(?:desactiva|apaga|desactivar)(?: el| la)? (?:cursor|mouse(?: cinetico)?|raton|camara)$",
+          "flags": "",
+          "reemplazo": "desactivar cursor"
+        },
+        {
+          "patron": "^(?:calibra|centra)(?: el)? cursor$",
+          "flags": "",
+          "reemplazo": "calibrar cursor"
+        },
+        {
+          "patron": "^(?:pausa|deten|para)(?: el)? cursor$",
+          "flags": "",
+          "reemplazo": "pausar cursor"
+        },
+        {
+          "patron": "^(?:reanuda|sigue)(?: con)?(?: el)? cursor$",
+          "flags": "",
+          "reemplazo": "reanudar cursor"
+        },
+        {
+          "patron": "^(?:(?:da|dale|haz|hazle) )?cli(?:c|ck) derecho$",
+          "flags": "",
+          "reemplazo": "clic derecho"
+        },
+        {
+          "patron": "^(?:(?:abre|muestra|inicia|empieza)(?: el)? )?tutorial$",
+          "flags": "",
+          "reemplazo": "tutorial"
+        }
       ]
     },
     "en": {
@@ -447,6 +492,13 @@
             "flags": ""
           },
           "ayuda"
+        ],
+        [
+          {
+            "patron": "^(?:(?:open|show|start) (?:the )?)?tutorial$",
+            "flags": ""
+          },
+          "tutorial"
         ],
         [
           {
@@ -735,6 +787,328 @@
           },
           "abre "
         ]
+      ],
+      "reglas": [
+        {
+          "patron": "^(?:(?:activate|enable|turn on) (?:the )?(?:cursor|camera cursor|kinetic mouse))$",
+          "flags": "",
+          "reemplazo": "activar cursor"
+        },
+        {
+          "patron": "^(?:(?:disable|deactivate|turn off) (?:the )?(?:cursor|camera cursor|kinetic mouse))$",
+          "flags": "",
+          "reemplazo": "desactivar cursor"
+        },
+        {
+          "patron": "^(?:pause (?:the )?cursor)$",
+          "flags": "",
+          "reemplazo": "pausar cursor"
+        },
+        {
+          "patron": "^(?:resume (?:the )?cursor)$",
+          "flags": "",
+          "reemplazo": "reanudar cursor"
+        },
+        {
+          "patron": "^(?:(?:calibrate|recalibrate|center) (?:the )?cursor)$",
+          "flags": "",
+          "reemplazo": "calibrar cursor"
+        },
+        {
+          "patron": "^(?:(?:head|face) control|control (?:head|face))$",
+          "flags": "",
+          "reemplazo": "control cabeza"
+        },
+        {
+          "patron": "^(?:(?:hand|hands|arm|arms) control|control (?:hands|arms))$",
+          "flags": "",
+          "reemplazo": "control manos"
+        },
+        {
+          "patron": "^(?:(?:residual limb|partial hand|stump) control|control (?:residual limb|partial hand|stump))$",
+          "flags": "",
+          "reemplazo": "control munon"
+        },
+        {
+          "patron": "^(?:(?:small|reduced) movements)$",
+          "flags": "",
+          "reemplazo": "movimientos pequenos"
+        },
+        {
+          "patron": "^(?:normal movements)$",
+          "flags": "",
+          "reemplazo": "movimientos normales"
+        },
+        {
+          "patron": "^(?:(?:enable|activate) (?:the )?tremor filter)$",
+          "flags": "",
+          "reemplazo": "activar temblor"
+        },
+        {
+          "patron": "^(?:(?:disable|deactivate) (?:the )?tremor filter)$",
+          "flags": "",
+          "reemplazo": "desactivar temblor"
+        },
+        {
+          "patron": "^(?:(?:slower cursor|cursor slower))$",
+          "flags": "",
+          "reemplazo": "cursor mas lento"
+        },
+        {
+          "patron": "^(?:(?:faster cursor|cursor faster))$",
+          "flags": "",
+          "reemplazo": "cursor mas rapido"
+        },
+        {
+          "patron": "^(?:next right click)$",
+          "flags": "",
+          "reemplazo": "siguiente clic derecho"
+        },
+        {
+          "patron": "^(?:cancel (?:the )?click)$",
+          "flags": "",
+          "reemplazo": "cancelar clic"
+        },
+        {
+          "patron": "^(?:(?:hide|remove) (?:the )?pet)$",
+          "flags": "",
+          "reemplazo": "oculta mascota"
+        },
+        {
+          "patron": "^(?:(?:greet|wave to) (?:the )?pet)$",
+          "flags": "",
+          "reemplazo": "saluda mascota"
+        },
+        {
+          "patron": "^(?:(?:sleep pet|put (?:the )?pet to sleep))$",
+          "flags": "",
+          "reemplazo": "duerme mascota"
+        },
+        {
+          "patron": "^(?:(?:wake (?:up )?(?:the )?pet|wake (?:the )?pet up))$",
+          "flags": "",
+          "reemplazo": "despierta mascota"
+        },
+        {
+          "patron": "^(?:pet|(?:choose|select|change to)(?: the)? pet) ",
+          "flags": "",
+          "reemplazo": "mascota "
+        },
+        {
+          "patron": "^(?:help|what can i say|what can you do|(?:show )?commands)$",
+          "flags": "",
+          "reemplazo": "ayuda"
+        },
+        {
+          "patron": "^(?:(?:open|show|start) (?:the )?)?tutorial$",
+          "flags": "",
+          "reemplazo": "tutorial"
+        },
+        {
+          "patron": "^(?:cancel|never ?mind|forget it)$",
+          "flags": "",
+          "reemplazo": "cancelar"
+        },
+        {
+          "patron": "^(?:stop talking|stop reading|be quiet|shut up|silence|quiet)$",
+          "flags": "",
+          "reemplazo": "calla"
+        },
+        {
+          "patron": "^(?:(?:open|create) )?(?:a )?new tab$",
+          "flags": "",
+          "reemplazo": "nueva pestaña"
+        },
+        {
+          "patron": "^(?:(?:open|create) )?(?:a )?new window$",
+          "flags": "",
+          "reemplazo": "nueva ventana"
+        },
+        {
+          "patron": "^close (?:this |the |current )?tab$",
+          "flags": "",
+          "reemplazo": "cierra la pestaña"
+        },
+        {
+          "patron": "^close (?:this |the |current )?window$",
+          "flags": "",
+          "reemplazo": "cierra la ventana"
+        },
+        {
+          "patron": "^close (?:all )?(?:the )?other tabs$",
+          "flags": "",
+          "reemplazo": "cierra las otras pestañas"
+        },
+        {
+          "patron": "^duplicate (?:this |the )?tab$",
+          "flags": "",
+          "reemplazo": "duplica la pestaña"
+        },
+        {
+          "patron": "^mute(?: (?:this|the))?(?: tab)?$",
+          "flags": "",
+          "reemplazo": "silencia la pestaña"
+        },
+        {
+          "patron": "^unmute(?: (?:this|the))?(?: tab)?$",
+          "flags": "",
+          "reemplazo": "activa el sonido"
+        },
+        {
+          "patron": "^(?:(?:go|switch) to )?(?:the )?next tab$",
+          "flags": "",
+          "reemplazo": "pestaña siguiente"
+        },
+        {
+          "patron": "^(?:(?:go|switch) to )?(?:the )?previous tab$",
+          "flags": "",
+          "reemplazo": "pestaña anterior"
+        },
+        {
+          "patron": "^(?:(?:go|switch) to )?tab (?:number )?(\\d+)$",
+          "flags": "",
+          "reemplazo": "pestaña $1"
+        },
+        {
+          "patron": "^(?:(?:go|switch) to )?(?:the )?last tab$",
+          "flags": "",
+          "reemplazo": "última pestaña"
+        },
+        {
+          "patron": "^(?:go )?back$|^previous page$",
+          "flags": "",
+          "reemplazo": "atrás"
+        },
+        {
+          "patron": "^(?:go )?forward$|^next page$",
+          "flags": "",
+          "reemplazo": "adelante"
+        },
+        {
+          "patron": "^(?:reload|refresh)(?: (?:the|this) page)?$",
+          "flags": "",
+          "reemplazo": "recarga"
+        },
+        {
+          "patron": "^(?:(?:scroll|go|move|page) )?down (?:a bit|a little)$",
+          "flags": "",
+          "reemplazo": "baja un poco"
+        },
+        {
+          "patron": "^(?:(?:scroll|go|move|page) )?down$",
+          "flags": "",
+          "reemplazo": "baja"
+        },
+        {
+          "patron": "^(?:(?:scroll|go|move|page) )?up (?:a bit|a little)$",
+          "flags": "",
+          "reemplazo": "sube un poco"
+        },
+        {
+          "patron": "^(?:(?:scroll|go|move|page) )?up$",
+          "flags": "",
+          "reemplazo": "sube"
+        },
+        {
+          "patron": "^(?:(?:scroll|go) )?(?:to (?:the )?)?top(?: of (?:the )?page)?$",
+          "flags": "",
+          "reemplazo": "ve al inicio"
+        },
+        {
+          "patron": "^(?:(?:scroll|go) )?(?:to (?:the )?)?bottom(?: of (?:the )?page)?$",
+          "flags": "",
+          "reemplazo": "ve al final"
+        },
+        {
+          "patron": "^(?:zoom in|bigger|larger)$",
+          "flags": "",
+          "reemplazo": "aumenta zoom"
+        },
+        {
+          "patron": "^(?:zoom out|smaller)$",
+          "flags": "",
+          "reemplazo": "reduce zoom"
+        },
+        {
+          "patron": "^(?:reset zoom|normal zoom|actual size)$",
+          "flags": "",
+          "reemplazo": "zoom normal"
+        },
+        {
+          "patron": "^(?:(?:enter|go) )?full ?screen$",
+          "flags": "",
+          "reemplazo": "pantalla completa"
+        },
+        {
+          "patron": "^(?:exit|leave) full ?screen$",
+          "flags": "",
+          "reemplazo": "sal de pantalla completa"
+        },
+        {
+          "patron": "^(?:press |hit )?enter$|^submit(?: (?:the )?form)?$",
+          "flags": "",
+          "reemplazo": "enter"
+        },
+        {
+          "patron": "^(?:click|left click|click it|click here)$",
+          "flags": "",
+          "reemplazo": "clic"
+        },
+        {
+          "patron": "^right click$",
+          "flags": "",
+          "reemplazo": "clic derecho"
+        },
+        {
+          "patron": "^(?:click|activate) (?:the )?selection$",
+          "flags": "",
+          "reemplazo": "dale clic"
+        },
+        {
+          "patron": "^(?:click|press|tap)(?: on)? ",
+          "flags": "",
+          "reemplazo": "clic en "
+        },
+        {
+          "patron": "^(?:select|highlight) ",
+          "flags": "",
+          "reemplazo": "selecciona "
+        },
+        {
+          "patron": "^(?:write|type|dictate) ",
+          "flags": "",
+          "reemplazo": "escribe "
+        },
+        {
+          "patron": "^(?:clear|delete|erase) (?:the )?(?:text|field)$",
+          "flags": "",
+          "reemplazo": "borra el texto"
+        },
+        {
+          "patron": "^focus(?: on)? ",
+          "flags": "",
+          "reemplazo": "enfoca "
+        },
+        {
+          "patron": "^(?:play|resume)(?: (?:the )?(?:video|audio|music))?$",
+          "flags": "",
+          "reemplazo": "reproduce"
+        },
+        {
+          "patron": "^pause(?: (?:the )?(?:video|audio|music))?$",
+          "flags": "",
+          "reemplazo": "pausa"
+        },
+        {
+          "patron": "^(?:search(?: for)?|look up|look for|find|google) ",
+          "flags": "",
+          "reemplazo": "busca "
+        },
+        {
+          "patron": "^(?:open|launch|start|visit|go to|navigate to|take me to)(?: the)? ",
+          "flags": "",
+          "reemplazo": "abre "
+        }
       ]
     },
     "pt": {
@@ -920,6 +1294,13 @@
             "flags": ""
           },
           "ayuda"
+        ],
+        [
+          {
+            "patron": "^(?:(?:abre|abrir|mostra|inicia) (?:o )?)?tutorial$",
+            "flags": ""
+          },
+          "tutorial"
         ],
         [
           {
@@ -1201,6 +1582,328 @@
           },
           "abre "
         ]
+      ],
+      "reglas": [
+        {
+          "patron": "^(?:(?:ativa|ativar|liga) (?:o )?cursor)$",
+          "flags": "",
+          "reemplazo": "activar cursor"
+        },
+        {
+          "patron": "^(?:(?:desativa|desativar|desliga) (?:o )?cursor)$",
+          "flags": "",
+          "reemplazo": "desactivar cursor"
+        },
+        {
+          "patron": "^(?:pausa (?:o )?cursor)$",
+          "flags": "",
+          "reemplazo": "pausar cursor"
+        },
+        {
+          "patron": "^(?:(?:retoma|continua) (?:o )?cursor)$",
+          "flags": "",
+          "reemplazo": "reanudar cursor"
+        },
+        {
+          "patron": "^(?:(?:calibra|recalibra|centraliza) (?:o )?cursor)$",
+          "flags": "",
+          "reemplazo": "calibrar cursor"
+        },
+        {
+          "patron": "^(?:controle (?:de |com )?(?:cabeca|rosto|tronco))$",
+          "flags": "",
+          "reemplazo": "control cabeza"
+        },
+        {
+          "patron": "^(?:controle (?:de |com )?(?:maos|bracos))$",
+          "flags": "",
+          "reemplazo": "control manos"
+        },
+        {
+          "patron": "^(?:controle (?:de |com )?(?:coto|mao parcial))$",
+          "flags": "",
+          "reemplazo": "control munon"
+        },
+        {
+          "patron": "^(?:movimentos pequenos)$",
+          "flags": "",
+          "reemplazo": "movimientos pequenos"
+        },
+        {
+          "patron": "^(?:movimentos normais)$",
+          "flags": "",
+          "reemplazo": "movimientos normales"
+        },
+        {
+          "patron": "^(?:ativa (?:o )?filtro de tremor)$",
+          "flags": "",
+          "reemplazo": "activar temblor"
+        },
+        {
+          "patron": "^(?:desativa (?:o )?filtro de tremor)$",
+          "flags": "",
+          "reemplazo": "desactivar temblor"
+        },
+        {
+          "patron": "^(?:cursor mais lento)$",
+          "flags": "",
+          "reemplazo": "cursor mas lento"
+        },
+        {
+          "patron": "^(?:cursor mais rapido)$",
+          "flags": "",
+          "reemplazo": "cursor mas rapido"
+        },
+        {
+          "patron": "^(?:proximo clique direito)$",
+          "flags": "",
+          "reemplazo": "siguiente clic derecho"
+        },
+        {
+          "patron": "^(?:cancela (?:o )?clique)$",
+          "flags": "",
+          "reemplazo": "cancelar clic"
+        },
+        {
+          "patron": "^(?:(?:oculta|esconde|remove) (?:o )?mascote)$",
+          "flags": "",
+          "reemplazo": "oculta mascota"
+        },
+        {
+          "patron": "^(?:(?:cumprimenta|sauda|acena para) (?:o )?mascote)$",
+          "flags": "",
+          "reemplazo": "saluda mascota"
+        },
+        {
+          "patron": "^(?:(?:dorme mascote|coloca (?:o )?mascote para dormir))$",
+          "flags": "",
+          "reemplazo": "duerme mascota"
+        },
+        {
+          "patron": "^(?:acorda (?:o )?mascote)$",
+          "flags": "",
+          "reemplazo": "despierta mascota"
+        },
+        {
+          "patron": "^(?:(?:clica|clique) (?:na |a )?selecao)$",
+          "flags": "",
+          "reemplazo": "dale clic"
+        },
+        {
+          "patron": "^(?:mascote|(?:escolhe|escolha|seleciona)(?: o)? mascote) ",
+          "flags": "",
+          "reemplazo": "mascota "
+        },
+        {
+          "patron": "^(?:ajuda|o que (?:eu )?posso dizer|comandos)$",
+          "flags": "",
+          "reemplazo": "ayuda"
+        },
+        {
+          "patron": "^(?:(?:abre|abrir|mostra|inicia) (?:o )?)?tutorial$",
+          "flags": "",
+          "reemplazo": "tutorial"
+        },
+        {
+          "patron": "^(?:cancela|cancelar|esquece|deixa pra la)$",
+          "flags": "",
+          "reemplazo": "cancelar"
+        },
+        {
+          "patron": "^(?:para de falar|para de ler|cala a boca|silencio|chega)$",
+          "flags": "",
+          "reemplazo": "calla"
+        },
+        {
+          "patron": "^(?:(?:abre|abrir|abra) )?(?:uma )?nova (?:aba|guia)$",
+          "flags": "",
+          "reemplazo": "nueva pestaña"
+        },
+        {
+          "patron": "^(?:(?:abre|abrir|abra) )?(?:uma )?nova janela$",
+          "flags": "",
+          "reemplazo": "nueva ventana"
+        },
+        {
+          "patron": "^(?:fecha|fechar|feche) (?:a |esta |essa )?(?:aba|guia)$",
+          "flags": "",
+          "reemplazo": "cierra la pestaña"
+        },
+        {
+          "patron": "^(?:fecha|fechar|feche) (?:a |esta |essa )?janela$",
+          "flags": "",
+          "reemplazo": "cierra la ventana"
+        },
+        {
+          "patron": "^(?:fecha|fechar|feche) (?:todas )?as outras (?:abas|guias)$",
+          "flags": "",
+          "reemplazo": "cierra las otras pestañas"
+        },
+        {
+          "patron": "^(?:duplica|duplicar|duplique) (?:a |esta )?(?:aba|guia)$",
+          "flags": "",
+          "reemplazo": "duplica la pestaña"
+        },
+        {
+          "patron": "^(?:silencia|silenciar|muta|mutar)(?: (?:a|esta) (?:aba|guia))?$",
+          "flags": "",
+          "reemplazo": "silencia la pestaña"
+        },
+        {
+          "patron": "^(?:ativa|reativa|liga) o som$|^desmuta(?:r)?$",
+          "flags": "",
+          "reemplazo": "activa el sonido"
+        },
+        {
+          "patron": "^(?:(?:vai|ir) para a )?(?:proxima (?:aba|guia)|(?:aba|guia) seguinte)$",
+          "flags": "",
+          "reemplazo": "pestaña siguiente"
+        },
+        {
+          "patron": "^(?:(?:vai|ir) para a )?(?:aba|guia) anterior$",
+          "flags": "",
+          "reemplazo": "pestaña anterior"
+        },
+        {
+          "patron": "^(?:(?:vai|ir) para a )?(?:aba|guia) (?:numero )?(\\d+)$",
+          "flags": "",
+          "reemplazo": "pestaña $1"
+        },
+        {
+          "patron": "^(?:(?:vai|ir) para a )?ultima (?:aba|guia)$",
+          "flags": "",
+          "reemplazo": "última pestaña"
+        },
+        {
+          "patron": "^(?:volta|voltar|volte|pagina anterior)$",
+          "flags": "",
+          "reemplazo": "atrás"
+        },
+        {
+          "patron": "^(?:avanca|avancar|avance|proxima pagina)$",
+          "flags": "",
+          "reemplazo": "adelante"
+        },
+        {
+          "patron": "^(?:recarrega|recarregar|recarregue|atualiza|atualizar|atualize)(?: a pagina)?$",
+          "flags": "",
+          "reemplazo": "recarga"
+        },
+        {
+          "patron": "^(?:(?:rola|role|rolar|desce|descer|desca|vai) )?(?:para |pra )?baixo um pouco$|^(?:desce|descer|desca) um pouco$",
+          "flags": "",
+          "reemplazo": "baja un poco"
+        },
+        {
+          "patron": "^(?:(?:rola|role|rolar|desce|descer|desca|vai) )?(?:para |pra )?baixo$|^(?:desce|descer|desca)$",
+          "flags": "",
+          "reemplazo": "baja"
+        },
+        {
+          "patron": "^(?:(?:rola|role|rolar|sobe|subir|suba|vai) )?(?:para |pra )?cima um pouco$|^(?:sobe|subir|suba) um pouco$",
+          "flags": "",
+          "reemplazo": "sube un poco"
+        },
+        {
+          "patron": "^(?:(?:rola|role|rolar|sobe|subir|suba|vai) )?(?:para |pra )?cima$|^(?:sobe|subir|suba)$",
+          "flags": "",
+          "reemplazo": "sube"
+        },
+        {
+          "patron": "^(?:vai |ir )?(?:para o |pro )?(?:topo|inicio)(?: da pagina)?$",
+          "flags": "",
+          "reemplazo": "ve al inicio"
+        },
+        {
+          "patron": "^(?:vai |ir )?(?:para o |pro )?(?:final|fim)(?: da pagina)?$",
+          "flags": "",
+          "reemplazo": "ve al final"
+        },
+        {
+          "patron": "^(?:aumenta(?:r)? o zoom|mais zoom|amplia(?:r)?)$",
+          "flags": "",
+          "reemplazo": "aumenta zoom"
+        },
+        {
+          "patron": "^(?:diminui(?:r)? o zoom|menos zoom|reduz(?:ir)? o zoom)$",
+          "flags": "",
+          "reemplazo": "reduce zoom"
+        },
+        {
+          "patron": "^zoom normal$",
+          "flags": "",
+          "reemplazo": "zoom normal"
+        },
+        {
+          "patron": "^(?:tela cheia|ecra inteiro)$",
+          "flags": "",
+          "reemplazo": "pantalla completa"
+        },
+        {
+          "patron": "^(?:sai|sair) (?:da tela cheia|do ecra inteiro)$",
+          "flags": "",
+          "reemplazo": "sal de pantalla completa"
+        },
+        {
+          "patron": "^(?:(?:aperta|pressiona|carrega em|carrega no) )?enter$|^envia(?:r)? o formulario$",
+          "flags": "",
+          "reemplazo": "enter"
+        },
+        {
+          "patron": "^(?:clica|clique|clicar|clic)$",
+          "flags": "",
+          "reemplazo": "clic"
+        },
+        {
+          "patron": "^clique (?:com o botao )?direito$",
+          "flags": "",
+          "reemplazo": "clic derecho"
+        },
+        {
+          "patron": "^(?:clica|clique|clicar|carrega|aperta|pressiona|toca)(?: (?:em|no|na))? ",
+          "flags": "",
+          "reemplazo": "clic en "
+        },
+        {
+          "patron": "^(?:seleciona|selecionar|selecione|destaca) ",
+          "flags": "",
+          "reemplazo": "selecciona "
+        },
+        {
+          "patron": "^(?:escreve|escrever|escreva|digita|digitar|digite|dita|ditar|dite) ",
+          "flags": "",
+          "reemplazo": "escribe "
+        },
+        {
+          "patron": "^(?:apaga|apagar|limpa|limpar) o (?:texto|campo)$",
+          "flags": "",
+          "reemplazo": "borra el texto"
+        },
+        {
+          "patron": "^(?:foca|focar)(?: (?:em|no|na))? ",
+          "flags": "",
+          "reemplazo": "enfoca "
+        },
+        {
+          "patron": "^(?:reproduz|reproduzir|toca|tocar|continua|play)(?: o (?:video|audio))?$",
+          "flags": "",
+          "reemplazo": "reproduce"
+        },
+        {
+          "patron": "^(?:pausa|pausar|pause)(?: o (?:video|audio))?$",
+          "flags": "",
+          "reemplazo": "pausa"
+        },
+        {
+          "patron": "^(?:pesquisa|pesquisar|pesquise|procura|procurar|procure|busca|buscar|busque)(?: por)? ",
+          "flags": "",
+          "reemplazo": "busca "
+        },
+        {
+          "patron": "^(?:abre|abrir|abra|vai para|ir para|va para|entra em|entrar em|visita|visitar|visite|acessa|acessar|acesse|inicia|iniciar)(?: o| a)? ",
+          "flags": "",
+          "reemplazo": "abre "
+        }
       ]
     },
     "de": {
@@ -1386,6 +2089,13 @@
             "flags": ""
           },
           "ayuda"
+        ],
+        [
+          {
+            "patron": "^(?:(?:offne|zeige|starte) (?:das |die )?)?(?:tutorial|anleitung)$",
+            "flags": ""
+          },
+          "tutorial"
         ],
         [
           {
@@ -1688,6 +2398,343 @@
           },
           "escribe $1"
         ]
+      ],
+      "reglas": [
+        {
+          "patron": "^(?:(?:aktiviere (?:den )?cursor|cursor aktivieren))$",
+          "flags": "",
+          "reemplazo": "activar cursor"
+        },
+        {
+          "patron": "^(?:(?:deaktiviere (?:den )?cursor|cursor deaktivieren))$",
+          "flags": "",
+          "reemplazo": "desactivar cursor"
+        },
+        {
+          "patron": "^(?:cursor pausieren)$",
+          "flags": "",
+          "reemplazo": "pausar cursor"
+        },
+        {
+          "patron": "^(?:cursor fortsetzen)$",
+          "flags": "",
+          "reemplazo": "reanudar cursor"
+        },
+        {
+          "patron": "^(?:cursor (?:kalibrieren|neu kalibrieren|zentrieren))$",
+          "flags": "",
+          "reemplazo": "calibrar cursor"
+        },
+        {
+          "patron": "^(?:kopfsteuerung)$",
+          "flags": "",
+          "reemplazo": "control cabeza"
+        },
+        {
+          "patron": "^(?:handsteuerung)$",
+          "flags": "",
+          "reemplazo": "control manos"
+        },
+        {
+          "patron": "^(?:(?:stumpfsteuerung|teilhandsteuerung))$",
+          "flags": "",
+          "reemplazo": "control munon"
+        },
+        {
+          "patron": "^(?:kleine bewegungen)$",
+          "flags": "",
+          "reemplazo": "movimientos pequenos"
+        },
+        {
+          "patron": "^(?:normale bewegungen)$",
+          "flags": "",
+          "reemplazo": "movimientos normales"
+        },
+        {
+          "patron": "^(?:zitterfilter aktivieren)$",
+          "flags": "",
+          "reemplazo": "activar temblor"
+        },
+        {
+          "patron": "^(?:zitterfilter deaktivieren)$",
+          "flags": "",
+          "reemplazo": "desactivar temblor"
+        },
+        {
+          "patron": "^(?:cursor langsamer)$",
+          "flags": "",
+          "reemplazo": "cursor mas lento"
+        },
+        {
+          "patron": "^(?:cursor schneller)$",
+          "flags": "",
+          "reemplazo": "cursor mas rapido"
+        },
+        {
+          "patron": "^(?:nachster rechtsklick)$",
+          "flags": "",
+          "reemplazo": "siguiente clic derecho"
+        },
+        {
+          "patron": "^(?:klick abbrechen)$",
+          "flags": "",
+          "reemplazo": "cancelar clic"
+        },
+        {
+          "patron": "^(?:(?:haustier|maskottchen) (?:ausblenden|verstecken))$",
+          "flags": "",
+          "reemplazo": "oculta mascota"
+        },
+        {
+          "patron": "^(?:(?:haustier|maskottchen) (?:gru(?:ss|ß)en|begru(?:ss|ß)en))$",
+          "flags": "",
+          "reemplazo": "saluda mascota"
+        },
+        {
+          "patron": "^(?:(?:haustier|maskottchen) schlafen legen)$",
+          "flags": "",
+          "reemplazo": "duerme mascota"
+        },
+        {
+          "patron": "^(?:(?:haustier|maskottchen) wecken)$",
+          "flags": "",
+          "reemplazo": "despierta mascota"
+        },
+        {
+          "patron": "^(?:auswahl anklicken)$",
+          "flags": "",
+          "reemplazo": "dale clic"
+        },
+        {
+          "patron": "^(?:(?:haustier|maskottchen) |(?:wahle (?:das )?(?:haustier|maskottchen)) )",
+          "flags": "",
+          "reemplazo": "mascota "
+        },
+        {
+          "patron": "^(?:hilfe|was kann ich sagen|befehle)$",
+          "flags": "",
+          "reemplazo": "ayuda"
+        },
+        {
+          "patron": "^(?:(?:offne|zeige|starte) (?:das |die )?)?(?:tutorial|anleitung)$",
+          "flags": "",
+          "reemplazo": "tutorial"
+        },
+        {
+          "patron": "^(?:abbrechen|abbruch|vergiss es)$",
+          "flags": "",
+          "reemplazo": "cancelar"
+        },
+        {
+          "patron": "^(?:sei still|ruhe|stopp|hor auf zu (?:reden|lesen))$",
+          "flags": "",
+          "reemplazo": "calla"
+        },
+        {
+          "patron": "^(?:(?:offne|mach) )?(?:einen |ein )?neue[nrs]? (?:tab|registerkarte)$",
+          "flags": "",
+          "reemplazo": "nueva pestaña"
+        },
+        {
+          "patron": "^(?:(?:offne|mach) )?(?:ein )?neues fenster$",
+          "flags": "",
+          "reemplazo": "nueva ventana"
+        },
+        {
+          "patron": "^schlie(?:ss|ß)e? (?:den |diesen )?tab$|^(?:den |diesen )?tab schlie(?:ss|ß)en$",
+          "flags": "",
+          "reemplazo": "cierra la pestaña"
+        },
+        {
+          "patron": "^schlie(?:ss|ß)e? (?:das |dieses )?fenster$|^(?:das |dieses )?fenster schlie(?:ss|ß)en$",
+          "flags": "",
+          "reemplazo": "cierra la ventana"
+        },
+        {
+          "patron": "^(?:schlie(?:ss|ß)e? (?:alle )?anderen tabs|(?:alle )?anderen tabs schlie(?:ss|ß)en)$",
+          "flags": "",
+          "reemplazo": "cierra las otras pestañas"
+        },
+        {
+          "patron": "^(?:tab duplizieren|dupliziere (?:den |diesen )?tab)$",
+          "flags": "",
+          "reemplazo": "duplica la pestaña"
+        },
+        {
+          "patron": "^(?:(?:tab )?stummschalten|ton aus)$",
+          "flags": "",
+          "reemplazo": "silencia la pestaña"
+        },
+        {
+          "patron": "^(?:ton an|stummschaltung aufheben)$",
+          "flags": "",
+          "reemplazo": "activa el sonido"
+        },
+        {
+          "patron": "^(?:(?:gehe? )?zum )?nachsten tab$|^nachster tab$",
+          "flags": "",
+          "reemplazo": "pestaña siguiente"
+        },
+        {
+          "patron": "^(?:(?:gehe? )?zum )?vorherigen tab$|^vorheriger tab$",
+          "flags": "",
+          "reemplazo": "pestaña anterior"
+        },
+        {
+          "patron": "^(?:gehe? zu )?tab (?:nummer )?(\\d+)$",
+          "flags": "",
+          "reemplazo": "pestaña $1"
+        },
+        {
+          "patron": "^(?:(?:gehe? )?zum )?letzten tab$|^letzter tab$",
+          "flags": "",
+          "reemplazo": "última pestaña"
+        },
+        {
+          "patron": "^(?:gehe? )?zuruck$",
+          "flags": "",
+          "reemplazo": "atrás"
+        },
+        {
+          "patron": "^(?:gehe? )?vorwarts$",
+          "flags": "",
+          "reemplazo": "adelante"
+        },
+        {
+          "patron": "^(?:(?:seite )?neu laden|lade neu|aktualisieren)$",
+          "flags": "",
+          "reemplazo": "recarga"
+        },
+        {
+          "patron": "^(?:(?:scrolle?|gehe?) )?(?:nach unten|runter|herunter) (?:ein bisschen|etwas)$|^(?:ein bisschen|etwas) (?:nach unten|runter)$",
+          "flags": "",
+          "reemplazo": "baja un poco"
+        },
+        {
+          "patron": "^(?:(?:scrolle?|gehe?) )?(?:nach unten|runter|herunter)$",
+          "flags": "",
+          "reemplazo": "baja"
+        },
+        {
+          "patron": "^(?:(?:scrolle?|gehe?) )?(?:nach oben|hoch|rauf|hinauf) (?:ein bisschen|etwas)$|^(?:ein bisschen|etwas) (?:nach oben|hoch)$",
+          "flags": "",
+          "reemplazo": "sube un poco"
+        },
+        {
+          "patron": "^(?:(?:scrolle?|gehe?) )?(?:nach oben|hoch|rauf|hinauf)$",
+          "flags": "",
+          "reemplazo": "sube"
+        },
+        {
+          "patron": "^(?:(?:gehe? )?zum (?:anfang|seitenanfang)|ganz nach oben)$",
+          "flags": "",
+          "reemplazo": "ve al inicio"
+        },
+        {
+          "patron": "^(?:(?:gehe? )?zum (?:ende|seitenende)|ganz nach unten)$",
+          "flags": "",
+          "reemplazo": "ve al final"
+        },
+        {
+          "patron": "^(?:vergro(?:ss|ß)ern|reinzoomen|zoom rein|hineinzoomen)$",
+          "flags": "",
+          "reemplazo": "aumenta zoom"
+        },
+        {
+          "patron": "^(?:verkleinern|rauszoomen|zoom raus|herauszoomen)$",
+          "flags": "",
+          "reemplazo": "reduce zoom"
+        },
+        {
+          "patron": "^zoom zurucksetzen$",
+          "flags": "",
+          "reemplazo": "zoom normal"
+        },
+        {
+          "patron": "^vollbild(?:modus)?$",
+          "flags": "",
+          "reemplazo": "pantalla completa"
+        },
+        {
+          "patron": "^vollbild(?:modus)? (?:beenden|verlassen)$",
+          "flags": "",
+          "reemplazo": "sal de pantalla completa"
+        },
+        {
+          "patron": "^(?:(?:drucke?) )?(?:enter|eingabe)$|^(?:abschicken|absenden)$",
+          "flags": "",
+          "reemplazo": "enter"
+        },
+        {
+          "patron": "^(?:klick|klicke|klicken)$",
+          "flags": "",
+          "reemplazo": "clic"
+        },
+        {
+          "patron": "^rechtsklick$",
+          "flags": "",
+          "reemplazo": "clic derecho"
+        },
+        {
+          "patron": "^(?:klicke?|klicken|drucke?|tippe) auf ",
+          "flags": "",
+          "reemplazo": "clic en "
+        },
+        {
+          "patron": "^(?:markiere|wahle) ",
+          "flags": "",
+          "reemplazo": "selecciona "
+        },
+        {
+          "patron": "^(?:schreibe?|tippe?|diktiere) ",
+          "flags": "",
+          "reemplazo": "escribe "
+        },
+        {
+          "patron": "^(?:text loschen|feld leeren|losche den text)$",
+          "flags": "",
+          "reemplazo": "borra el texto"
+        },
+        {
+          "patron": "^fokussiere ",
+          "flags": "",
+          "reemplazo": "enfoca "
+        },
+        {
+          "patron": "^(?:abspielen|wiedergabe|play|fortsetzen)$",
+          "flags": "",
+          "reemplazo": "reproduce"
+        },
+        {
+          "patron": "^(?:pause|pausieren|anhalten)$",
+          "flags": "",
+          "reemplazo": "pausa"
+        },
+        {
+          "patron": "^(?:suche?|suchen)(?: nach)? ",
+          "flags": "",
+          "reemplazo": "busca "
+        },
+        {
+          "patron": "^(?:offne|offnen|gehe? zu|gehe? auf|besuche|starte|navigiere zu)(?: die| den| das)? ",
+          "flags": "",
+          "reemplazo": "abre "
+        },
+        {
+          "patron": "^(.+) (?:offnen|aufmachen)$",
+          "flags": "",
+          "reemplazo": "abre $1"
+        },
+        {
+          "patron": "^(?:nach )?(.+) suchen$",
+          "flags": "",
+          "reemplazo": "busca $1"
+        },
+        {
+          "patron": "^(.+) (?:schreiben|tippen)$",
+          "flags": "",
+          "reemplazo": "escribe $1"
+        }
       ]
     },
     "fr": {
@@ -1873,6 +2920,13 @@
             "flags": ""
           },
           "ayuda"
+        ],
+        [
+          {
+            "patron": "^(?:(?:ouvre|montre|lance) (?:le )?)?tutoriel$",
+            "flags": ""
+          },
+          "tutorial"
         ],
         [
           {
@@ -2154,6 +3208,328 @@
           },
           "abre "
         ]
+      ],
+      "reglas": [
+        {
+          "patron": "^(?:(?:active|activer) (?:le )?curseur)$",
+          "flags": "",
+          "reemplazo": "activar cursor"
+        },
+        {
+          "patron": "^(?:(?:desactive|desactiver) (?:le )?curseur)$",
+          "flags": "",
+          "reemplazo": "desactivar cursor"
+        },
+        {
+          "patron": "^(?:(?:pause|mets en pause) (?:le )?curseur)$",
+          "flags": "",
+          "reemplazo": "pausar cursor"
+        },
+        {
+          "patron": "^(?:(?:reprends|reprendre) (?:le )?curseur)$",
+          "flags": "",
+          "reemplazo": "reanudar cursor"
+        },
+        {
+          "patron": "^(?:(?:calibre|recalibre|centre) (?:le )?curseur)$",
+          "flags": "",
+          "reemplazo": "calibrar cursor"
+        },
+        {
+          "patron": "^(?:controle (?:avec |par )?(?:la )?tete)$",
+          "flags": "",
+          "reemplazo": "control cabeza"
+        },
+        {
+          "patron": "^(?:controle (?:avec |par )?(?:les )?mains)$",
+          "flags": "",
+          "reemplazo": "control manos"
+        },
+        {
+          "patron": "^(?:controle (?:avec |par )?(?:le )?moignon)$",
+          "flags": "",
+          "reemplazo": "control munon"
+        },
+        {
+          "patron": "^(?:petits mouvements)$",
+          "flags": "",
+          "reemplazo": "movimientos pequenos"
+        },
+        {
+          "patron": "^(?:mouvements normaux)$",
+          "flags": "",
+          "reemplazo": "movimientos normales"
+        },
+        {
+          "patron": "^(?:active (?:le )?filtre de tremblement)$",
+          "flags": "",
+          "reemplazo": "activar temblor"
+        },
+        {
+          "patron": "^(?:desactive (?:le )?filtre de tremblement)$",
+          "flags": "",
+          "reemplazo": "desactivar temblor"
+        },
+        {
+          "patron": "^(?:curseur plus lent)$",
+          "flags": "",
+          "reemplazo": "cursor mas lento"
+        },
+        {
+          "patron": "^(?:curseur plus rapide)$",
+          "flags": "",
+          "reemplazo": "cursor mas rapido"
+        },
+        {
+          "patron": "^(?:prochain clic droit)$",
+          "flags": "",
+          "reemplazo": "siguiente clic derecho"
+        },
+        {
+          "patron": "^(?:annule (?:le )?clic)$",
+          "flags": "",
+          "reemplazo": "cancelar clic"
+        },
+        {
+          "patron": "^(?:(?:cache|masque|retire) (?:la )?mascotte)$",
+          "flags": "",
+          "reemplazo": "oculta mascota"
+        },
+        {
+          "patron": "^(?:(?:salue|saluer) (?:la )?mascotte)$",
+          "flags": "",
+          "reemplazo": "saluda mascota"
+        },
+        {
+          "patron": "^(?:(?:endors (?:la )?mascotte|mascotte dors))$",
+          "flags": "",
+          "reemplazo": "duerme mascota"
+        },
+        {
+          "patron": "^(?:reveille (?:la )?mascotte)$",
+          "flags": "",
+          "reemplazo": "despierta mascota"
+        },
+        {
+          "patron": "^(?:clique (?:sur )?(?:la )?selection)$",
+          "flags": "",
+          "reemplazo": "dale clic"
+        },
+        {
+          "patron": "^(?:mascotte|(?:choisis|choisir)(?: la)? mascotte) ",
+          "flags": "",
+          "reemplazo": "mascota "
+        },
+        {
+          "patron": "^(?:aide|que puis-je dire|qu'est-ce que je peux dire|commandes)$",
+          "flags": "",
+          "reemplazo": "ayuda"
+        },
+        {
+          "patron": "^(?:(?:ouvre|montre|lance) (?:le )?)?tutoriel$",
+          "flags": "",
+          "reemplazo": "tutorial"
+        },
+        {
+          "patron": "^(?:annule|annuler|laisse tomber|oublie)$",
+          "flags": "",
+          "reemplazo": "cancelar"
+        },
+        {
+          "patron": "^(?:tais-toi|silence|stop|arrete de (?:parler|lire))$",
+          "flags": "",
+          "reemplazo": "calla"
+        },
+        {
+          "patron": "^(?:(?:ouvre|ouvrir) )?(?:un )?nouvel onglet$",
+          "flags": "",
+          "reemplazo": "nueva pestaña"
+        },
+        {
+          "patron": "^(?:(?:ouvre|ouvrir) )?(?:une )?nouvelle fenetre$",
+          "flags": "",
+          "reemplazo": "nueva ventana"
+        },
+        {
+          "patron": "^(?:ferme|fermer|fermez) (?:l'|l |cet |ce )?onglet(?: actuel)?$",
+          "flags": "",
+          "reemplazo": "cierra la pestaña"
+        },
+        {
+          "patron": "^(?:ferme|fermer|fermez) (?:la |cette )?fenetre$",
+          "flags": "",
+          "reemplazo": "cierra la ventana"
+        },
+        {
+          "patron": "^(?:ferme|fermer|fermez) (?:tous )?les autres onglets$",
+          "flags": "",
+          "reemplazo": "cierra las otras pestañas"
+        },
+        {
+          "patron": "^(?:duplique|dupliquer) (?:l'|l |cet )?onglet$",
+          "flags": "",
+          "reemplazo": "duplica la pestaña"
+        },
+        {
+          "patron": "^(?:coupe(?:r)? le son|mets en sourdine|muet)$",
+          "flags": "",
+          "reemplazo": "silencia la pestaña"
+        },
+        {
+          "patron": "^(?:remets|reactive|active) le son$",
+          "flags": "",
+          "reemplazo": "activa el sonido"
+        },
+        {
+          "patron": "^(?:(?:va a l'|aller a l')?onglet suivant)$",
+          "flags": "",
+          "reemplazo": "pestaña siguiente"
+        },
+        {
+          "patron": "^(?:(?:va a l'|aller a l')?onglet precedent)$",
+          "flags": "",
+          "reemplazo": "pestaña anterior"
+        },
+        {
+          "patron": "^(?:va a l'|aller a l')?onglet (?:numero )?(\\d+)$",
+          "flags": "",
+          "reemplazo": "pestaña $1"
+        },
+        {
+          "patron": "^(?:va au |aller au )?dernier onglet$",
+          "flags": "",
+          "reemplazo": "última pestaña"
+        },
+        {
+          "patron": "^(?:retour|reviens|recule|precedent|page precedente|retourne en arriere)$",
+          "flags": "",
+          "reemplazo": "atrás"
+        },
+        {
+          "patron": "^(?:avance|page suivante|suivant|va en avant)$",
+          "flags": "",
+          "reemplazo": "adelante"
+        },
+        {
+          "patron": "^(?:recharge|recharger|actualise|actualiser|rafraichis)(?: la page)?$",
+          "flags": "",
+          "reemplazo": "recarga"
+        },
+        {
+          "patron": "^(?:(?:defile|descends|descendre|va) )?(?:vers le bas|en bas) un peu$|^descends un peu$",
+          "flags": "",
+          "reemplazo": "baja un poco"
+        },
+        {
+          "patron": "^(?:(?:defile|descends|descendre|va) )?(?:vers le bas|en bas)$|^(?:descends|descendre)$",
+          "flags": "",
+          "reemplazo": "baja"
+        },
+        {
+          "patron": "^(?:(?:defile|monte|monter|remonte|va) )?(?:vers le haut|en haut) un peu$|^(?:monte|remonte) un peu$",
+          "flags": "",
+          "reemplazo": "sube un poco"
+        },
+        {
+          "patron": "^(?:(?:defile|monte|monter|remonte|va) )?(?:vers le haut|en haut)$|^(?:monte|monter|remonte)$",
+          "flags": "",
+          "reemplazo": "sube"
+        },
+        {
+          "patron": "^(?:va |aller )?(?:au )?debut(?: de la page)?$|^tout en haut$",
+          "flags": "",
+          "reemplazo": "ve al inicio"
+        },
+        {
+          "patron": "^(?:va |aller )?(?:a la )?fin(?: de la page)?$|^tout en bas$",
+          "flags": "",
+          "reemplazo": "ve al final"
+        },
+        {
+          "patron": "^(?:zoome|zoomer|agrandis|zoom avant)$",
+          "flags": "",
+          "reemplazo": "aumenta zoom"
+        },
+        {
+          "patron": "^(?:dezoome|dezoomer|reduis|zoom arriere)$",
+          "flags": "",
+          "reemplazo": "reduce zoom"
+        },
+        {
+          "patron": "^(?:zoom normal|reinitialise le zoom)$",
+          "flags": "",
+          "reemplazo": "zoom normal"
+        },
+        {
+          "patron": "^(?:plein ecran)$",
+          "flags": "",
+          "reemplazo": "pantalla completa"
+        },
+        {
+          "patron": "^(?:quitte|quitter|sors|sortir) (?:du |le )?plein ecran$",
+          "flags": "",
+          "reemplazo": "sal de pantalla completa"
+        },
+        {
+          "patron": "^(?:appuie sur )?entree$|^(?:valide|valider|soumettre|envoie le formulaire)$",
+          "flags": "",
+          "reemplazo": "enter"
+        },
+        {
+          "patron": "^(?:clique|cliquer|clic)$",
+          "flags": "",
+          "reemplazo": "clic"
+        },
+        {
+          "patron": "^clic droit$",
+          "flags": "",
+          "reemplazo": "clic derecho"
+        },
+        {
+          "patron": "^(?:clique|cliquer|cliquez|clic|appuie|appuyer)(?: sur)? ",
+          "flags": "",
+          "reemplazo": "clic en "
+        },
+        {
+          "patron": "^(?:selectionne|selectionner|surligne) ",
+          "flags": "",
+          "reemplazo": "selecciona "
+        },
+        {
+          "patron": "^(?:ecris|ecrire|ecrivez|tape|taper|tapez|dicte|dicter) ",
+          "flags": "",
+          "reemplazo": "escribe "
+        },
+        {
+          "patron": "^(?:efface|effacer|vide|vider) le (?:texte|champ)$",
+          "flags": "",
+          "reemplazo": "borra el texto"
+        },
+        {
+          "patron": "^(?:mets le focus sur|focus sur|va au champ) ",
+          "flags": "",
+          "reemplazo": "enfoca "
+        },
+        {
+          "patron": "^(?:lecture|lance la video|reprends|joue|play)(?: la video)?$",
+          "flags": "",
+          "reemplazo": "reproduce"
+        },
+        {
+          "patron": "^(?:pause|mets en pause)(?: la video)?$",
+          "flags": "",
+          "reemplazo": "pausa"
+        },
+        {
+          "patron": "^(?:cherche|chercher|cherchez|recherche|rechercher|trouve) ",
+          "flags": "",
+          "reemplazo": "busca "
+        },
+        {
+          "patron": "^(?:ouvre|ouvrir|ouvrez|va sur|va a|aller sur|aller a|lance|visite|demarre)(?: le| la)?(?: l'| )",
+          "flags": "",
+          "reemplazo": "abre "
+        }
       ]
     },
     "it": {
@@ -2339,6 +3715,13 @@
             "flags": ""
           },
           "ayuda"
+        ],
+        [
+          {
+            "patron": "^(?:(?:apri|mostra|avvia) (?:il )?)?tutorial$",
+            "flags": ""
+          },
+          "tutorial"
         ],
         [
           {
@@ -2620,7 +4003,2544 @@
           },
           "abre "
         ]
+      ],
+      "reglas": [
+        {
+          "patron": "^(?:(?:attiva|abilita) (?:il )?cursore)$",
+          "flags": "",
+          "reemplazo": "activar cursor"
+        },
+        {
+          "patron": "^(?:(?:disattiva|disabilita) (?:il )?cursore)$",
+          "flags": "",
+          "reemplazo": "desactivar cursor"
+        },
+        {
+          "patron": "^(?:(?:pausa|metti in pausa) (?:il )?cursore)$",
+          "flags": "",
+          "reemplazo": "pausar cursor"
+        },
+        {
+          "patron": "^(?:riprendi (?:il )?cursore)$",
+          "flags": "",
+          "reemplazo": "reanudar cursor"
+        },
+        {
+          "patron": "^(?:(?:calibra|ricalibra|centra) (?:il )?cursore)$",
+          "flags": "",
+          "reemplazo": "calibrar cursor"
+        },
+        {
+          "patron": "^(?:controllo (?:con |della )?(?:la )?testa)$",
+          "flags": "",
+          "reemplazo": "control cabeza"
+        },
+        {
+          "patron": "^(?:controllo (?:con |delle )?(?:le )?mani)$",
+          "flags": "",
+          "reemplazo": "control manos"
+        },
+        {
+          "patron": "^(?:controllo (?:con |del )?(?:il )?moncone)$",
+          "flags": "",
+          "reemplazo": "control munon"
+        },
+        {
+          "patron": "^(?:piccoli movimenti)$",
+          "flags": "",
+          "reemplazo": "movimientos pequenos"
+        },
+        {
+          "patron": "^(?:movimenti normali)$",
+          "flags": "",
+          "reemplazo": "movimientos normales"
+        },
+        {
+          "patron": "^(?:attiva (?:il )?filtro tremore)$",
+          "flags": "",
+          "reemplazo": "activar temblor"
+        },
+        {
+          "patron": "^(?:disattiva (?:il )?filtro tremore)$",
+          "flags": "",
+          "reemplazo": "desactivar temblor"
+        },
+        {
+          "patron": "^(?:cursore piu lento)$",
+          "flags": "",
+          "reemplazo": "cursor mas lento"
+        },
+        {
+          "patron": "^(?:cursore piu veloce)$",
+          "flags": "",
+          "reemplazo": "cursor mas rapido"
+        },
+        {
+          "patron": "^(?:prossimo clic destro)$",
+          "flags": "",
+          "reemplazo": "siguiente clic derecho"
+        },
+        {
+          "patron": "^(?:annulla (?:il )?clic)$",
+          "flags": "",
+          "reemplazo": "cancelar clic"
+        },
+        {
+          "patron": "^(?:(?:nascondi|rimuovi) (?:la )?mascotte)$",
+          "flags": "",
+          "reemplazo": "oculta mascota"
+        },
+        {
+          "patron": "^(?:saluta (?:la )?mascotte)$",
+          "flags": "",
+          "reemplazo": "saluda mascota"
+        },
+        {
+          "patron": "^(?:(?:addormenta (?:la )?mascotte|mascotte dormi))$",
+          "flags": "",
+          "reemplazo": "duerme mascota"
+        },
+        {
+          "patron": "^(?:sveglia (?:la )?mascotte)$",
+          "flags": "",
+          "reemplazo": "despierta mascota"
+        },
+        {
+          "patron": "^(?:clicca (?:sulla |la )?selezione)$",
+          "flags": "",
+          "reemplazo": "dale clic"
+        },
+        {
+          "patron": "^(?:mascotte|(?:scegli|seleziona)(?: la)? mascotte) ",
+          "flags": "",
+          "reemplazo": "mascota "
+        },
+        {
+          "patron": "^(?:aiuto|cosa posso dire|comandi)$",
+          "flags": "",
+          "reemplazo": "ayuda"
+        },
+        {
+          "patron": "^(?:(?:apri|mostra|avvia) (?:il )?)?tutorial$",
+          "flags": "",
+          "reemplazo": "tutorial"
+        },
+        {
+          "patron": "^(?:annulla|lascia stare|lascia perdere)$",
+          "flags": "",
+          "reemplazo": "cancelar"
+        },
+        {
+          "patron": "^(?:zitto|stai zitto|silenzio|basta|smetti di (?:parlare|leggere))$",
+          "flags": "",
+          "reemplazo": "calla"
+        },
+        {
+          "patron": "^(?:apri )?(?:una )?nuova scheda$",
+          "flags": "",
+          "reemplazo": "nueva pestaña"
+        },
+        {
+          "patron": "^(?:apri )?(?:una )?nuova finestra$",
+          "flags": "",
+          "reemplazo": "nueva ventana"
+        },
+        {
+          "patron": "^chiudi (?:la |questa )?scheda$",
+          "flags": "",
+          "reemplazo": "cierra la pestaña"
+        },
+        {
+          "patron": "^chiudi (?:la |questa )?finestra$",
+          "flags": "",
+          "reemplazo": "cierra la ventana"
+        },
+        {
+          "patron": "^chiudi (?:tutte )?le altre schede$",
+          "flags": "",
+          "reemplazo": "cierra las otras pestañas"
+        },
+        {
+          "patron": "^duplica (?:la |questa )?scheda$",
+          "flags": "",
+          "reemplazo": "duplica la pestaña"
+        },
+        {
+          "patron": "^(?:disattiva l'audio|muto|silenzia(?: la scheda)?)$",
+          "flags": "",
+          "reemplazo": "silencia la pestaña"
+        },
+        {
+          "patron": "^(?:riattiva|attiva) l'audio$",
+          "flags": "",
+          "reemplazo": "activa el sonido"
+        },
+        {
+          "patron": "^(?:vai alla )?(?:scheda successiva|prossima scheda)$",
+          "flags": "",
+          "reemplazo": "pestaña siguiente"
+        },
+        {
+          "patron": "^(?:vai alla )?scheda precedente$",
+          "flags": "",
+          "reemplazo": "pestaña anterior"
+        },
+        {
+          "patron": "^(?:vai alla )?scheda (?:numero )?(\\d+)$",
+          "flags": "",
+          "reemplazo": "pestaña $1"
+        },
+        {
+          "patron": "^(?:vai all')?ultima scheda$",
+          "flags": "",
+          "reemplazo": "última pestaña"
+        },
+        {
+          "patron": "^(?:indietro|torna indietro|pagina precedente)$",
+          "flags": "",
+          "reemplazo": "atrás"
+        },
+        {
+          "patron": "^(?:avanti|vai avanti|pagina successiva)$",
+          "flags": "",
+          "reemplazo": "adelante"
+        },
+        {
+          "patron": "^(?:ricarica|aggiorna)(?: la pagina)?$",
+          "flags": "",
+          "reemplazo": "recarga"
+        },
+        {
+          "patron": "^(?:(?:scorri|vai) )?(?:in )?giu un po'?$|^scendi un po'?$",
+          "flags": "",
+          "reemplazo": "baja un poco"
+        },
+        {
+          "patron": "^(?:(?:scorri|vai) )?(?:in )?giu$|^scendi$",
+          "flags": "",
+          "reemplazo": "baja"
+        },
+        {
+          "patron": "^(?:(?:scorri|vai) )?(?:in )?su un po'?$|^sali un po'?$",
+          "flags": "",
+          "reemplazo": "sube un poco"
+        },
+        {
+          "patron": "^(?:(?:scorri|vai) )?(?:in )?su$|^sali$",
+          "flags": "",
+          "reemplazo": "sube"
+        },
+        {
+          "patron": "^(?:vai )?all'inizio$|^in cima$",
+          "flags": "",
+          "reemplazo": "ve al inicio"
+        },
+        {
+          "patron": "^(?:vai )?alla fine$|^in fondo$",
+          "flags": "",
+          "reemplazo": "ve al final"
+        },
+        {
+          "patron": "^(?:ingrandisci|zoom avanti|aumenta lo zoom)$",
+          "flags": "",
+          "reemplazo": "aumenta zoom"
+        },
+        {
+          "patron": "^(?:riduci|rimpicciolisci|zoom indietro)$",
+          "flags": "",
+          "reemplazo": "reduce zoom"
+        },
+        {
+          "patron": "^zoom normale$",
+          "flags": "",
+          "reemplazo": "zoom normal"
+        },
+        {
+          "patron": "^schermo intero$",
+          "flags": "",
+          "reemplazo": "pantalla completa"
+        },
+        {
+          "patron": "^esci (?:dallo|da) schermo intero$",
+          "flags": "",
+          "reemplazo": "sal de pantalla completa"
+        },
+        {
+          "patron": "^(?:premi )?invio$|^invia(?: il modulo)?$",
+          "flags": "",
+          "reemplazo": "enter"
+        },
+        {
+          "patron": "^(?:clicca|clic|click)$",
+          "flags": "",
+          "reemplazo": "clic"
+        },
+        {
+          "patron": "^(?:clic|tasto) destro$",
+          "flags": "",
+          "reemplazo": "clic derecho"
+        },
+        {
+          "patron": "^(?:clicca|premi|tocca)(?: su)? ",
+          "flags": "",
+          "reemplazo": "clic en "
+        },
+        {
+          "patron": "^(?:seleziona|evidenzia) ",
+          "flags": "",
+          "reemplazo": "selecciona "
+        },
+        {
+          "patron": "^(?:scrivi|scrivere|digita|detta) ",
+          "flags": "",
+          "reemplazo": "escribe "
+        },
+        {
+          "patron": "^(?:cancella|svuota) il (?:testo|campo)$",
+          "flags": "",
+          "reemplazo": "borra el texto"
+        },
+        {
+          "patron": "^(?:metti il focus su|vai al campo) ",
+          "flags": "",
+          "reemplazo": "enfoca "
+        },
+        {
+          "patron": "^(?:riproduci|play|riprendi)(?: il video)?$",
+          "flags": "",
+          "reemplazo": "reproduce"
+        },
+        {
+          "patron": "^(?:pausa|metti in pausa)(?: il video)?$",
+          "flags": "",
+          "reemplazo": "pausa"
+        },
+        {
+          "patron": "^(?:cerca|cercare|ricerca|trova) ",
+          "flags": "",
+          "reemplazo": "busca "
+        },
+        {
+          "patron": "^(?:apri|aprire|vai su|vai a|visita|avvia)(?: il| lo| la)?(?: l'| )",
+          "flags": "",
+          "reemplazo": "abre "
+        }
       ]
+    }
+  },
+  "activacion": {
+    "version": 1,
+    "validacion": {
+      "minimo": 3,
+      "maximo": 24,
+      "palabras": 3,
+      "letras": 3
+    },
+    "maxAlias": 3,
+    "fragmentosPorPalabra": 3,
+    "pluralLiteral": true,
+    "tambienComputadora": false,
+    "posicion": "inicio_o_envoltorio",
+    "compuestosVocativos": [
+      "Hey Google"
+    ],
+    "vocativos": {
+      "es": [
+        "oye",
+        "oe",
+        "hola"
+      ],
+      "en": [
+        "hey",
+        "hello"
+      ],
+      "pt": [
+        "oi",
+        "ola"
+      ],
+      "de": [
+        "hallo"
+      ],
+      "fr": [
+        "salut"
+      ],
+      "it": [
+        "ciao"
+      ]
+    },
+    "cierres": {
+      "es": [
+        "gracias",
+        "listo",
+        "silencio"
+      ],
+      "en": [
+        "thanks",
+        "done",
+        "silence"
+      ],
+      "pt": [
+        "obrigado",
+        "pronto",
+        "silencio"
+      ],
+      "de": [
+        "danke",
+        "fertig",
+        "ruhe"
+      ],
+      "fr": [
+        "merci",
+        "termine",
+        "silence"
+      ],
+      "it": [
+        "grazie",
+        "fatto",
+        "silenzio"
+      ]
+    },
+    "interrupciones": {
+      "es": [
+        "calla",
+        "silencio",
+        "deja de hablar"
+      ],
+      "en": [
+        "silence",
+        "stop speaking"
+      ],
+      "pt": [
+        "silencio",
+        "para de falar"
+      ],
+      "de": [
+        "ruhe",
+        "nicht sprechen"
+      ],
+      "fr": [
+        "silence",
+        "arrete de parler"
+      ],
+      "it": [
+        "silenzio",
+        "smetti di parlare"
+      ]
+    },
+    "pronunciaciones": {
+      "jarvis": [
+        "yarbis",
+        "yarvis",
+        "jarbis"
+      ],
+      "alexa": [
+        "aleksa"
+      ],
+      "mike": [
+        "maik"
+      ],
+      "george": [
+        "yorch"
+      ]
+    },
+    "perfilEspanol": {
+      "minimoLetras": 5,
+      "reglas": [
+        {
+          "patron": "c(?=[ei])",
+          "flags": "g",
+          "reemplazo": "s"
+        },
+        {
+          "patron": "qu(?=[ei])",
+          "flags": "g",
+          "reemplazo": "k"
+        },
+        {
+          "patron": "c(?!h)",
+          "flags": "g",
+          "reemplazo": "k"
+        },
+        {
+          "patron": "ph",
+          "flags": "g",
+          "reemplazo": "f"
+        },
+        {
+          "patron": "v",
+          "flags": "g",
+          "reemplazo": "b"
+        },
+        {
+          "patron": "z",
+          "flags": "g",
+          "reemplazo": "s"
+        },
+        {
+          "patron": "x",
+          "flags": "g",
+          "reemplazo": "ks"
+        }
+      ]
+    },
+    "reservadas": {
+      "activa": "orden",
+      "activar": "orden",
+      "enciende": "orden",
+      "enciender": "orden",
+      "enciendir": "orden",
+      "prende": "orden",
+      "prender": "orden",
+      "prendir": "orden",
+      "cursor": "orden",
+      "mouse": "orden",
+      "mouser": "orden",
+      "mousir": "orden",
+      "cinetico": "orden",
+      "raton": "orden",
+      "camara": "orden",
+      "camarar": "orden",
+      "desactiva": "orden",
+      "desactivar": "orden",
+      "apaga": "orden",
+      "apagar": "orden",
+      "calibra": "orden",
+      "calibrar": "orden",
+      "centra": "orden",
+      "centrar": "orden",
+      "pausa": "orden",
+      "pausar": "orden",
+      "deten": "orden",
+      "para": "orden",
+      "parar": "orden",
+      "reanuda": "orden",
+      "reanudar": "orden",
+      "sigue": "orden",
+      "siguer": "orden",
+      "siguir": "orden",
+      "con": "orden",
+      "dale": "orden",
+      "daler": "orden",
+      "dalir": "orden",
+      "haz": "orden",
+      "hazle": "orden",
+      "hazler": "orden",
+      "hazlir": "orden",
+      "cli": "orden",
+      "derecho": "orden",
+      "clic": "orden",
+      "abre": "orden",
+      "abrer": "orden",
+      "abrir": "orden",
+      "muestra": "orden",
+      "muestrar": "orden",
+      "inicia": "orden",
+      "iniciar": "orden",
+      "empieza": "orden",
+      "empiezar": "orden",
+      "tutorial": "orden",
+      "activate": "orden",
+      "activater": "orden",
+      "activatir": "orden",
+      "enable": "orden",
+      "enabler": "orden",
+      "enablir": "orden",
+      "turn": "orden",
+      "the": "orden",
+      "ther": "orden",
+      "thir": "orden",
+      "camera": "orden",
+      "camerar": "orden",
+      "kinetic": "orden",
+      "disable": "orden",
+      "disabler": "orden",
+      "disablir": "orden",
+      "deactivate": "orden",
+      "deactivater": "orden",
+      "deactivatir": "orden",
+      "of": "orden",
+      "pause": "orden",
+      "pauser": "orden",
+      "pausir": "orden",
+      "resume": "orden",
+      "resumer": "orden",
+      "resumir": "orden",
+      "calibrate": "orden",
+      "calibrater": "orden",
+      "calibratir": "orden",
+      "recalibrate": "orden",
+      "recalibrater": "orden",
+      "recalibratir": "orden",
+      "center": "orden",
+      "head": "orden",
+      "face": "orden",
+      "facer": "orden",
+      "facir": "orden",
+      "control": "orden",
+      "cabeza": "orden",
+      "cabezar": "orden",
+      "hand": "orden",
+      "hands": "orden",
+      "arm": "orden",
+      "arms": "orden",
+      "manos": "orden",
+      "residual": "orden",
+      "limb": "orden",
+      "partial": "orden",
+      "stump": "orden",
+      "munon": "orden",
+      "small": "orden",
+      "reduced": "orden",
+      "movements": "orden",
+      "movimientos": "orden",
+      "pequenos": "orden",
+      "normal": "orden",
+      "normales": "orden",
+      "tremor": "orden",
+      "filter": "orden",
+      "temblor": "orden",
+      "slower": "orden",
+      "mas": "orden",
+      "lento": "orden",
+      "faster": "orden",
+      "rapido": "orden",
+      "next": "orden",
+      "right": "orden",
+      "click": "orden",
+      "siguiente": "orden",
+      "siguienter": "orden",
+      "siguientir": "orden",
+      "cancel": "orden",
+      "cancelar": "orden",
+      "hide": "orden",
+      "hider": "orden",
+      "hidir": "orden",
+      "remove": "orden",
+      "remover": "orden",
+      "removir": "orden",
+      "pet": "orden",
+      "oculta": "orden",
+      "ocultar": "orden",
+      "mascota": "orden",
+      "mascotar": "orden",
+      "gret": "orden",
+      "wave": "orden",
+      "waver": "orden",
+      "wavir": "orden",
+      "saluda": "orden",
+      "saludar": "orden",
+      "slep": "orden",
+      "put": "orden",
+      "duerme": "orden",
+      "duermer": "orden",
+      "duermir": "orden",
+      "wake": "orden",
+      "waker": "orden",
+      "wakir": "orden",
+      "despierta": "orden",
+      "despiertar": "orden",
+      "chose": "orden",
+      "choser": "orden",
+      "chosir": "orden",
+      "select": "orden",
+      "change": "orden",
+      "changer": "orden",
+      "changir": "orden",
+      "help": "orden",
+      "what": "orden",
+      "can": "muletilla",
+      "say": "orden",
+      "you": "muletilla",
+      "show": "orden",
+      "comands": "orden",
+      "ayuda": "orden",
+      "ayudar": "orden",
+      "open": "orden",
+      "start": "orden",
+      "never": "orden",
+      "mind": "orden",
+      "forget": "orden",
+      "stop": "orden",
+      "talking": "orden",
+      "reading": "orden",
+      "quiet": "orden",
+      "shut": "orden",
+      "silence": "orden",
+      "silencer": "orden",
+      "silencir": "orden",
+      "calla": "orden",
+      "callar": "orden",
+      "create": "orden",
+      "creater": "orden",
+      "creatir": "orden",
+      "new": "orden",
+      "tab": "orden",
+      "nueva": "orden",
+      "nuevar": "orden",
+      "pestana": "orden",
+      "pestanar": "orden",
+      "window": "orden",
+      "ventana": "orden",
+      "ventanar": "orden",
+      "close": "orden",
+      "closer": "orden",
+      "closir": "orden",
+      "this": "orden",
+      "current": "orden",
+      "cierra": "orden",
+      "cierrar": "orden",
+      "all": "orden",
+      "other": "orden",
+      "tabs": "orden",
+      "las": "orden",
+      "otras": "orden",
+      "pestanas": "orden",
+      "duplicate": "orden",
+      "duplicater": "orden",
+      "duplicatir": "orden",
+      "duplica": "orden",
+      "duplicar": "orden",
+      "mute": "orden",
+      "muter": "orden",
+      "mutir": "orden",
+      "silencia": "orden",
+      "silenciar": "orden",
+      "unmute": "orden",
+      "unmuter": "orden",
+      "unmutir": "orden",
+      "sonido": "orden",
+      "switch": "orden",
+      "previous": "orden",
+      "anterior": "orden",
+      "number": "orden",
+      "last": "orden",
+      "ultima": "orden",
+      "ultimar": "orden",
+      "back": "orden",
+      "page": "orden",
+      "pager": "orden",
+      "pagir": "orden",
+      "atras": "orden",
+      "forward": "orden",
+      "adelante": "orden",
+      "adelanter": "orden",
+      "adelantir": "orden",
+      "reload": "orden",
+      "refresh": "orden",
+      "recarga": "orden",
+      "recargar": "orden",
+      "scroll": "orden",
+      "move": "orden",
+      "mover": "orden",
+      "movir": "orden",
+      "down": "orden",
+      "bit": "orden",
+      "litle": "orden",
+      "litler": "orden",
+      "litlir": "orden",
+      "baja": "orden",
+      "bajar": "orden",
+      "poco": "orden",
+      "sube": "orden",
+      "suber": "orden",
+      "subir": "orden",
+      "top": "orden",
+      "inicio": "orden",
+      "botom": "orden",
+      "final": "orden",
+      "zom": "orden",
+      "biger": "orden",
+      "larger": "orden",
+      "aumenta": "orden",
+      "aumentar": "orden",
+      "out": "orden",
+      "smaller": "orden",
+      "reduce": "orden",
+      "reducer": "orden",
+      "reducir": "orden",
+      "reset": "orden",
+      "actual": "orden",
+      "size": "orden",
+      "sizer": "orden",
+      "sizir": "orden",
+      "enter": "orden",
+      "full": "orden",
+      "scren": "orden",
+      "pantalla": "orden",
+      "pantallar": "orden",
+      "completa": "orden",
+      "completar": "orden",
+      "exit": "orden",
+      "leave": "orden",
+      "leaver": "orden",
+      "leavir": "orden",
+      "sal": "orden",
+      "pres": "orden",
+      "hit": "orden",
+      "submit": "orden",
+      "form": "orden",
+      "left": "orden",
+      "here": "orden",
+      "herer": "orden",
+      "herir": "orden",
+      "selection": "orden",
+      "tap": "orden",
+      "highlight": "orden",
+      "seleciona": "orden",
+      "selecionar": "orden",
+      "write": "orden",
+      "writer": "orden",
+      "writir": "orden",
+      "type": "orden",
+      "typer": "orden",
+      "typir": "orden",
+      "dictate": "orden",
+      "dictater": "orden",
+      "dictatir": "orden",
+      "escribe": "orden",
+      "escriber": "orden",
+      "escribir": "orden",
+      "clear": "orden",
+      "delete": "orden",
+      "deleter": "orden",
+      "deletir": "orden",
+      "erase": "orden",
+      "eraser": "orden",
+      "erasir": "orden",
+      "text": "orden",
+      "field": "orden",
+      "borra": "orden",
+      "borrar": "orden",
+      "texto": "orden",
+      "focus": "orden",
+      "enfoca": "orden",
+      "enfocar": "orden",
+      "play": "orden",
+      "video": "orden",
+      "audio": "orden",
+      "music": "orden",
+      "reproduce": "orden",
+      "reproducer": "orden",
+      "reproducir": "orden",
+      "search": "orden",
+      "for": "orden",
+      "lok": "orden",
+      "find": "orden",
+      "gogle": "orden",
+      "gogler": "orden",
+      "goglir": "orden",
+      "busca": "orden",
+      "buscar": "orden",
+      "launch": "orden",
+      "visit": "orden",
+      "navigate": "orden",
+      "navigater": "orden",
+      "navigatir": "orden",
+      "take": "orden",
+      "taker": "orden",
+      "takir": "orden",
+      "ativa": "orden",
+      "ativar": "orden",
+      "liga": "orden",
+      "ligar": "orden",
+      "desativa": "orden",
+      "desativar": "orden",
+      "desliga": "orden",
+      "desligar": "orden",
+      "retoma": "orden",
+      "retomar": "orden",
+      "continua": "orden",
+      "continuar": "orden",
+      "recalibra": "orden",
+      "recalibrar": "orden",
+      "centraliza": "orden",
+      "centralizar": "orden",
+      "controle": "orden",
+      "controler": "orden",
+      "controlir": "orden",
+      "com": "orden",
+      "cabeca": "orden",
+      "cabecar": "orden",
+      "rosto": "orden",
+      "tronco": "orden",
+      "maos": "orden",
+      "bracos": "orden",
+      "coto": "orden",
+      "mao": "orden",
+      "parcial": "orden",
+      "movimentos": "orden",
+      "normais": "orden",
+      "filtro": "orden",
+      "mais": "orden",
+      "proximo": "orden",
+      "clique": "orden",
+      "cliquer": "orden",
+      "cliquir": "orden",
+      "direito": "orden",
+      "cancela": "orden",
+      "esconde": "orden",
+      "esconder": "orden",
+      "escondir": "orden",
+      "mascote": "orden",
+      "mascoter": "orden",
+      "mascotir": "orden",
+      "cumprimenta": "orden",
+      "cumprimentar": "orden",
+      "sauda": "orden",
+      "saudar": "orden",
+      "acena": "orden",
+      "acenar": "orden",
+      "dorme": "orden",
+      "dormer": "orden",
+      "dormir": "orden",
+      "coloca": "orden",
+      "colocar": "orden",
+      "acorda": "orden",
+      "acordar": "orden",
+      "clica": "orden",
+      "clicar": "orden",
+      "selecao": "orden",
+      "escolhe": "orden",
+      "escolher": "orden",
+      "escolhir": "orden",
+      "escolha": "orden",
+      "escolhar": "orden",
+      "ajuda": "muletilla",
+      "ajudar": "orden",
+      "que": "muletilla",
+      "quer": "orden",
+      "quir": "orden",
+      "poso": "orden",
+      "dizer": "orden",
+      "comandos": "orden",
+      "mostra": "orden",
+      "mostrar": "orden",
+      "esquece": "orden",
+      "esquecer": "orden",
+      "esquecir": "orden",
+      "deixa": "orden",
+      "deixar": "orden",
+      "pra": "orden",
+      "prar": "orden",
+      "falar": "orden",
+      "ler": "orden",
+      "cala": "orden",
+      "calar": "orden",
+      "boca": "orden",
+      "bocar": "orden",
+      "silencio": "orden",
+      "chega": "orden",
+      "chegar": "orden",
+      "abra": "orden",
+      "abrar": "orden",
+      "uma": "orden",
+      "umar": "orden",
+      "nova": "orden",
+      "novar": "orden",
+      "aba": "orden",
+      "abar": "orden",
+      "guia": "orden",
+      "guiar": "orden",
+      "janela": "orden",
+      "janelar": "orden",
+      "fecha": "orden",
+      "fechar": "orden",
+      "feche": "orden",
+      "fecher": "orden",
+      "fechir": "orden",
+      "esta": "orden",
+      "estar": "orden",
+      "esa": "orden",
+      "esar": "orden",
+      "todas": "orden",
+      "outras": "orden",
+      "abas": "orden",
+      "guias": "orden",
+      "duplique": "orden",
+      "dupliquer": "orden",
+      "dupliquir": "orden",
+      "muta": "orden",
+      "mutar": "orden",
+      "reativa": "orden",
+      "reativar": "orden",
+      "som": "orden",
+      "desmuta": "orden",
+      "desmutar": "orden",
+      "vai": "orden",
+      "proxima": "orden",
+      "proximar": "orden",
+      "seguinte": "orden",
+      "seguinter": "orden",
+      "seguintir": "orden",
+      "numero": "orden",
+      "volta": "orden",
+      "voltar": "orden",
+      "volte": "orden",
+      "volter": "orden",
+      "voltir": "orden",
+      "pagina": "orden",
+      "paginar": "orden",
+      "avanca": "orden",
+      "avancar": "orden",
+      "avance": "orden",
+      "avancer": "orden",
+      "avancir": "orden",
+      "recarrega": "orden",
+      "recarregar": "orden",
+      "recarregue": "orden",
+      "recarreguer": "orden",
+      "recarreguir": "orden",
+      "atualiza": "orden",
+      "atualizar": "orden",
+      "atualize": "orden",
+      "atualizer": "orden",
+      "atualizir": "orden",
+      "rola": "orden",
+      "rolar": "orden",
+      "role": "orden",
+      "roler": "orden",
+      "rolir": "orden",
+      "desce": "orden",
+      "descer": "orden",
+      "descir": "orden",
+      "desca": "orden",
+      "descar": "orden",
+      "baixo": "orden",
+      "pouco": "orden",
+      "sobe": "orden",
+      "sober": "orden",
+      "sobir": "orden",
+      "suba": "orden",
+      "subar": "orden",
+      "cima": "orden",
+      "cimar": "orden",
+      "pro": "orden",
+      "topo": "orden",
+      "fim": "orden",
+      "amplia": "orden",
+      "ampliar": "orden",
+      "diminui": "orden",
+      "menos": "orden",
+      "reduz": "orden",
+      "tela": "orden",
+      "telar": "orden",
+      "cheia": "orden",
+      "cheiar": "orden",
+      "ecra": "orden",
+      "ecrar": "orden",
+      "inteiro": "orden",
+      "sai": "orden",
+      "sair": "orden",
+      "aperta": "orden",
+      "apertar": "orden",
+      "presiona": "orden",
+      "presionar": "orden",
+      "carrega": "orden",
+      "carregar": "orden",
+      "envia": "orden",
+      "enviar": "orden",
+      "formulario": "orden",
+      "botao": "orden",
+      "toca": "orden",
+      "tocar": "orden",
+      "selecione": "orden",
+      "selecioner": "orden",
+      "selecionir": "orden",
+      "destaca": "orden",
+      "destacar": "orden",
+      "escreve": "orden",
+      "escrever": "orden",
+      "escrevir": "orden",
+      "escreva": "orden",
+      "escrevar": "orden",
+      "digita": "orden",
+      "digitar": "orden",
+      "digite": "orden",
+      "digiter": "orden",
+      "digitir": "orden",
+      "dita": "orden",
+      "ditar": "orden",
+      "dite": "orden",
+      "diter": "orden",
+      "ditir": "orden",
+      "limpa": "orden",
+      "limpar": "orden",
+      "campo": "orden",
+      "foca": "orden",
+      "focar": "orden",
+      "reproduz": "orden",
+      "reproduzir": "orden",
+      "pesquisa": "orden",
+      "pesquisar": "orden",
+      "pesquise": "orden",
+      "pesquiser": "orden",
+      "pesquisir": "orden",
+      "procura": "orden",
+      "procurar": "orden",
+      "procure": "orden",
+      "procurer": "orden",
+      "procurir": "orden",
+      "busque": "orden",
+      "busquer": "orden",
+      "busquir": "orden",
+      "por": "muletilla",
+      "entra": "orden",
+      "entrar": "orden",
+      "visita": "orden",
+      "visitar": "orden",
+      "visite": "orden",
+      "visiter": "orden",
+      "visitir": "orden",
+      "acesa": "orden",
+      "acesar": "orden",
+      "acese": "orden",
+      "aceser": "orden",
+      "acesir": "orden",
+      "aktiviere": "orden",
+      "aktivierer": "orden",
+      "aktivierir": "orden",
+      "den": "orden",
+      "aktivieren": "orden",
+      "deaktiviere": "orden",
+      "deaktivierer": "orden",
+      "deaktivierir": "orden",
+      "deaktivieren": "orden",
+      "pausieren": "orden",
+      "fortsetzen": "orden",
+      "kalibrieren": "orden",
+      "neu": "orden",
+      "zentrieren": "orden",
+      "kopfsteuerung": "orden",
+      "handsteuerung": "orden",
+      "stumpfsteuerung": "orden",
+      "teilhandsteuerung": "orden",
+      "kleine": "orden",
+      "kleiner": "orden",
+      "kleinir": "orden",
+      "bewegungen": "orden",
+      "normale": "orden",
+      "normaler": "orden",
+      "normalir": "orden",
+      "ziterfilter": "orden",
+      "langsamer": "orden",
+      "schneller": "orden",
+      "nachster": "orden",
+      "rechtsklick": "orden",
+      "klick": "orden",
+      "abrechen": "orden",
+      "haustier": "orden",
+      "maskotchen": "orden",
+      "ausblenden": "orden",
+      "verstecken": "orden",
+      "gru": "orden",
+      "begru": "orden",
+      "schlafen": "orden",
+      "legen": "orden",
+      "wecken": "orden",
+      "auswahl": "orden",
+      "anklicken": "orden",
+      "wahle": "orden",
+      "wahler": "orden",
+      "wahlir": "orden",
+      "das": "orden",
+      "hilfe": "orden",
+      "hilfer": "orden",
+      "hilfir": "orden",
+      "was": "orden",
+      "kan": "orden",
+      "ich": "muletilla",
+      "sagen": "orden",
+      "befehle": "orden",
+      "befehler": "orden",
+      "befehlir": "orden",
+      "ofne": "orden",
+      "ofner": "orden",
+      "ofnir": "orden",
+      "zeige": "orden",
+      "zeiger": "orden",
+      "zeigir": "orden",
+      "starte": "orden",
+      "starter": "orden",
+      "startir": "orden",
+      "die": "orden",
+      "dier": "orden",
+      "dir": "orden",
+      "anleitung": "orden",
+      "abruch": "orden",
+      "vergis": "orden",
+      "sei": "orden",
+      "still": "orden",
+      "ruhe": "orden",
+      "ruher": "orden",
+      "ruhir": "orden",
+      "hor": "orden",
+      "auf": "orden",
+      "reden": "orden",
+      "lesen": "orden",
+      "mach": "muletilla",
+      "einen": "orden",
+      "ein": "orden",
+      "neue": "orden",
+      "neuer": "orden",
+      "neuir": "orden",
+      "nrs": "orden",
+      "registerkarte": "orden",
+      "registerkarter": "orden",
+      "registerkartir": "orden",
+      "neues": "orden",
+      "fenster": "orden",
+      "schlie": "orden",
+      "schlier": "orden",
+      "schlir": "orden",
+      "diesen": "orden",
+      "dieses": "orden",
+      "alle": "orden",
+      "aller": "orden",
+      "allir": "orden",
+      "anderen": "orden",
+      "duplizieren": "orden",
+      "dupliziere": "orden",
+      "duplizierer": "orden",
+      "duplizierir": "orden",
+      "stumschalten": "orden",
+      "ton": "orden",
+      "aus": "orden",
+      "stumschaltung": "orden",
+      "aufheben": "orden",
+      "gehe": "orden",
+      "geher": "orden",
+      "gehir": "orden",
+      "zum": "orden",
+      "nachsten": "orden",
+      "vorherigen": "orden",
+      "vorheriger": "orden",
+      "numer": "orden",
+      "letzten": "orden",
+      "letzter": "orden",
+      "zuruck": "orden",
+      "vorwarts": "orden",
+      "seite": "orden",
+      "seiter": "orden",
+      "seitir": "orden",
+      "laden": "orden",
+      "lade": "orden",
+      "lader": "orden",
+      "ladir": "orden",
+      "aktualisieren": "orden",
+      "scrolle": "orden",
+      "scroller": "orden",
+      "scrollir": "orden",
+      "nach": "orden",
+      "unten": "orden",
+      "runter": "orden",
+      "herunter": "orden",
+      "bischen": "orden",
+      "etwas": "orden",
+      "oben": "orden",
+      "hoch": "orden",
+      "rauf": "orden",
+      "hinauf": "orden",
+      "anfang": "orden",
+      "seitenanfang": "orden",
+      "ganz": "orden",
+      "ende": "orden",
+      "ender": "orden",
+      "endir": "orden",
+      "seitenende": "orden",
+      "seitenender": "orden",
+      "seitenendir": "orden",
+      "vergro": "orden",
+      "ern": "orden",
+      "reinzomen": "orden",
+      "rein": "orden",
+      "hineinzomen": "orden",
+      "verkleinern": "orden",
+      "rauszomen": "orden",
+      "raus": "orden",
+      "herauszomen": "orden",
+      "zurucksetzen": "orden",
+      "vollbild": "orden",
+      "modus": "orden",
+      "benden": "orden",
+      "verlasen": "orden",
+      "drucke": "orden",
+      "drucker": "orden",
+      "druckir": "orden",
+      "eingabe": "orden",
+      "eingaber": "orden",
+      "eingabir": "orden",
+      "abschicken": "orden",
+      "absenden": "orden",
+      "klicke": "orden",
+      "klicker": "orden",
+      "klickir": "orden",
+      "klicken": "orden",
+      "tipe": "orden",
+      "tiper": "orden",
+      "tipir": "orden",
+      "markiere": "orden",
+      "markierer": "orden",
+      "markierir": "orden",
+      "schreibe": "orden",
+      "schreiber": "orden",
+      "schreibir": "orden",
+      "diktiere": "orden",
+      "diktierer": "orden",
+      "diktierir": "orden",
+      "loschen": "orden",
+      "feld": "orden",
+      "leren": "orden",
+      "losche": "orden",
+      "loscher": "orden",
+      "loschir": "orden",
+      "fokusiere": "orden",
+      "fokusierer": "orden",
+      "fokusierir": "orden",
+      "abspielen": "orden",
+      "wiedergabe": "orden",
+      "wiedergaber": "orden",
+      "wiedergabir": "orden",
+      "anhalten": "orden",
+      "suche": "orden",
+      "sucher": "orden",
+      "suchir": "orden",
+      "suchen": "orden",
+      "ofnen": "orden",
+      "besuche": "orden",
+      "besucher": "orden",
+      "besuchir": "orden",
+      "navigiere": "orden",
+      "navigierer": "orden",
+      "navigierir": "orden",
+      "aufmachen": "orden",
+      "schreiben": "orden",
+      "tipen": "orden",
+      "active": "orden",
+      "activer": "orden",
+      "activir": "orden",
+      "curseur": "orden",
+      "desactive": "orden",
+      "desactiver": "orden",
+      "desactivir": "orden",
+      "mets": "orden",
+      "reprends": "orden",
+      "reprendre": "orden",
+      "reprendrer": "orden",
+      "reprendrir": "orden",
+      "calibre": "orden",
+      "calibrer": "orden",
+      "calibrir": "orden",
+      "recalibre": "orden",
+      "recalibrer": "orden",
+      "recalibrir": "orden",
+      "centre": "orden",
+      "centrer": "orden",
+      "centrir": "orden",
+      "avec": "orden",
+      "par": "orden",
+      "tete": "orden",
+      "teter": "orden",
+      "tetir": "orden",
+      "les": "orden",
+      "mains": "orden",
+      "moignon": "orden",
+      "petits": "orden",
+      "mouvements": "orden",
+      "normaux": "orden",
+      "filtre": "orden",
+      "filtrer": "orden",
+      "filtrir": "orden",
+      "tremblement": "orden",
+      "plus": "orden",
+      "lent": "orden",
+      "rapide": "orden",
+      "rapider": "orden",
+      "rapidir": "orden",
+      "prochain": "orden",
+      "droit": "orden",
+      "anule": "orden",
+      "anuler": "orden",
+      "anulir": "orden",
+      "cache": "orden",
+      "cacher": "orden",
+      "cachir": "orden",
+      "masque": "orden",
+      "masquer": "orden",
+      "masquir": "orden",
+      "retire": "orden",
+      "retirer": "orden",
+      "retirir": "orden",
+      "salue": "orden",
+      "saluer": "orden",
+      "saluir": "orden",
+      "endors": "orden",
+      "dors": "orden",
+      "reveille": "orden",
+      "reveiller": "orden",
+      "reveillir": "orden",
+      "sur": "orden",
+      "choisis": "orden",
+      "choisir": "orden",
+      "aide": "orden",
+      "aider": "orden",
+      "aidir": "orden",
+      "puis": "orden",
+      "dire": "orden",
+      "direr": "orden",
+      "dirir": "orden",
+      "est": "muletilla",
+      "peux": "muletilla",
+      "comandes": "orden",
+      "ouvre": "orden",
+      "ouvrer": "orden",
+      "ouvrir": "orden",
+      "montre": "orden",
+      "montrer": "orden",
+      "montrir": "orden",
+      "lance": "orden",
+      "lancer": "orden",
+      "lancir": "orden",
+      "tutoriel": "orden",
+      "laise": "orden",
+      "laiser": "orden",
+      "laisir": "orden",
+      "tomber": "orden",
+      "oublie": "orden",
+      "oublier": "orden",
+      "oublir": "orden",
+      "tais": "orden",
+      "toi": "orden",
+      "arrete": "orden",
+      "arreter": "orden",
+      "arretir": "orden",
+      "parler": "orden",
+      "lire": "orden",
+      "lirer": "orden",
+      "lirir": "orden",
+      "nouvel": "orden",
+      "onglet": "orden",
+      "une": "orden",
+      "uner": "orden",
+      "unir": "orden",
+      "nouvelle": "orden",
+      "nouveller": "orden",
+      "nouvellir": "orden",
+      "fenetre": "orden",
+      "fenetrer": "orden",
+      "fenetrir": "orden",
+      "ferme": "orden",
+      "fermer": "orden",
+      "fermir": "orden",
+      "fermez": "orden",
+      "cet": "orden",
+      "actuel": "orden",
+      "cete": "orden",
+      "ceter": "orden",
+      "cetir": "orden",
+      "tous": "orden",
+      "autres": "orden",
+      "onglets": "orden",
+      "coupe": "orden",
+      "couper": "orden",
+      "coupir": "orden",
+      "son": "orden",
+      "sourdine": "orden",
+      "sourdiner": "orden",
+      "sourdinir": "orden",
+      "muet": "orden",
+      "remets": "orden",
+      "reactive": "orden",
+      "reactiver": "orden",
+      "reactivir": "orden",
+      "suivant": "orden",
+      "precedent": "orden",
+      "dernier": "orden",
+      "retour": "orden",
+      "reviens": "orden",
+      "recule": "orden",
+      "reculer": "orden",
+      "reculir": "orden",
+      "precedente": "orden",
+      "precedenter": "orden",
+      "precedentir": "orden",
+      "retourne": "orden",
+      "retourner": "orden",
+      "retournir": "orden",
+      "arriere": "orden",
+      "arrierer": "orden",
+      "arrierir": "orden",
+      "suivante": "orden",
+      "suivanter": "orden",
+      "suivantir": "orden",
+      "avant": "orden",
+      "recharge": "orden",
+      "recharger": "orden",
+      "rechargir": "orden",
+      "actualise": "orden",
+      "actualiser": "orden",
+      "actualisir": "orden",
+      "rafraichis": "orden",
+      "defile": "orden",
+      "defiler": "orden",
+      "defilir": "orden",
+      "descends": "orden",
+      "descendre": "orden",
+      "descendrer": "orden",
+      "descendrir": "orden",
+      "vers": "orden",
+      "bas": "orden",
+      "peu": "orden",
+      "monte": "orden",
+      "monter": "orden",
+      "montir": "orden",
+      "remonte": "orden",
+      "remonter": "orden",
+      "remontir": "orden",
+      "haut": "orden",
+      "debut": "orden",
+      "tout": "orden",
+      "fin": "orden",
+      "zome": "orden",
+      "zomer": "orden",
+      "zomir": "orden",
+      "agrandis": "orden",
+      "dezome": "orden",
+      "dezomer": "orden",
+      "dezomir": "orden",
+      "reduis": "orden",
+      "reinitialise": "orden",
+      "reinitialiser": "orden",
+      "reinitialisir": "orden",
+      "plein": "orden",
+      "ecran": "orden",
+      "quite": "orden",
+      "quiter": "orden",
+      "quitir": "orden",
+      "sors": "orden",
+      "sortir": "orden",
+      "apuie": "orden",
+      "apuier": "orden",
+      "apuir": "orden",
+      "entre": "orden",
+      "entrer": "orden",
+      "entreir": "orden",
+      "valide": "orden",
+      "valider": "orden",
+      "validir": "orden",
+      "soumetre": "orden",
+      "soumetrer": "orden",
+      "soumetrir": "orden",
+      "envoie": "orden",
+      "envoier": "orden",
+      "envoir": "orden",
+      "formulaire": "orden",
+      "formulairer": "orden",
+      "formulairir": "orden",
+      "cliquez": "orden",
+      "apuyer": "orden",
+      "selectione": "orden",
+      "selectioner": "orden",
+      "selectionir": "orden",
+      "surligne": "orden",
+      "surligner": "orden",
+      "surlignir": "orden",
+      "ecris": "orden",
+      "ecrire": "orden",
+      "ecrirer": "orden",
+      "ecririr": "orden",
+      "ecrivez": "orden",
+      "tape": "orden",
+      "taper": "orden",
+      "tapir": "orden",
+      "tapez": "orden",
+      "dicte": "orden",
+      "dicter": "orden",
+      "dictir": "orden",
+      "eface": "orden",
+      "efacer": "orden",
+      "efacir": "orden",
+      "vide": "orden",
+      "vider": "orden",
+      "vidir": "orden",
+      "texte": "orden",
+      "texter": "orden",
+      "textir": "orden",
+      "champ": "orden",
+      "lecture": "orden",
+      "lecturer": "orden",
+      "lecturir": "orden",
+      "joue": "orden",
+      "jouer": "orden",
+      "jouir": "orden",
+      "cherche": "orden",
+      "chercher": "orden",
+      "cherchir": "orden",
+      "cherchez": "orden",
+      "recherche": "orden",
+      "rechercher": "orden",
+      "recherchir": "orden",
+      "trouve": "orden",
+      "trouver": "orden",
+      "trouvir": "orden",
+      "ouvrez": "orden",
+      "demarre": "orden",
+      "demarrer": "orden",
+      "demarrir": "orden",
+      "abilita": "orden",
+      "abilitar": "orden",
+      "cursore": "orden",
+      "cursorer": "orden",
+      "cursorir": "orden",
+      "disativa": "orden",
+      "disativar": "orden",
+      "disabilita": "orden",
+      "disabilitar": "orden",
+      "meti": "orden",
+      "riprendi": "orden",
+      "ricalibra": "orden",
+      "ricalibrar": "orden",
+      "controllo": "orden",
+      "della": "orden",
+      "dellar": "orden",
+      "testa": "orden",
+      "testar": "orden",
+      "delle": "orden",
+      "deller": "orden",
+      "dellir": "orden",
+      "mani": "orden",
+      "del": "orden",
+      "moncone": "orden",
+      "monconer": "orden",
+      "monconir": "orden",
+      "picoli": "orden",
+      "movimenti": "orden",
+      "normali": "orden",
+      "tremore": "orden",
+      "tremorer": "orden",
+      "tremorir": "orden",
+      "piu": "orden",
+      "veloce": "orden",
+      "velocer": "orden",
+      "velocir": "orden",
+      "prosimo": "orden",
+      "destro": "orden",
+      "anulla": "orden",
+      "anullar": "orden",
+      "nascondi": "orden",
+      "rimuovi": "orden",
+      "saluta": "orden",
+      "salutar": "orden",
+      "adormenta": "orden",
+      "adormentar": "orden",
+      "dormi": "orden",
+      "sveglia": "orden",
+      "svegliar": "orden",
+      "sulla": "orden",
+      "sullar": "orden",
+      "selezione": "orden",
+      "selezioner": "orden",
+      "selezionir": "orden",
+      "scegli": "orden",
+      "seleziona": "orden",
+      "selezionar": "orden",
+      "aiuto": "orden",
+      "cosa": "orden",
+      "cosar": "orden",
+      "comandi": "orden",
+      "apri": "orden",
+      "avia": "orden",
+      "aviar": "orden",
+      "lascia": "orden",
+      "lasciar": "orden",
+      "stare": "orden",
+      "starer": "orden",
+      "starir": "orden",
+      "perdere": "orden",
+      "perderer": "orden",
+      "perderir": "orden",
+      "zito": "orden",
+      "stai": "orden",
+      "silenzio": "orden",
+      "basta": "orden",
+      "bastar": "orden",
+      "smeti": "orden",
+      "parlare": "orden",
+      "parlarer": "orden",
+      "parlarir": "orden",
+      "legere": "orden",
+      "legerer": "orden",
+      "legerir": "orden",
+      "una": "orden",
+      "unar": "orden",
+      "nuova": "orden",
+      "nuovar": "orden",
+      "scheda": "orden",
+      "schedar": "orden",
+      "finestra": "orden",
+      "finestrar": "orden",
+      "chiudi": "orden",
+      "questa": "orden",
+      "questar": "orden",
+      "tute": "orden",
+      "tuter": "orden",
+      "tutir": "orden",
+      "altre": "orden",
+      "altrer": "orden",
+      "altrir": "orden",
+      "schede": "orden",
+      "scheder": "orden",
+      "schedir": "orden",
+      "muto": "orden",
+      "silenzia": "orden",
+      "silenziar": "orden",
+      "riativa": "orden",
+      "riativar": "orden",
+      "alla": "orden",
+      "allar": "orden",
+      "sucesiva": "orden",
+      "sucesivar": "orden",
+      "prosima": "orden",
+      "prosimar": "orden",
+      "indietro": "orden",
+      "torna": "orden",
+      "tornar": "orden",
+      "avanti": "orden",
+      "ricarica": "orden",
+      "ricaricar": "orden",
+      "agiorna": "orden",
+      "agiornar": "orden",
+      "scorri": "orden",
+      "giu": "orden",
+      "scendi": "orden",
+      "sali": "orden",
+      "inizio": "orden",
+      "fine": "orden",
+      "finer": "orden",
+      "finir": "orden",
+      "fondo": "orden",
+      "ingrandisci": "orden",
+      "riduci": "orden",
+      "rimpiciolisci": "orden",
+      "schermo": "orden",
+      "intero": "orden",
+      "esci": "orden",
+      "dallo": "orden",
+      "premi": "orden",
+      "invio": "orden",
+      "invia": "orden",
+      "inviar": "orden",
+      "modulo": "orden",
+      "tasto": "orden",
+      "evidenzia": "orden",
+      "evidenziar": "orden",
+      "scrivi": "orden",
+      "scrivere": "orden",
+      "scriverer": "orden",
+      "scriverir": "orden",
+      "deta": "orden",
+      "detar": "orden",
+      "cancella": "orden",
+      "cancellar": "orden",
+      "svuota": "orden",
+      "svuotar": "orden",
+      "testo": "orden",
+      "riproduci": "orden",
+      "cerca": "orden",
+      "cercar": "orden",
+      "cercare": "orden",
+      "cercarer": "orden",
+      "cercarir": "orden",
+      "ricerca": "orden",
+      "ricercar": "orden",
+      "trova": "orden",
+      "trovar": "orden",
+      "aprire": "orden",
+      "aprirer": "orden",
+      "apririr": "orden",
+      "abras": "orden",
+      "abri": "orden",
+      "abres": "orden",
+      "abreme": "orden",
+      "abremer": "orden",
+      "abremir": "orden",
+      "abrime": "orden",
+      "abrimer": "orden",
+      "abrimir": "orden",
+      "abrame": "orden",
+      "abramer": "orden",
+      "abramir": "orden",
+      "abrirme": "orden",
+      "abrirmer": "orden",
+      "abrirmir": "orden",
+      "busques": "orden",
+      "buscas": "orden",
+      "buscame": "orden",
+      "buscamer": "orden",
+      "buscamir": "orden",
+      "busqueme": "orden",
+      "busquemer": "orden",
+      "busquemir": "orden",
+      "buscarme": "orden",
+      "buscarmer": "orden",
+      "buscarmir": "orden",
+      "escriba": "orden",
+      "escribar": "orden",
+      "escribas": "orden",
+      "escribi": "orden",
+      "escribes": "orden",
+      "escribeme": "orden",
+      "escribemer": "orden",
+      "escribemir": "orden",
+      "escribime": "orden",
+      "escribimer": "orden",
+      "escribimir": "orden",
+      "dicta": "orden",
+      "dictar": "orden",
+      "dictes": "orden",
+      "cierre": "orden",
+      "cierrer": "orden",
+      "cierrir": "orden",
+      "cierres": "orden",
+      "cerra": "orden",
+      "cerrar": "orden",
+      "cierras": "orden",
+      "cierrame": "orden",
+      "cierramer": "orden",
+      "cierramir": "orden",
+      "cerrame": "orden",
+      "cerramer": "orden",
+      "cerramir": "orden",
+      "baje": "orden",
+      "bajer": "orden",
+      "bajir": "orden",
+      "bajes": "orden",
+      "bajas": "orden",
+      "bajale": "orden",
+      "bajaler": "orden",
+      "bajalir": "orden",
+      "subas": "orden",
+      "subi": "orden",
+      "subes": "orden",
+      "subele": "orden",
+      "subeler": "orden",
+      "subelir": "orden",
+      "vuelva": "orden",
+      "vuelvar": "orden",
+      "vuelve": "orden",
+      "vuelver": "orden",
+      "vuelvir": "orden",
+      "vuelvas": "orden",
+      "volve": "orden",
+      "volver": "orden",
+      "volvir": "orden",
+      "vuelves": "orden",
+      "regrese": "orden",
+      "regreser": "orden",
+      "regresir": "orden",
+      "regresa": "orden",
+      "regresar": "orden",
+      "regreses": "orden",
+      "regresas": "orden",
+      "retroceda": "orden",
+      "retrocedar": "orden",
+      "retrocede": "orden",
+      "retroceder": "orden",
+      "retrocedir": "orden",
+      "retrocedas": "orden",
+      "avanza": "orden",
+      "avanzar": "orden",
+      "avances": "orden",
+      "avanzas": "orden",
+      "recargue": "orden",
+      "recarguer": "orden",
+      "recarguir": "orden",
+      "recargues": "orden",
+      "recargas": "orden",
+      "actualice": "orden",
+      "actualicer": "orden",
+      "actualicir": "orden",
+      "actualiza": "orden",
+      "actualizar": "orden",
+      "actualices": "orden",
+      "refresque": "orden",
+      "refresquer": "orden",
+      "refresquir": "orden",
+      "refresca": "orden",
+      "refrescar": "orden",
+      "refresques": "orden",
+      "seleciones": "orden",
+      "selecionas": "orden",
+      "selecioname": "orden",
+      "selecionamer": "orden",
+      "selecionamir": "orden",
+      "resalte": "orden",
+      "resalter": "orden",
+      "resaltir": "orden",
+      "resalta": "orden",
+      "resaltar": "orden",
+      "resaltes": "orden",
+      "pulse": "orden",
+      "pulser": "orden",
+      "pulsir": "orden",
+      "pulsa": "orden",
+      "pulsar": "orden",
+      "pulses": "orden",
+      "pulsas": "orden",
+      "toque": "orden",
+      "toquer": "orden",
+      "toquir": "orden",
+      "toques": "orden",
+      "clickea": "orden",
+      "clickear": "orden",
+      "cliquea": "orden",
+      "cliquear": "orden",
+      "presione": "orden",
+      "presioner": "orden",
+      "presionir": "orden",
+      "presiones": "orden",
+      "presionas": "orden",
+      "aprieta": "orden",
+      "aprietar": "orden",
+      "apriete": "orden",
+      "aprieter": "orden",
+      "aprietir": "orden",
+      "aprietes": "orden",
+      "apreta": "orden",
+      "apretar": "orden",
+      "aplasta": "orden",
+      "aplastar": "orden",
+      "aplaste": "orden",
+      "aplaster": "orden",
+      "aplastir": "orden",
+      "aplastes": "orden",
+      "enfoque": "orden",
+      "enfoquer": "orden",
+      "enfoquir": "orden",
+      "enfoques": "orden",
+      "reproduzca": "orden",
+      "reproduzcar": "orden",
+      "reproduzcas": "orden",
+      "pauses": "orden",
+      "haga": "orden",
+      "hagar": "orden",
+      "hagas": "orden",
+      "hace": "muletilla",
+      "hacer": "orden",
+      "hacir": "orden",
+      "haces": "muletilla",
+      "hagale": "orden",
+      "hagaler": "orden",
+      "hagalir": "orden",
+      "hacele": "orden",
+      "haceler": "orden",
+      "hacelir": "orden",
+      "dele": "orden",
+      "deler": "orden",
+      "delir": "orden",
+      "cancele": "orden",
+      "canceler": "orden",
+      "cancelir": "orden",
+      "canceles": "orden",
+      "borre": "orden",
+      "borrer": "orden",
+      "borrir": "orden",
+      "borres": "orden",
+      "borras": "orden",
+      "limpie": "orden",
+      "limpier": "orden",
+      "limpir": "orden",
+      "limpia": "orden",
+      "limpiar": "orden",
+      "limpies": "orden",
+      "acerque": "orden",
+      "acerquer": "orden",
+      "acerquir": "orden",
+      "acerca": "orden",
+      "acercar": "orden",
+      "aleje": "orden",
+      "alejer": "orden",
+      "alejir": "orden",
+      "aleja": "orden",
+      "alejar": "orden",
+      "amplie": "orden",
+      "amplier": "orden",
+      "amplir": "orden",
+      "agrande": "orden",
+      "agrander": "orden",
+      "agrandir": "orden",
+      "agranda": "orden",
+      "agrandar": "orden",
+      "achique": "orden",
+      "achiquer": "orden",
+      "achiquir": "orden",
+      "achica": "orden",
+      "achicar": "orden",
+      "aumente": "orden",
+      "aumenter": "orden",
+      "aumentir": "orden",
+      "reduzca": "orden",
+      "reduzcar": "orden",
+      "vaya": "orden",
+      "vayar": "orden",
+      "vayas": "orden",
+      "anda": "orden",
+      "andar": "orden",
+      "entrir": "orden",
+      "entres": "orden",
+      "ingrese": "orden",
+      "ingreser": "orden",
+      "ingresir": "orden",
+      "ingresa": "orden",
+      "ingresar": "orden",
+      "inicie": "orden",
+      "inicier": "orden",
+      "inicir": "orden",
+      "ejecute": "orden",
+      "ejecuter": "orden",
+      "ejecutir": "orden",
+      "ejecuta": "orden",
+      "ejecutar": "orden",
+      "dupliques": "orden",
+      "silencie": "orden",
+      "silencier": "orden",
+      "silencies": "orden",
+      "mutea": "orden",
+      "mutear": "orden",
+      "muteir": "orden",
+      "mutes": "orden",
+      "callate": "orden",
+      "callater": "orden",
+      "callatir": "orden",
+      "callese": "orden",
+      "calleser": "orden",
+      "callesir": "orden",
+      "actives": "orden",
+      "apague": "orden",
+      "apaguer": "orden",
+      "apaguir": "orden",
+      "apagues": "orden",
+      "encienda": "orden",
+      "enciendar": "orden",
+      "prenda": "orden",
+      "prendar": "orden",
+      "quita": "orden",
+      "quitar": "orden",
+      "quites": "orden",
+      "cambie": "orden",
+      "cambier": "orden",
+      "cambir": "orden",
+      "cambia": "orden",
+      "cambiar": "orden",
+      "cambies": "orden",
+      "pase": "orden",
+      "paser": "orden",
+      "pasir": "orden",
+      "pasa": "orden",
+      "pasar": "orden",
+      "pases": "orden",
+      "gogleir": "orden",
+      "goglea": "orden",
+      "goglear": "orden",
+      "envie": "orden",
+      "envier": "orden",
+      "envir": "orden",
+      "envies": "orden",
+      "mande": "orden",
+      "mander": "orden",
+      "mandir": "orden",
+      "manda": "orden",
+      "mandar": "orden",
+      "mandes": "orden",
+      "elige": "orden",
+      "eliger": "orden",
+      "eligir": "orden",
+      "detente": "orden",
+      "detenter": "orden",
+      "detentir": "orden",
+      "detener": "orden",
+      "deja": "orden",
+      "dejar": "orden",
+      "olvidalo": "orden",
+      "olvida": "orden",
+      "olvidar": "orden",
+      "nada": "orden",
+      "nadar": "orden",
+      "dejalo": "orden",
+      "deseleciona": "orden",
+      "deselecionar": "orden",
+      "crea": "orden",
+      "crear": "orden",
+      "pon": "orden",
+      "poner": "orden",
+      "ponme": "orden",
+      "ponmer": "orden",
+      "ponmir": "orden",
+      "ponerme": "orden",
+      "ponermer": "orden",
+      "ponermir": "orden",
+      "agrega": "orden",
+      "agregar": "orden",
+      "anade": "orden",
+      "anader": "orden",
+      "anadir": "orden",
+      "dame": "orden",
+      "damer": "orden",
+      "damir": "orden",
+      "clona": "orden",
+      "clonar": "orden",
+      "enmudece": "orden",
+      "enmudecer": "orden",
+      "enmudecir": "orden",
+      "corta": "orden",
+      "cortar": "orden",
+      "devuelve": "orden",
+      "devuelver": "orden",
+      "devuelvir": "orden",
+      "reactiva": "orden",
+      "reactivar": "orden",
+      "desmutea": "orden",
+      "desmutear": "orden",
+      "desilencia": "orden",
+      "desilenciar": "orden",
+      "salta": "orden",
+      "saltar": "orden",
+      "salir": "orden",
+      "restablece": "orden",
+      "restablecer": "orden",
+      "restablecir": "orden",
+      "desciende": "orden",
+      "desciender": "orden",
+      "desciendir": "orden",
+      "asciende": "orden",
+      "asciender": "orden",
+      "asciendir": "orden",
+      "scrollea": "orden",
+      "scrollear": "orden",
+      "desplazate": "orden",
+      "desplazater": "orden",
+      "desplazatir": "orden",
+      "desplaza": "orden",
+      "desplazar": "orden",
+      "desliza": "orden",
+      "deslizar": "orden",
+      "muevete": "orden",
+      "mueveter": "orden",
+      "muevetir": "orden",
+      "abajo": "orden",
+      "arriba": "orden",
+      "arribar": "orden",
+      "intro": "orden",
+      "llevame": "orden",
+      "llevamer": "orden",
+      "llevamir": "orden",
+      "dirigete": "orden",
+      "dirigeter": "orden",
+      "dirigetir": "orden",
+      "acede": "orden",
+      "aceder": "orden",
+      "acedir": "orden",
+      "muestrame": "orden",
+      "muestramer": "orden",
+      "muestramir": "orden",
+      "busqueda": "orden",
+      "busquedar": "orden",
+      "realiza": "orden",
+      "realizar": "orden",
+      "encuentra": "orden",
+      "encuentrar": "orden",
+      "consulta": "orden",
+      "consultar": "orden",
+      "investiga": "orden",
+      "investigar": "orden",
+      "averigua": "orden",
+      "averiguar": "orden",
+      "vacia": "orden",
+      "vaciar": "orden",
+      "descansa": "orden",
+      "descansar": "orden",
+      "acomoda": "orden",
+      "acomodar": "orden",
+      "oye": "muletilla",
+      "oiga": "muletilla",
+      "hey": "muletilla",
+      "pues": "muletilla",
+      "okey": "muletilla",
+      "okay": "muletilla",
+      "vale": "muletilla",
+      "bueno": "muletilla",
+      "ver": "muletilla",
+      "mira": "muletilla",
+      "este": "muletilla",
+      "ahora": "muletilla",
+      "ahorita": "muletilla",
+      "entonces": "muletilla",
+      "porfa": "muletilla",
+      "porfis": "muletilla",
+      "favor": "muletilla",
+      "hazme": "muletilla",
+      "harias": "muletilla",
+      "hagame": "muletilla",
+      "ayudame": "muletilla",
+      "ayudeme": "muletilla",
+      "ayudas": "muletilla",
+      "quiero": "muletilla",
+      "necesito": "muletilla",
+      "quisiera": "muletilla",
+      "puedes": "muletilla",
+      "podrias": "muletilla",
+      "puede": "muletilla",
+      "podria": "muletilla",
+      "podes": "muletilla",
+      "gustaria": "muletilla",
+      "intenta": "muletilla",
+      "trata": "muletilla",
+      "vamos": "muletilla",
+      "voy": "muletilla",
+      "please": "muletilla",
+      "now": "muletilla",
+      "could": "muletilla",
+      "would": "muletilla",
+      "will": "muletilla",
+      "want": "muletilla",
+      "like": "muletilla",
+      "ahead": "muletilla",
+      "and": "muletilla",
+      "let": "muletilla",
+      "thanks": "muletilla",
+      "thank": "muletilla",
+      "agora": "muletilla",
+      "entao": "muletilla",
+      "pode": "muletilla",
+      "poderia": "muletilla",
+      "voce": "muletilla",
+      "consegue": "muletilla",
+      "quero": "muletilla",
+      "gostaria": "muletilla",
+      "obrigado": "muletilla",
+      "obrigada": "muletilla",
+      "bite": "muletilla",
+      "hallo": "muletilla",
+      "jetzt": "muletilla",
+      "also": "muletilla",
+      "kanst": "muletilla",
+      "kontest": "muletilla",
+      "konen": "muletilla",
+      "sie": "muletilla",
+      "konten": "muletilla",
+      "mochte": "muletilla",
+      "mal": "muletilla",
+      "danke": "muletilla",
+      "plait": "muletilla",
+      "vous": "muletilla",
+      "stp": "muletilla",
+      "svp": "muletilla",
+      "pouvez": "muletilla",
+      "veux": "muletilla",
+      "voudrais": "muletilla",
+      "aimerais": "muletilla",
+      "acord": "muletilla",
+      "alors": "muletilla",
+      "maintenant": "muletilla",
+      "merci": "muletilla",
+      "veuillez": "muletilla",
+      "per": "muletilla",
+      "favore": "muletilla",
+      "piacere": "muletilla",
+      "puoi": "muletilla",
+      "potresti": "muletilla",
+      "ehi": "muletilla",
+      "adeso": "muletilla",
+      "ora": "muletilla",
+      "allora": "muletilla",
+      "voglio": "muletilla",
+      "vorrei": "muletilla",
+      "grazie": "muletilla",
+      "tinku": "mascota",
+      "cuchu": "mascota",
+      "yati": "mascota"
+    }
+  },
+  "tolerancia": {
+    "prefijoTokens": 1,
+    "minimoLetras": 5,
+    "distanciaMaxima": 1,
+    "distanciaSegundo": 3,
+    "combinarEdicionFonetica": false,
+    "verbos": {
+      "es": [
+        "buscar",
+        "recarga",
+        "actualiza",
+        "refresca",
+        "aumenta",
+        "reduce",
+        "selecciona"
+      ],
+      "en": [
+        "search",
+        "reload",
+        "refresh",
+        "select"
+      ],
+      "pt": [
+        "busca",
+        "pesquisa",
+        "recarrega",
+        "seleciona"
+      ],
+      "de": [
+        "suche",
+        "aktualisiere"
+      ],
+      "fr": [
+        "cherche",
+        "recharge"
+      ],
+      "it": [
+        "cerca",
+        "ricarica",
+        "seleziona"
+      ]
+    },
+    "excluidos": {
+      "es": [
+        "cerrar",
+        "cierra",
+        "salir",
+        "terminar",
+        "borrar",
+        "borra",
+        "eliminar",
+        "vaciar",
+        "limpiar",
+        "enviar",
+        "envia",
+        "publicar",
+        "comprar",
+        "ejecutar",
+        "ejecuta",
+        "pulsar",
+        "pulsa",
+        "clic",
+        "enter",
+        "atajos",
+        "apagar",
+        "desactivar"
+      ],
+      "en": [
+        "close",
+        "exit",
+        "quit",
+        "finish",
+        "delete",
+        "erase",
+        "empty",
+        "clear",
+        "send",
+        "publish",
+        "buy",
+        "run",
+        "execute",
+        "press",
+        "click",
+        "enter",
+        "shortcut",
+        "disable",
+        "stop"
+      ],
+      "pt": [
+        "fechar",
+        "fecha",
+        "sair",
+        "terminar",
+        "apagar",
+        "eliminar",
+        "esvaziar",
+        "limpar",
+        "enviar",
+        "publicar",
+        "comprar",
+        "executar",
+        "pressionar",
+        "clicar",
+        "enter",
+        "atalho",
+        "desativar"
+      ],
+      "de": [
+        "schliessen",
+        "beenden",
+        "verlassen",
+        "loschen",
+        "leeren",
+        "bereinigen",
+        "senden",
+        "veroffentlichen",
+        "kaufen",
+        "ausfuhren",
+        "drucken",
+        "klicken",
+        "eingabe",
+        "tastenkurzel",
+        "ausschalten",
+        "deaktivieren"
+      ],
+      "fr": [
+        "fermer",
+        "quitter",
+        "terminer",
+        "supprimer",
+        "effacer",
+        "vider",
+        "nettoyer",
+        "envoyer",
+        "publier",
+        "acheter",
+        "executer",
+        "appuyer",
+        "cliquer",
+        "entree",
+        "raccourci",
+        "eteindre",
+        "desactiver"
+      ],
+      "it": [
+        "chiudere",
+        "chiudi",
+        "uscire",
+        "terminare",
+        "cancellare",
+        "eliminare",
+        "svuotare",
+        "pulire",
+        "inviare",
+        "pubblicare",
+        "comprare",
+        "eseguire",
+        "premere",
+        "clic",
+        "invio",
+        "scorciatoia",
+        "spegnere",
+        "disattivare"
+      ]
+    },
+    "sitios": {
+      "youtube": [
+        "yutub"
+      ]
+    }
+  },
+  "tutorial": {
+    "version": 1,
+    "orden": "tutorial",
+    "pasos": [
+      {
+        "id": "voz"
+      },
+      {
+        "id": "nombre"
+      },
+      {
+        "id": "baja",
+        "orden": "baja"
+      },
+      {
+        "id": "selecciona",
+        "orden": "selecciona Siguiente"
+      },
+      {
+        "id": "clic",
+        "orden": "dale clic"
+      },
+      {
+        "id": "filtro"
+      },
+      {
+        "id": "cursor",
+        "soloBase": true
+      },
+      {
+        "id": "reabrir",
+        "orden": "tutorial"
+      }
+    ]
+  },
+  "comportamiento": {
+    "version": 1,
+    "capacidades": [
+      "activacion-posicional",
+      "alias-explicitos",
+      "prueba-sin-ejecucion",
+      "resultado-ejecucion",
+      "confirmacion-destino",
+      "conversacion-tts",
+      "tolerancia-benigna"
+    ],
+    "estados": [
+      "inactivo",
+      "esperando",
+      "ejecutando",
+      "hablando",
+      "confirmando"
+    ],
+    "resultados": [
+      "ok",
+      "fallo",
+      "desconocida",
+      "confirmando"
+    ],
+    "modoConversacion": false,
+    "ventanaMs": 8000,
+    "confirmacionMs": 8000,
+    "destructivas": [
+      "cerrar_pestana",
+      "cerrar_otras",
+      "cerrar_ventana"
+    ],
+    "confirmaciones": {
+      "es": {
+        "verbo": "confirmo",
+        "cerrar_pestana": "cerrar esta pestaña",
+        "cerrar_otras": "cerrar otras pestañas",
+        "cerrar_ventana": "cerrar ventana",
+        "pregunta": "Di exactamente: {frase}. Caduca en 8 segundos."
+      },
+      "en": {
+        "verbo": "confirm",
+        "cerrar_pestana": "close this tab",
+        "cerrar_otras": "close other tabs",
+        "cerrar_ventana": "close window",
+        "pregunta": "Say exactly: {frase}. Expires in 8 seconds."
+      },
+      "pt": {
+        "verbo": "confirmo",
+        "cerrar_pestana": "fechar esta aba",
+        "cerrar_otras": "fechar outras abas",
+        "cerrar_ventana": "fechar janela",
+        "pregunta": "Diga exatamente: {frase}. Expira em 8 segundos."
+      },
+      "de": {
+        "verbo": "bestätige",
+        "cerrar_pestana": "diesen Tab schließen",
+        "cerrar_otras": "andere Tabs schließen",
+        "cerrar_ventana": "Fenster schließen",
+        "pregunta": "Sagen Sie genau: {frase}. Gilt 8 Sekunden."
+      },
+      "fr": {
+        "verbo": "confirme",
+        "cerrar_pestana": "fermer cet onglet",
+        "cerrar_otras": "fermer les autres onglets",
+        "cerrar_ventana": "fermer la fenêtre",
+        "pregunta": "Dites exactement : {frase}. Expire dans 8 secondes."
+      },
+      "it": {
+        "verbo": "confermo",
+        "cerrar_pestana": "chiudere questa scheda",
+        "cerrar_otras": "chiudere altre schede",
+        "cerrar_ventana": "chiudere finestra",
+        "pregunta": "Di esattamente: {frase}. Scade tra 8 secondi."
+      }
     }
   },
   "sitios": {
@@ -2861,6 +6781,9 @@
         "voz.requiereInteraccion": "La página requiere una interacción para reproducir.",
         "voz.dimeBusqueda": "Dime qué quieres buscar.",
         "voz.noEntendi": "No entendí. Prueba «abre YouTube», «busca gatos en Google» o di «ayuda».",
+        "voz.corregido": "Entendí: {orden}.",
+        "voz.abriendo": "Abriendo {sitio}.",
+        "voz.repite": "No estoy seguro de esa orden. Repítela, por favor.",
         "voz.permitirMicrofono": "Permite el micrófono de AdaptaPE para usar voz en todo Chrome.",
         "voz.soloPaginas": "En Chrome usa abre, busca o comandos de pestañas/ventanas. Dictado, clic y desplazamiento necesitan una página web.",
         "voz.cursor.temblor": "Filtro de temblor activado.",
@@ -2901,6 +6824,9 @@
         "voz.requiereInteraccion": "The page needs an interaction before it can play.",
         "voz.dimeBusqueda": "Tell me what you want to search for.",
         "voz.noEntendi": "I did not understand. Try “open YouTube”, “search cats on Google” or say “help”.",
+        "voz.corregido": "I understood: {orden}.",
+        "voz.abriendo": "Opening {sitio}.",
+        "voz.repite": "I am not sure about that command. Please repeat it.",
         "voz.permitirMicrofono": "Allow the AdaptaPE microphone to use voice across Chrome.",
         "voz.soloPaginas": "In Chrome use open, search or tab/window commands. Dictation, click and scrolling need a web page.",
         "voz.cursor.temblor": "Tremor filter on.",
@@ -2941,6 +6867,9 @@
         "voz.requiereInteraccion": "A página exige uma interação para reproduzir.",
         "voz.dimeBusqueda": "Diga o que você quer pesquisar.",
         "voz.noEntendi": "Não entendi. Tente «abre YouTube», «pesquisa gatos no Google» ou diga «ajuda».",
+        "voz.corregido": "Entendi: {orden}.",
+        "voz.abriendo": "Abrindo {sitio}.",
+        "voz.repite": "Não tenho certeza dessa ordem. Repita, por favor.",
         "voz.permitirMicrofono": "Permita o microfone do AdaptaPE para usar a voz em todo o Chrome.",
         "voz.soloPaginas": "No Chrome use abre, pesquisa ou comandos de abas/janelas. Ditado, clique e rolagem precisam de uma página web.",
         "voz.cursor.temblor": "Filtro de tremor ativado.",
@@ -2981,6 +6910,9 @@
         "voz.requiereInteraccion": "Die Seite braucht eine Interaktion, um abzuspielen.",
         "voz.dimeBusqueda": "Sag mir, wonach du suchen willst.",
         "voz.noEntendi": "Nicht verstanden. Versuche „öffne YouTube“, „suche Katzen auf Google“ oder sag „Hilfe“.",
+        "voz.corregido": "Verstanden: {orden}.",
+        "voz.abriendo": "{sitio} wird geöffnet.",
+        "voz.repite": "Bei diesem Befehl bin ich unsicher. Bitte wiederhole ihn.",
         "voz.permitirMicrofono": "Erlaube das Mikrofon von AdaptaPE, um Sprache in ganz Chrome zu nutzen.",
         "voz.soloPaginas": "In Chrome nutze öffne, suche oder Tab- und Fensterbefehle. Diktat, Klick und Scrollen brauchen eine Webseite.",
         "voz.cursor.temblor": "Zitterfilter aktiviert.",
@@ -3021,6 +6953,9 @@
         "voz.requiereInteraccion": "La page exige une interaction pour lancer la lecture.",
         "voz.dimeBusqueda": "Dites-moi ce que vous voulez chercher.",
         "voz.noEntendi": "Je n'ai pas compris. Essayez « ouvre YouTube », « cherche chats sur Google » ou dites « aide ».",
+        "voz.corregido": "Compris : {orden}.",
+        "voz.abriendo": "Ouverture de {sitio}.",
+        "voz.repite": "Je ne suis pas sûr de cet ordre. Répétez-le, s’il vous plaît.",
         "voz.permitirMicrofono": "Autorisez le micro d'AdaptaPE pour utiliser la voix dans tout Chrome.",
         "voz.soloPaginas": "Dans Chrome, utilisez ouvre, cherche ou les commandes d'onglets et de fenêtres. Dictée, clic et défilement nécessitent une page web.",
         "voz.cursor.temblor": "Filtre de tremblement activé.",
@@ -3061,6 +6996,9 @@
         "voz.requiereInteraccion": "La pagina richiede un'interazione per riprodurre.",
         "voz.dimeBusqueda": "Dimmi cosa vuoi cercare.",
         "voz.noEntendi": "Non ho capito. Prova «apri YouTube», «cerca gatti su Google» o di «aiuto».",
+        "voz.corregido": "Ho capito: {orden}.",
+        "voz.abriendo": "Apro {sitio}.",
+        "voz.repite": "Non sono sicuro di questo comando. Ripetilo, per favore.",
         "voz.permitirMicrofono": "Consenti il microfono di AdaptaPE per usare la voce in tutto Chrome.",
         "voz.soloPaginas": "In Chrome usa apri, cerca o i comandi di schede e finestre. Dettatura, clic e scorrimento richiedono una pagina web.",
         "voz.cursor.temblor": "Filtro tremore attivato.",
@@ -3078,6 +7016,49 @@
     },
     "paginas": {
       "es": {
+        "popup.tutorial": "Tutorial",
+        "popup.unFiltro": "Sólo un filtro a la vez",
+        "popup.dwell": "Tiempo para pulsar quedándote quieto",
+        "popup.ayudaDwell": "Mantén el cursor quieto {segundos} s sobre un botón para pulsarlo. Entre 0,5 y 1,5 s.",
+        "popup.dwellValor": "{segundos} segundos",
+        "popup.atraccion": "Atracción a controles",
+        "popup.ayudaAtraccion": "El cursor se acerca suavemente a los botones y enlaces cercanos. Apágala si prefieres moverlo sin ayuda.",
+        "tutorial.titulo": "Tutorial práctico",
+        "tutorial.intro": "Sigue los pasos en orden. Cada uno se comprueba aquí mismo y puedes repetirlo cuando quieras.",
+        "tutorial.pendiente": "Pendiente",
+        "tutorial.hecho": "Hecho",
+        "tutorial.voz.titulo": "Activa la voz y el micrófono",
+        "tutorial.voz.texto": "Pulsa el botón. Cuando Chrome pida el micrófono, elige «Permitir».",
+        "tutorial.voz.boton": "Activar la voz",
+        "tutorial.nombre.titulo": "Di tu nombre de activación",
+        "tutorial.nombre.texto": "Tu nombre de activación es «{palabra}». Pulsa «Probar nombre» y dilo en voz alta: AdaptaPE te responderá.",
+        "tutorial.nombre.oido": "Oí «{texto}». ¡Funciona! AdaptaPE te escucha.",
+        "tutorial.nombre.noOido": "Oí «{texto}», que no activa tu nombre. Inténtalo otra vez o añade esa frase como alias en el panel.",
+        "tutorial.nombre.respuesta": "Te escucho.",
+        "tutorial.baja.titulo": "Ejercicio 1: baja la página",
+        "tutorial.baja.texto": "Di «{palabra}, baja». La página debe desplazarse hacia abajo.",
+        "tutorial.selecciona.titulo": "Ejercicio 2: selecciona un botón",
+        "tutorial.selecciona.texto": "Di «{palabra}, selecciona Siguiente». El botón se resaltará.",
+        "tutorial.objetivo": "Siguiente",
+        "tutorial.clic.titulo": "Ejercicio 3: dale clic",
+        "tutorial.clic.texto": "Con el botón resaltado, di «{palabra}, dale clic». Se pulsará por ti.",
+        "tutorial.filtro.titulo": "Elige un filtro de color",
+        "tutorial.filtro.texto": "Prueba un filtro: esta página cambia al instante. Puedes volver a «Sin filtro» cuando quieras.",
+        "tutorial.cursor.titulo": "Practica el cursor con la cámara",
+        "tutorial.cursor.texto": "Activa el cursor, muévelo con la cabeza, el brazo o la mano y déjalo quieto sobre cada botón: se pulsa solo tras un momento (1 s por defecto).",
+        "tutorial.cursor.activar": "Activar el cursor con cámara",
+        "tutorial.cursor.boton": "Botón {n}",
+        "tutorial.cursor.clic": "También puedes hacer clic con un gesto: junta el pulgar y el índice (pinza) con la mano, abre bien la boca y ciérrala con la cabeza, o cierra el puño y espera un momento. AdaptaPE no usa el parpadeo para hacer clic. En el panel puedes ajustar el tiempo de espera y la atracción a controles.",
+        "tutorial.reabrir.titulo": "Vuelve cuando quieras",
+        "tutorial.reabrir.texto": "Para repetir este tutorial, pulsa «Tutorial» en el panel de AdaptaPE o di «{palabra}, tutorial».",
+        "popup.alias": "Alias (hasta 3, separados por punto y coma)",
+        "popup.aliasInvalido": "Usa hasta 3 alias válidos, distintos del nombre y entre sí, sin órdenes ni muletillas.",
+        "popup.tambienComputadora": "También responder a Computadora",
+        "popup.modoConversacion": "Modo conversación (8 segundos tras cada éxito)",
+        "popup.probarNombre": "Probar nombre",
+        "popup.anadirAlias": "Añadir como alias",
+        "popup.diNombre": "Di sólo el nombre. La siguiente frase se mostrará sin ejecutar ninguna orden.",
+        "popup.pruebaCaducada": "La prueba terminó sin oír nada. Ahora tus frases vuelven a ser órdenes. Pulsa Probar nombre para repetirla.",
         "popup.titulo": "Ayudas de AdaptaPE",
         "popup.tituloLite": "Ayudas de AdaptaPE Lite",
         "popup.introduccion": "Elige las ayudas que quieres usar.",
@@ -3087,12 +7068,25 @@
         "popup.lectura": "Lectura en voz alta",
         "popup.ayudaLectura": "Escucha el elemento que señalas.",
         "popup.voz": "Control por voz",
-        "popup.ayudaVoz": "Di «Computadora» y espera el sonido.",
+        "popup.ayudaVoz": "Di «{palabra}» y espera el sonido.",
         "popup.idioma": "Idioma",
         "popup.ayudaIdioma": "Idioma de AdaptaPE y de tus órdenes de voz. «Automático» usa el idioma de tu computadora.",
         "popup.automatico": "Automático: {idioma}",
         "popup.ordenes": "Órdenes y micrófono",
         "popup.ejemplosVoz": "Después del sonido, di «Abre YouTube», «Busca gatos», «Bajar» o «Cerrar pestaña». Di «Ayuda» para escuchar más órdenes.",
+        "popup.nombre": "Nombre de activación",
+        "popup.ayudaNombre": "Dilo antes de cada orden. Sustituye a «Computadora». De 3 a 24 letras, hasta 3 palabras.",
+        "popup.guardarNombre": "Guardar nombre",
+        "popup.restaurarNombre": "Usar «Computadora»",
+        "popup.nombreGuardado": "Nombre guardado.",
+        "popup.nombreRestaurado": "Se usará «Computadora».",
+        "activacion.longitud": "Usa entre 3 y 24 caracteres.",
+        "activacion.caracteres": "Usa sólo letras, espacios, guion o apóstrofo.",
+        "activacion.palabras": "Usa como máximo 3 palabras.",
+        "activacion.letras": "Incluye al menos 3 letras.",
+        "activacion.orden": "Ese nombre se confunde con una orden de voz. Elige otro.",
+        "activacion.mascota": "Ese es el nombre de una mascota. Elige otro.",
+        "activacion.muletilla": "Esa palabra es una muletilla o cortesía. Elige otro nombre.",
         "popup.filtros": "Filtros de color",
         "popup.ayudaFiltro": "Elige tu filtro de daltonismo.",
         "popup.sinFiltro": "Sin filtro",
@@ -3149,6 +7143,7 @@
         "popup.consultandoMicro": "Consultando el estado del micrófono…",
         "popup.configurarMicro": "Configurar micrófono",
         "popup.configNoAbrio": "No se abrió la configuración. Vuelve a pulsar Configurar micrófono.",
+        "popup.tutorialNoAbrio": "No se abrió el tutorial. Vuelve a pulsar Tutorial.",
         "popup.microNoConsulta": "No se pudo consultar el micrófono. Cierra y vuelve a abrir el panel.",
         "popup.activaVoz": "Activa Control por voz para escuchar tus órdenes.",
         "bienvenida.titulo": "Bienvenida a AdaptaPE",
@@ -3161,7 +7156,7 @@
         "bienvenida.paso2Lite": "Si Chrome pide permiso para el micrófono, elige «Permitir».",
         "bienvenida.paso3": "Para tener el panel a mano, pulsa el icono de extensiones (pieza de rompecabezas) junto a la barra de direcciones y luego el alfiler de AdaptaPE.",
         "bienvenida.paso3Lite": "Para tener el panel a mano, pulsa el icono de extensiones (pieza de rompecabezas) junto a la barra de direcciones y luego el alfiler de AdaptaPE Lite.",
-        "bienvenida.ayudaVoz": "Di «Computadora», espera el sonido y da tu orden, por ejemplo «Abre YouTube».",
+        "bienvenida.ayudaVoz": "Di «{palabra}», espera el sonido y da tu orden, por ejemplo «Abre YouTube».",
         "bienvenida.ayudaCursor": "Mueve el cursor con la cabeza o una extremidad. Para hacer clic, quédate quieto un segundo.",
         "bienvenida.final": "Los filtros de color, el idioma y la mascota están en el panel de AdaptaPE.",
         "bienvenida.finalLite": "Los filtros de color, el idioma y la mascota están en el panel de AdaptaPE Lite.",
@@ -3187,7 +7182,7 @@
         "permisos.eligeMicro": "Elige «Permitir» en el aviso de Chrome para autorizar el micrófono.",
         "permisos.eligeCamara": "Elige «Permitir» en el aviso de Chrome para autorizar la cámara.",
         "permisos.camaraLista": "Cámara autorizada. Volviendo a tu página…",
-        "permisos.microActivo": "Micrófono autorizado. Puedes cerrar esta pestaña y decir «Computadora» para dar una orden.",
+        "permisos.microActivo": "Micrófono autorizado. Puedes cerrar esta pestaña y decir «{palabra}» para dar una orden.",
         "permisos.microInactivo": "Micrófono autorizado. Activa Control por voz en el panel de AdaptaPE para empezar.",
         "permisos.denegadoMicro": "Permiso denegado. Permite el micrófono en los ajustes de Chrome y vuelve a intentar.",
         "permisos.denegadoCamara": "Permiso denegado. Permite la cámara en los ajustes de Chrome y vuelve a intentar.",
@@ -3195,6 +7190,49 @@
         "permisos.falloCamara": "No se pudo iniciar la cámara. Comprueba el dispositivo y vuelve a intentar."
       },
       "en": {
+        "popup.tutorial": "Tutorial",
+        "popup.unFiltro": "Only one filter at a time",
+        "popup.dwell": "Time to click by holding still",
+        "popup.ayudaDwell": "Hold the cursor still on a button for {segundos} s to press it. Between 0.5 and 1.5 s.",
+        "popup.dwellValor": "{segundos} seconds",
+        "popup.atraccion": "Attraction to controls",
+        "popup.ayudaAtraccion": "The cursor gently moves toward nearby buttons and links. Turn it off if you prefer to move it without help.",
+        "tutorial.titulo": "Practical tutorial",
+        "tutorial.intro": "Follow the steps in order. Each one is checked right here and you can repeat it whenever you like.",
+        "tutorial.pendiente": "Pending",
+        "tutorial.hecho": "Done",
+        "tutorial.voz.titulo": "Turn on voice and the microphone",
+        "tutorial.voz.texto": "Press the button. When Chrome asks for the microphone, choose “Allow”.",
+        "tutorial.voz.boton": "Turn on voice",
+        "tutorial.nombre.titulo": "Say your activation name",
+        "tutorial.nombre.texto": "Your activation name is “{palabra}”. Press “Test name” and say it out loud: AdaptaPE will answer.",
+        "tutorial.nombre.oido": "I heard “{texto}”. It works! AdaptaPE is listening.",
+        "tutorial.nombre.noOido": "I heard “{texto}”, which does not activate your name. Try again or add that phrase as an alias in the panel.",
+        "tutorial.nombre.respuesta": "I’m listening.",
+        "tutorial.baja.titulo": "Exercise 1: scroll down",
+        "tutorial.baja.texto": "Say “{palabra}, scroll down”. The page should scroll down.",
+        "tutorial.selecciona.titulo": "Exercise 2: select a button",
+        "tutorial.selecciona.texto": "Say “{palabra}, select Next”. The button will be highlighted.",
+        "tutorial.objetivo": "Next",
+        "tutorial.clic.titulo": "Exercise 3: click it",
+        "tutorial.clic.texto": "With the button highlighted, say “{palabra}, click selection”. It will be pressed for you.",
+        "tutorial.filtro.titulo": "Choose a color filter",
+        "tutorial.filtro.texto": "Try a filter: this page changes instantly. You can go back to “No filter” whenever you like.",
+        "tutorial.cursor.titulo": "Practice the camera cursor",
+        "tutorial.cursor.texto": "Turn on the cursor, move it with your head, arm or hand, and hold it still over each button: it is pressed by itself after a moment (1 s by default).",
+        "tutorial.cursor.activar": "Turn on the camera cursor",
+        "tutorial.cursor.boton": "Button {n}",
+        "tutorial.cursor.clic": "You can also click with a gesture: bring your thumb and index finger together (pinch) with your hand, open your mouth wide and close it with your head, or close your fist and wait a moment. AdaptaPE does not use blinking to click. In the panel you can adjust the waiting time and the attraction to controls.",
+        "tutorial.reabrir.titulo": "Come back whenever you like",
+        "tutorial.reabrir.texto": "To repeat this tutorial, press “Tutorial” in the AdaptaPE panel or say “{palabra}, tutorial”.",
+        "popup.alias": "Aliases (up to 3, separated by semicolons)",
+        "popup.aliasInvalido": "Use up to 3 valid, distinct aliases, different from the name, without commands or fillers.",
+        "popup.tambienComputadora": "Also respond to Computadora",
+        "popup.modoConversacion": "Conversation mode (8 seconds after each success)",
+        "popup.probarNombre": "Test name",
+        "popup.anadirAlias": "Add as alias",
+        "popup.diNombre": "Say only the name. The next phrase will be shown without running any command.",
+        "popup.pruebaCaducada": "The test ended without hearing anything. Your phrases are commands again. Press Test name to repeat it.",
         "popup.titulo": "AdaptaPE aids",
         "popup.tituloLite": "AdaptaPE Lite aids",
         "popup.introduccion": "Choose the aids you want to use.",
@@ -3204,12 +7242,25 @@
         "popup.lectura": "Read aloud",
         "popup.ayudaLectura": "Hear the element you point at.",
         "popup.voz": "Voice control",
-        "popup.ayudaVoz": "Say “Computer” and wait for the sound.",
+        "popup.ayudaVoz": "Say “{palabra}” and wait for the sound.",
         "popup.idioma": "Language",
         "popup.ayudaIdioma": "Language of AdaptaPE and of your voice commands. “Automatic” uses your computer’s language.",
         "popup.automatico": "Automatic: {idioma}",
         "popup.ordenes": "Commands and microphone",
         "popup.ejemplosVoz": "After the sound, say “Open YouTube”, “Search cats”, “Scroll down” or “Close tab”. Say “Help” to hear more commands.",
+        "popup.nombre": "Wake name",
+        "popup.ayudaNombre": "Say it before each command. It replaces “Computer”. 3 to 24 letters, up to 3 words.",
+        "popup.guardarNombre": "Save name",
+        "popup.restaurarNombre": "Use “Computer”",
+        "popup.nombreGuardado": "Name saved.",
+        "popup.nombreRestaurado": "“Computer” will be used.",
+        "activacion.longitud": "Use 3 to 24 characters.",
+        "activacion.caracteres": "Use only letters, spaces, hyphens or apostrophes.",
+        "activacion.palabras": "Use 3 words at most.",
+        "activacion.letras": "Include at least 3 letters.",
+        "activacion.orden": "That name sounds like a voice command. Choose another.",
+        "activacion.mascota": "That is a pet’s name. Choose another.",
+        "activacion.muletilla": "That word is a filler or courtesy word. Choose another name.",
         "popup.filtros": "Color filters",
         "popup.ayudaFiltro": "Choose your color blindness filter.",
         "popup.sinFiltro": "No filter",
@@ -3266,6 +7317,7 @@
         "popup.consultandoMicro": "Checking the microphone status…",
         "popup.configurarMicro": "Set up microphone",
         "popup.configNoAbrio": "Setup did not open. Press Set up microphone again.",
+        "popup.tutorialNoAbrio": "The tutorial did not open. Press Tutorial again.",
         "popup.microNoConsulta": "Could not check the microphone. Close and reopen the panel.",
         "popup.activaVoz": "Turn on Voice control to hear your commands.",
         "bienvenida.titulo": "Welcome to AdaptaPE",
@@ -3278,7 +7330,7 @@
         "bienvenida.paso2Lite": "If Chrome asks for microphone permission, choose “Allow”.",
         "bienvenida.paso3": "To keep the panel handy, press the extensions icon (puzzle piece) next to the address bar, then the AdaptaPE pin.",
         "bienvenida.paso3Lite": "To keep the panel handy, press the extensions icon (puzzle piece) next to the address bar, then the AdaptaPE Lite pin.",
-        "bienvenida.ayudaVoz": "Say “Computer”, wait for the sound and give your command, for example “Open YouTube”.",
+        "bienvenida.ayudaVoz": "Say “{palabra}”, wait for the sound and give your command, for example “Open YouTube”.",
         "bienvenida.ayudaCursor": "Move the cursor with your head or a limb. To click, stay still for one second.",
         "bienvenida.final": "Color filters, language and pet are in the AdaptaPE panel.",
         "bienvenida.finalLite": "Color filters, language and pet are in the AdaptaPE Lite panel.",
@@ -3304,7 +7356,7 @@
         "permisos.eligeMicro": "Choose “Allow” in the Chrome prompt to authorize the microphone.",
         "permisos.eligeCamara": "Choose “Allow” in the Chrome prompt to authorize the camera.",
         "permisos.camaraLista": "Camera authorized. Returning to your page…",
-        "permisos.microActivo": "Microphone authorized. You can close this tab and say “Computer” to give a command.",
+        "permisos.microActivo": "Microphone authorized. You can close this tab and say “{palabra}” to give a command.",
         "permisos.microInactivo": "Microphone authorized. Turn on Voice control in the AdaptaPE panel to start.",
         "permisos.denegadoMicro": "Permission denied. Allow the microphone in Chrome settings and try again.",
         "permisos.denegadoCamara": "Permission denied. Allow the camera in Chrome settings and try again.",
@@ -3312,6 +7364,49 @@
         "permisos.falloCamara": "The camera could not start. Check the device and try again."
       },
       "pt": {
+        "popup.tutorial": "Tutorial",
+        "popup.unFiltro": "Só um filtro de cada vez",
+        "popup.dwell": "Tempo para clicar ficando parado",
+        "popup.ayudaDwell": "Mantenha o cursor parado {segundos} s sobre um botão para pressioná-lo. Entre 0,5 e 1,5 s.",
+        "popup.dwellValor": "{segundos} segundos",
+        "popup.atraccion": "Atração por controles",
+        "popup.ayudaAtraccion": "O cursor se aproxima suavemente dos botões e links próximos. Desative se preferir movê-lo sem ajuda.",
+        "tutorial.titulo": "Tutorial prático",
+        "tutorial.intro": "Siga os passos em ordem. Cada um é verificado aqui mesmo e você pode repeti-lo quando quiser.",
+        "tutorial.pendiente": "Pendente",
+        "tutorial.hecho": "Feito",
+        "tutorial.voz.titulo": "Ative a voz e o microfone",
+        "tutorial.voz.texto": "Pressione o botão. Quando o Chrome pedir o microfone, escolha «Permitir».",
+        "tutorial.voz.boton": "Ativar a voz",
+        "tutorial.nombre.titulo": "Diga seu nome de ativação",
+        "tutorial.nombre.texto": "Seu nome de ativação é «{palabra}». Pressione «Testar nome» e diga-o em voz alta: o AdaptaPE vai responder.",
+        "tutorial.nombre.oido": "Ouvi «{texto}». Funciona! O AdaptaPE está ouvindo.",
+        "tutorial.nombre.noOido": "Ouvi «{texto}», que não ativa o seu nome. Tente de novo ou adicione essa frase como apelido no painel.",
+        "tutorial.nombre.respuesta": "Estou ouvindo.",
+        "tutorial.baja.titulo": "Exercício 1: desça a página",
+        "tutorial.baja.texto": "Diga «{palabra}, desce». A página deve rolar para baixo.",
+        "tutorial.selecciona.titulo": "Exercício 2: selecione um botão",
+        "tutorial.selecciona.texto": "Diga «{palabra}, seleciona Seguinte». O botão será destacado.",
+        "tutorial.objetivo": "Seguinte",
+        "tutorial.clic.titulo": "Exercício 3: clique nele",
+        "tutorial.clic.texto": "Com o botão destacado, diga «{palabra}, clica na seleção». Ele será pressionado por você.",
+        "tutorial.filtro.titulo": "Escolha um filtro de cor",
+        "tutorial.filtro.texto": "Experimente um filtro: esta página muda na hora. Você pode voltar a «Sem filtro» quando quiser.",
+        "tutorial.cursor.titulo": "Pratique o cursor com a câmera",
+        "tutorial.cursor.texto": "Ative o cursor, mova-o com a cabeça, o braço ou a mão e deixe-o parado sobre cada botão: ele é pressionado sozinho depois de um momento (1 s por padrão).",
+        "tutorial.cursor.activar": "Ativar o cursor com câmera",
+        "tutorial.cursor.boton": "Botão {n}",
+        "tutorial.cursor.clic": "Você também pode clicar com um gesto: junte o polegar e o indicador (pinça) com a mão, abra bem a boca e feche-a com a cabeça, ou feche o punho e espere um momento. O AdaptaPE não usa o piscar de olhos para clicar. No painel você pode ajustar o tempo de espera e a atração por controles.",
+        "tutorial.reabrir.titulo": "Volte quando quiser",
+        "tutorial.reabrir.texto": "Para repetir este tutorial, pressione «Tutorial» no painel do AdaptaPE ou diga «{palabra}, tutorial».",
+        "popup.alias": "Apelidos (até 3, separados por ponto e vírgula)",
+        "popup.aliasInvalido": "Use até 3 apelidos válidos e distintos, diferentes do nome, sem comandos ou expressões de cortesia.",
+        "popup.tambienComputadora": "Também responder a Computadora",
+        "popup.modoConversacion": "Modo de conversa (8 segundos após cada sucesso)",
+        "popup.probarNombre": "Testar nome",
+        "popup.anadirAlias": "Adicionar como apelido",
+        "popup.diNombre": "Diga apenas o nome. A próxima frase será mostrada sem executar nenhum comando.",
+        "popup.pruebaCaducada": "O teste terminou sem ouvir nada. Suas frases voltam a ser comandos. Pressione Testar nome para repetir.",
         "popup.titulo": "Recursos do AdaptaPE",
         "popup.tituloLite": "Recursos do AdaptaPE Lite",
         "popup.introduccion": "Escolha os recursos que você quer usar.",
@@ -3321,12 +7416,25 @@
         "popup.lectura": "Leitura em voz alta",
         "popup.ayudaLectura": "Ouça o elemento que você aponta.",
         "popup.voz": "Controle por voz",
-        "popup.ayudaVoz": "Diga «Computador» e espere o som.",
+        "popup.ayudaVoz": "Diga «{palabra}» e espere o som.",
         "popup.idioma": "Idioma",
         "popup.ayudaIdioma": "Idioma do AdaptaPE e dos seus comandos de voz. «Automático» usa o idioma do seu computador.",
         "popup.automatico": "Automático: {idioma}",
         "popup.ordenes": "Comandos e microfone",
         "popup.ejemplosVoz": "Depois do som, diga «Abre YouTube», «Pesquisa gatos», «Desce» ou «Fecha a aba». Diga «Ajuda» para ouvir mais comandos.",
+        "popup.nombre": "Nome de ativação",
+        "popup.ayudaNombre": "Diga-o antes de cada comando. Substitui «Computador». De 3 a 24 letras, até 3 palavras.",
+        "popup.guardarNombre": "Guardar nome",
+        "popup.restaurarNombre": "Usar «Computador»",
+        "popup.nombreGuardado": "Nome guardado.",
+        "popup.nombreRestaurado": "Será usado «Computador».",
+        "activacion.longitud": "Use entre 3 e 24 caracteres.",
+        "activacion.caracteres": "Use só letras, espaços, hífen ou apóstrofo.",
+        "activacion.palabras": "Use no máximo 3 palavras.",
+        "activacion.letras": "Inclua pelo menos 3 letras.",
+        "activacion.orden": "Esse nome confunde-se com um comando de voz. Escolha outro.",
+        "activacion.mascota": "Esse é o nome de um mascote. Escolha outro.",
+        "activacion.muletilla": "Essa palavra é uma expressão de cortesia ou apoio. Escolha outro nome.",
         "popup.filtros": "Filtros de cor",
         "popup.ayudaFiltro": "Escolha o seu filtro de daltonismo.",
         "popup.sinFiltro": "Sem filtro",
@@ -3383,6 +7491,7 @@
         "popup.consultandoMicro": "Verificando o estado do microfone…",
         "popup.configurarMicro": "Configurar microfone",
         "popup.configNoAbrio": "A configuração não abriu. Pressione Configurar microfone de novo.",
+        "popup.tutorialNoAbrio": "O tutorial não abriu. Pressione Tutorial de novo.",
         "popup.microNoConsulta": "Não foi possível verificar o microfone. Feche e abra o painel de novo.",
         "popup.activaVoz": "Ative o Controle por voz para ouvir seus comandos.",
         "bienvenida.titulo": "Boas-vindas ao AdaptaPE",
@@ -3395,7 +7504,7 @@
         "bienvenida.paso2Lite": "Se o Chrome pedir permissão para o microfone, escolha «Permitir».",
         "bienvenida.paso3": "Para ter o painel à mão, pressione o ícone de extensões (peça de quebra-cabeça) ao lado da barra de endereços e depois o alfinete do AdaptaPE.",
         "bienvenida.paso3Lite": "Para ter o painel à mão, pressione o ícone de extensões (peça de quebra-cabeça) ao lado da barra de endereços e depois o alfinete do AdaptaPE Lite.",
-        "bienvenida.ayudaVoz": "Diga «Computador», espere o som e dê o seu comando, por exemplo «Abre YouTube».",
+        "bienvenida.ayudaVoz": "Diga «{palabra}», espere o som e dê o seu comando, por exemplo «Abre YouTube».",
         "bienvenida.ayudaCursor": "Mova o cursor com a cabeça ou um membro. Para clicar, fique parado um segundo.",
         "bienvenida.final": "Os filtros de cor, o idioma e o mascote estão no painel do AdaptaPE.",
         "bienvenida.finalLite": "Os filtros de cor, o idioma e o mascote estão no painel do AdaptaPE Lite.",
@@ -3421,7 +7530,7 @@
         "permisos.eligeMicro": "Escolha «Permitir» no aviso do Chrome para autorizar o microfone.",
         "permisos.eligeCamara": "Escolha «Permitir» no aviso do Chrome para autorizar a câmera.",
         "permisos.camaraLista": "Câmera autorizada. Voltando para a sua página…",
-        "permisos.microActivo": "Microfone autorizado. Você pode fechar esta aba e dizer «Computador» para dar um comando.",
+        "permisos.microActivo": "Microfone autorizado. Você pode fechar esta aba e dizer «{palabra}» para dar um comando.",
         "permisos.microInactivo": "Microfone autorizado. Ative o Controle por voz no painel do AdaptaPE para começar.",
         "permisos.denegadoMicro": "Permissão negada. Permita o microfone nas configurações do Chrome e tente de novo.",
         "permisos.denegadoCamara": "Permissão negada. Permita a câmera nas configurações do Chrome e tente de novo.",
@@ -3429,6 +7538,49 @@
         "permisos.falloCamara": "Não foi possível iniciar a câmera. Verifique o dispositivo e tente de novo."
       },
       "de": {
+        "popup.tutorial": "Tutorial",
+        "popup.unFiltro": "Nur ein Filter gleichzeitig",
+        "popup.dwell": "Zeit zum Klicken durch Stillhalten",
+        "popup.ayudaDwell": "Halte den Cursor {segundos} s still über einer Schaltfläche, um sie zu drücken. Zwischen 0,5 und 1,5 s.",
+        "popup.dwellValor": "{segundos} Sekunden",
+        "popup.atraccion": "Anziehung zu Bedienelementen",
+        "popup.ayudaAtraccion": "Der Cursor bewegt sich sanft zu nahen Schaltflächen und Links. Schalte sie aus, wenn du ihn lieber ohne Hilfe bewegst.",
+        "tutorial.titulo": "Praktisches Tutorial",
+        "tutorial.intro": "Folge den Schritten der Reihe nach. Jeder wird gleich hier geprüft und du kannst ihn jederzeit wiederholen.",
+        "tutorial.pendiente": "Offen",
+        "tutorial.hecho": "Erledigt",
+        "tutorial.voz.titulo": "Sprache und Mikrofon aktivieren",
+        "tutorial.voz.texto": "Drücke die Schaltfläche. Wenn Chrome nach dem Mikrofon fragt, wähle „Zulassen“.",
+        "tutorial.voz.boton": "Sprache aktivieren",
+        "tutorial.nombre.titulo": "Sag deinen Aktivierungsnamen",
+        "tutorial.nombre.texto": "Dein Aktivierungsname ist „{palabra}“. Drücke „Namen testen“ und sprich ihn laut aus: AdaptaPE antwortet.",
+        "tutorial.nombre.oido": "Ich habe „{texto}“ gehört. Es funktioniert! AdaptaPE hört zu.",
+        "tutorial.nombre.noOido": "Ich habe „{texto}“ gehört, das deinen Namen nicht aktiviert. Versuche es noch einmal oder füge diese Phrase im Panel als Alias hinzu.",
+        "tutorial.nombre.respuesta": "Ich höre zu.",
+        "tutorial.baja.titulo": "Übung 1: Seite nach unten",
+        "tutorial.baja.texto": "Sag „{palabra}, nach unten“. Die Seite sollte nach unten scrollen.",
+        "tutorial.selecciona.titulo": "Übung 2: Schaltfläche auswählen",
+        "tutorial.selecciona.texto": "Sag „{palabra}, markiere Weiter“. Die Schaltfläche wird hervorgehoben.",
+        "tutorial.objetivo": "Weiter",
+        "tutorial.clic.titulo": "Übung 3: anklicken",
+        "tutorial.clic.texto": "Sag bei hervorgehobener Schaltfläche „{palabra}, Auswahl anklicken“. Sie wird für dich gedrückt.",
+        "tutorial.filtro.titulo": "Farbfilter wählen",
+        "tutorial.filtro.texto": "Probiere einen Filter aus: Diese Seite ändert sich sofort. Du kannst jederzeit zu „Kein Filter“ zurückkehren.",
+        "tutorial.cursor.titulo": "Kamera-Cursor üben",
+        "tutorial.cursor.texto": "Aktiviere den Cursor, bewege ihn mit Kopf, Arm oder Hand und halte ihn über jeder Schaltfläche still: Nach einem Moment (standardmäßig 1 s) wird sie von selbst gedrückt.",
+        "tutorial.cursor.activar": "Kamera-Cursor aktivieren",
+        "tutorial.cursor.boton": "Schaltfläche {n}",
+        "tutorial.cursor.clic": "Du kannst auch mit einer Geste klicken: Führe mit der Hand Daumen und Zeigefinger zusammen (Pinzette), öffne mit dem Kopf den Mund weit und schließe ihn wieder, oder balle die Faust und warte einen Moment. AdaptaPE nutzt kein Blinzeln zum Klicken. Im Panel kannst du die Wartezeit und die Anziehung zu Bedienelementen einstellen.",
+        "tutorial.reabrir.titulo": "Komm jederzeit zurück",
+        "tutorial.reabrir.texto": "Um dieses Tutorial zu wiederholen, drücke „Tutorial“ im AdaptaPE-Panel oder sag „{palabra}, Tutorial“.",
+        "popup.alias": "Aliasse (bis zu 3, durch Semikolon getrennt)",
+        "popup.aliasInvalido": "Bis zu 3 gültige, unterschiedliche Aliasse verwenden, die sich vom Namen unterscheiden, ohne Befehle oder Füllwörter.",
+        "popup.tambienComputadora": "Auch auf Computadora reagieren",
+        "popup.modoConversacion": "Gesprächsmodus (8 Sekunden nach jedem Erfolg)",
+        "popup.probarNombre": "Namen testen",
+        "popup.anadirAlias": "Als Alias hinzufügen",
+        "popup.diNombre": "Nur den Namen sagen. Der nächste Satz wird angezeigt, ohne einen Befehl auszuführen.",
+        "popup.pruebaCaducada": "Der Test endete, ohne etwas zu hören. Deine Sätze sind wieder Befehle. Drücke Namen testen, um ihn zu wiederholen.",
         "popup.titulo": "AdaptaPE-Hilfen",
         "popup.tituloLite": "AdaptaPE Lite-Hilfen",
         "popup.introduccion": "Wähle die Hilfen, die du nutzen möchtest.",
@@ -3438,12 +7590,25 @@
         "popup.lectura": "Vorlesen",
         "popup.ayudaLectura": "Höre das Element, auf das du zeigst.",
         "popup.voz": "Sprachsteuerung",
-        "popup.ayudaVoz": "Sage „Computer“ und warte auf den Ton.",
+        "popup.ayudaVoz": "Sage „{palabra}“ und warte auf den Ton.",
         "popup.idioma": "Sprache",
         "popup.ayudaIdioma": "Sprache von AdaptaPE und deiner Sprachbefehle. „Automatisch“ nutzt die Sprache deines Computers.",
         "popup.automatico": "Automatisch: {idioma}",
         "popup.ordenes": "Befehle und Mikrofon",
         "popup.ejemplosVoz": "Sage nach dem Ton „Öffne YouTube“, „Suche Katzen“, „Nach unten“ oder „Tab schließen“. Sage „Hilfe“, um weitere Befehle zu hören.",
+        "popup.nombre": "Aktivierungsname",
+        "popup.ayudaNombre": "Sag ihn vor jedem Befehl. Er ersetzt „Computer“. 3 bis 24 Buchstaben, höchstens 3 Wörter.",
+        "popup.guardarNombre": "Namen speichern",
+        "popup.restaurarNombre": "„Computer“ verwenden",
+        "popup.nombreGuardado": "Name gespeichert.",
+        "popup.nombreRestaurado": "„Computer“ wird verwendet.",
+        "activacion.longitud": "Verwende 3 bis 24 Zeichen.",
+        "activacion.caracteres": "Verwende nur Buchstaben, Leerzeichen, Bindestrich oder Apostroph.",
+        "activacion.palabras": "Verwende höchstens 3 Wörter.",
+        "activacion.letras": "Verwende mindestens 3 Buchstaben.",
+        "activacion.orden": "Dieser Name klingt wie ein Sprachbefehl. Wähle einen anderen.",
+        "activacion.mascota": "Das ist der Name eines Haustiers. Wähle einen anderen.",
+        "activacion.muletilla": "Dieses Wort ist ein Füll- oder Höflichkeitswort. Wähle einen anderen Namen.",
         "popup.filtros": "Farbfilter",
         "popup.ayudaFiltro": "Wähle deinen Filter für Farbenblindheit.",
         "popup.sinFiltro": "Kein Filter",
@@ -3500,6 +7665,7 @@
         "popup.consultandoMicro": "Mikrofonstatus wird geprüft…",
         "popup.configurarMicro": "Mikrofon einrichten",
         "popup.configNoAbrio": "Die Einrichtung wurde nicht geöffnet. Drücke erneut auf Mikrofon einrichten.",
+        "popup.tutorialNoAbrio": "Das Tutorial wurde nicht geöffnet. Drücke erneut auf Tutorial.",
         "popup.microNoConsulta": "Das Mikrofon konnte nicht geprüft werden. Schließe das Panel und öffne es erneut.",
         "popup.activaVoz": "Schalte die Sprachsteuerung ein, damit deine Befehle gehört werden.",
         "bienvenida.titulo": "Willkommen bei AdaptaPE",
@@ -3512,7 +7678,7 @@
         "bienvenida.paso2Lite": "Wenn Chrome nach der Berechtigung für das Mikrofon fragt, wähle „Zulassen“.",
         "bienvenida.paso3": "Damit das Panel griffbereit ist, drücke das Erweiterungssymbol (Puzzleteil) neben der Adressleiste und dann die Stecknadel von AdaptaPE.",
         "bienvenida.paso3Lite": "Damit das Panel griffbereit ist, drücke das Erweiterungssymbol (Puzzleteil) neben der Adressleiste und dann die Stecknadel von AdaptaPE Lite.",
-        "bienvenida.ayudaVoz": "Sage „Computer“, warte auf den Ton und gib deinen Befehl, zum Beispiel „Öffne YouTube“.",
+        "bienvenida.ayudaVoz": "Sage „{palabra}“, warte auf den Ton und gib deinen Befehl, zum Beispiel „Öffne YouTube“.",
         "bienvenida.ayudaCursor": "Bewege den Cursor mit dem Kopf oder einer Gliedmaße. Zum Klicken halte eine Sekunde still.",
         "bienvenida.final": "Farbfilter, Sprache und Maskottchen findest du im AdaptaPE-Panel.",
         "bienvenida.finalLite": "Farbfilter, Sprache und Maskottchen findest du im AdaptaPE Lite-Panel.",
@@ -3538,7 +7704,7 @@
         "permisos.eligeMicro": "Wähle „Zulassen“ in der Chrome-Abfrage, um das Mikrofon freizugeben.",
         "permisos.eligeCamara": "Wähle „Zulassen“ in der Chrome-Abfrage, um die Kamera freizugeben.",
         "permisos.camaraLista": "Kamera freigegeben. Zurück zu deiner Seite…",
-        "permisos.microActivo": "Mikrofon freigegeben. Du kannst diesen Tab schließen und „Computer“ sagen, um einen Befehl zu geben.",
+        "permisos.microActivo": "Mikrofon freigegeben. Du kannst diesen Tab schließen und „{palabra}“ sagen, um einen Befehl zu geben.",
         "permisos.microInactivo": "Mikrofon freigegeben. Schalte die Sprachsteuerung im AdaptaPE-Panel ein, um zu beginnen.",
         "permisos.denegadoMicro": "Berechtigung verweigert. Erlaube das Mikrofon in den Chrome-Einstellungen und versuche es erneut.",
         "permisos.denegadoCamara": "Berechtigung verweigert. Erlaube die Kamera in den Chrome-Einstellungen und versuche es erneut.",
@@ -3546,6 +7712,49 @@
         "permisos.falloCamara": "Die Kamera konnte nicht gestartet werden. Prüfe das Gerät und versuche es erneut."
       },
       "fr": {
+        "popup.tutorial": "Tutoriel",
+        "popup.unFiltro": "Un seul filtre à la fois",
+        "popup.dwell": "Temps pour cliquer en restant immobile",
+        "popup.ayudaDwell": "Gardez le curseur immobile {segundos} s sur un bouton pour l’appuyer. Entre 0,5 et 1,5 s.",
+        "popup.dwellValor": "{segundos} secondes",
+        "popup.atraccion": "Attraction vers les contrôles",
+        "popup.ayudaAtraccion": "Le curseur se rapproche doucement des boutons et liens proches. Désactivez-la si vous préférez le déplacer sans aide.",
+        "tutorial.titulo": "Tutoriel pratique",
+        "tutorial.intro": "Suivez les étapes dans l’ordre. Chacune est vérifiée ici même et vous pouvez la refaire quand vous voulez.",
+        "tutorial.pendiente": "À faire",
+        "tutorial.hecho": "Fait",
+        "tutorial.voz.titulo": "Activez la voix et le microphone",
+        "tutorial.voz.texto": "Appuyez sur le bouton. Quand Chrome demande le microphone, choisissez « Autoriser ».",
+        "tutorial.voz.boton": "Activer la voix",
+        "tutorial.nombre.titulo": "Dites votre nom d’activation",
+        "tutorial.nombre.texto": "Votre nom d’activation est « {palabra} ». Appuyez sur « Tester le nom » et dites-le à voix haute : AdaptaPE vous répondra.",
+        "tutorial.nombre.oido": "J’ai entendu « {texto} ». Ça marche ! AdaptaPE vous écoute.",
+        "tutorial.nombre.noOido": "J’ai entendu « {texto} », ce qui n’active pas votre nom. Réessayez ou ajoutez cette phrase comme alias dans le panneau.",
+        "tutorial.nombre.respuesta": "Je vous écoute.",
+        "tutorial.baja.titulo": "Exercice 1 : descendez la page",
+        "tutorial.baja.texto": "Dites « {palabra}, descends ». La page doit défiler vers le bas.",
+        "tutorial.selecciona.titulo": "Exercice 2 : sélectionnez un bouton",
+        "tutorial.selecciona.texto": "Dites « {palabra}, sélectionne Suivant ». Le bouton sera mis en évidence.",
+        "tutorial.objetivo": "Suivant",
+        "tutorial.clic.titulo": "Exercice 3 : cliquez dessus",
+        "tutorial.clic.texto": "Le bouton étant en évidence, dites « {palabra}, clique sur la sélection ». Il sera appuyé pour vous.",
+        "tutorial.filtro.titulo": "Choisissez un filtre de couleur",
+        "tutorial.filtro.texto": "Essayez un filtre : cette page change instantanément. Vous pouvez revenir à « Aucun filtre » quand vous voulez.",
+        "tutorial.cursor.titulo": "Entraînez-vous avec le curseur caméra",
+        "tutorial.cursor.texto": "Activez le curseur, déplacez-le avec la tête, le bras ou la main et gardez-le immobile sur chaque bouton : il est appuyé tout seul après un instant (1 s par défaut).",
+        "tutorial.cursor.activar": "Activer le curseur caméra",
+        "tutorial.cursor.boton": "Bouton {n}",
+        "tutorial.cursor.clic": "Vous pouvez aussi cliquer avec un geste : rapprochez le pouce et l’index (pince) avec la main, ouvrez grand la bouche puis fermez-la avec la tête, ou fermez le poing et attendez un instant. AdaptaPE n’utilise pas le clignement des yeux pour cliquer. Dans le panneau, vous pouvez régler le temps d’attente et l’attraction vers les contrôles.",
+        "tutorial.reabrir.titulo": "Revenez quand vous voulez",
+        "tutorial.reabrir.texto": "Pour refaire ce tutoriel, appuyez sur « Tutoriel » dans le panneau d’AdaptaPE ou dites « {palabra}, tutoriel ».",
+        "popup.alias": "Alias (3 maximum, séparés par un point-virgule)",
+        "popup.aliasInvalido": "Utilisez jusqu’à 3 alias valides et distincts, différents du nom, sans commandes ni formules de politesse.",
+        "popup.tambienComputadora": "Répondre aussi à Computadora",
+        "popup.modoConversacion": "Mode conversation (8 secondes après chaque réussite)",
+        "popup.probarNombre": "Tester le nom",
+        "popup.anadirAlias": "Ajouter comme alias",
+        "popup.diNombre": "Dites seulement le nom. La prochaine phrase sera affichée sans exécuter de commande.",
+        "popup.pruebaCaducada": "Le test s’est terminé sans rien entendre. Vos phrases redeviennent des commandes. Appuyez sur Tester le nom pour recommencer.",
         "popup.titulo": "Aides d’AdaptaPE",
         "popup.tituloLite": "Aides d’AdaptaPE Lite",
         "popup.introduccion": "Choisissez les aides que vous voulez utiliser.",
@@ -3555,12 +7764,25 @@
         "popup.lectura": "Lecture à voix haute",
         "popup.ayudaLectura": "Écoutez l’élément que vous pointez.",
         "popup.voz": "Commande vocale",
-        "popup.ayudaVoz": "Dites « Ordinateur » et attendez le son.",
+        "popup.ayudaVoz": "Dites « {palabra} » et attendez le son.",
         "popup.idioma": "Langue",
         "popup.ayudaIdioma": "Langue d’AdaptaPE et de vos commandes vocales. « Automatique » utilise la langue de votre ordinateur.",
         "popup.automatico": "Automatique : {idioma}",
         "popup.ordenes": "Commandes et micro",
         "popup.ejemplosVoz": "Après le son, dites « Ouvre YouTube », « Cherche chats », « Descends » ou « Ferme l’onglet ». Dites « Aide » pour entendre d’autres commandes.",
+        "popup.nombre": "Nom d’activation",
+        "popup.ayudaNombre": "Dites-le avant chaque commande. Il remplace « Ordinateur ». De 3 à 24 lettres, 3 mots au plus.",
+        "popup.guardarNombre": "Enregistrer le nom",
+        "popup.restaurarNombre": "Utiliser « Ordinateur »",
+        "popup.nombreGuardado": "Nom enregistré.",
+        "popup.nombreRestaurado": "« Ordinateur » sera utilisé.",
+        "activacion.longitud": "Utilisez de 3 à 24 caractères.",
+        "activacion.caracteres": "Utilisez seulement des lettres, espaces, traits d’union ou apostrophes.",
+        "activacion.palabras": "Utilisez 3 mots au plus.",
+        "activacion.letras": "Incluez au moins 3 lettres.",
+        "activacion.orden": "Ce nom ressemble à une commande vocale. Choisissez-en un autre.",
+        "activacion.mascota": "C’est le nom d’une mascotte. Choisissez-en un autre.",
+        "activacion.muletilla": "Ce mot est une formule de politesse ou de remplissage. Choisissez un autre nom.",
         "popup.filtros": "Filtres de couleur",
         "popup.ayudaFiltro": "Choisissez votre filtre de daltonisme.",
         "popup.sinFiltro": "Aucun filtre",
@@ -3617,6 +7839,7 @@
         "popup.consultandoMicro": "Vérification de l’état du micro…",
         "popup.configurarMicro": "Configurer le micro",
         "popup.configNoAbrio": "La configuration ne s’est pas ouverte. Appuyez à nouveau sur Configurer le micro.",
+        "popup.tutorialNoAbrio": "Le tutoriel ne s’est pas ouvert. Appuyez à nouveau sur Tutoriel.",
         "popup.microNoConsulta": "Impossible de vérifier le micro. Fermez puis rouvrez le panneau.",
         "popup.activaVoz": "Activez la Commande vocale pour écouter vos commandes.",
         "bienvenida.titulo": "Bienvenue dans AdaptaPE",
@@ -3629,7 +7852,7 @@
         "bienvenida.paso2Lite": "Si Chrome demande l’autorisation pour le micro, choisissez « Autoriser ».",
         "bienvenida.paso3": "Pour garder le panneau à portée de main, appuyez sur l’icône des extensions (pièce de puzzle) à côté de la barre d’adresse, puis sur l’épingle d’AdaptaPE.",
         "bienvenida.paso3Lite": "Pour garder le panneau à portée de main, appuyez sur l’icône des extensions (pièce de puzzle) à côté de la barre d’adresse, puis sur l’épingle d’AdaptaPE Lite.",
-        "bienvenida.ayudaVoz": "Dites « Ordinateur », attendez le son et donnez votre commande, par exemple « Ouvre YouTube ».",
+        "bienvenida.ayudaVoz": "Dites « {palabra} », attendez le son et donnez votre commande, par exemple « Ouvre YouTube ».",
         "bienvenida.ayudaCursor": "Déplacez le curseur avec la tête ou un membre. Pour cliquer, restez immobile une seconde.",
         "bienvenida.final": "Les filtres de couleur, la langue et la mascotte se trouvent dans le panneau d’AdaptaPE.",
         "bienvenida.finalLite": "Les filtres de couleur, la langue et la mascotte se trouvent dans le panneau d’AdaptaPE Lite.",
@@ -3655,7 +7878,7 @@
         "permisos.eligeMicro": "Choisissez « Autoriser » dans l’invite de Chrome pour autoriser le micro.",
         "permisos.eligeCamara": "Choisissez « Autoriser » dans l’invite de Chrome pour autoriser la caméra.",
         "permisos.camaraLista": "Caméra autorisée. Retour à votre page…",
-        "permisos.microActivo": "Micro autorisé. Vous pouvez fermer cet onglet et dire « Ordinateur » pour donner une commande.",
+        "permisos.microActivo": "Micro autorisé. Vous pouvez fermer cet onglet et dire « {palabra} » pour donner une commande.",
         "permisos.microInactivo": "Micro autorisé. Activez la Commande vocale dans le panneau d’AdaptaPE pour commencer.",
         "permisos.denegadoMicro": "Autorisation refusée. Autorisez le micro dans les paramètres de Chrome et réessayez.",
         "permisos.denegadoCamara": "Autorisation refusée. Autorisez la caméra dans les paramètres de Chrome et réessayez.",
@@ -3663,6 +7886,49 @@
         "permisos.falloCamara": "Impossible de démarrer la caméra. Vérifiez l’appareil et réessayez."
       },
       "it": {
+        "popup.tutorial": "Tutorial",
+        "popup.unFiltro": "Un solo filtro alla volta",
+        "popup.dwell": "Tempo per cliccare restando fermi",
+        "popup.ayudaDwell": "Tieni il cursore fermo {segundos} s su un pulsante per premerlo. Tra 0,5 e 1,5 s.",
+        "popup.dwellValor": "{segundos} secondi",
+        "popup.atraccion": "Attrazione verso i controlli",
+        "popup.ayudaAtraccion": "Il cursore si avvicina dolcemente ai pulsanti e ai link vicini. Disattivala se preferisci muoverlo senza aiuto.",
+        "tutorial.titulo": "Tutorial pratico",
+        "tutorial.intro": "Segui i passaggi in ordine. Ognuno viene verificato qui e puoi ripeterlo quando vuoi.",
+        "tutorial.pendiente": "Da fare",
+        "tutorial.hecho": "Fatto",
+        "tutorial.voz.titulo": "Attiva la voce e il microfono",
+        "tutorial.voz.texto": "Premi il pulsante. Quando Chrome chiede il microfono, scegli «Consenti».",
+        "tutorial.voz.boton": "Attiva la voce",
+        "tutorial.nombre.titulo": "Di’ il tuo nome di attivazione",
+        "tutorial.nombre.texto": "Il tuo nome di attivazione è «{palabra}». Premi «Prova nome» e dillo ad alta voce: AdaptaPE ti risponderà.",
+        "tutorial.nombre.oido": "Ho sentito «{texto}». Funziona! AdaptaPE ti ascolta.",
+        "tutorial.nombre.noOido": "Ho sentito «{texto}», che non attiva il tuo nome. Riprova o aggiungi quella frase come alias nel pannello.",
+        "tutorial.nombre.respuesta": "Ti ascolto.",
+        "tutorial.baja.titulo": "Esercizio 1: scorri la pagina in basso",
+        "tutorial.baja.texto": "Di’ «{palabra}, scendi». La pagina deve scorrere verso il basso.",
+        "tutorial.selecciona.titulo": "Esercizio 2: seleziona un pulsante",
+        "tutorial.selecciona.texto": "Di’ «{palabra}, seleziona Avanti». Il pulsante verrà evidenziato.",
+        "tutorial.objetivo": "Avanti",
+        "tutorial.clic.titulo": "Esercizio 3: cliccalo",
+        "tutorial.clic.texto": "Con il pulsante evidenziato, di’ «{palabra}, clicca sulla selezione». Verrà premuto per te.",
+        "tutorial.filtro.titulo": "Scegli un filtro colore",
+        "tutorial.filtro.texto": "Prova un filtro: questa pagina cambia subito. Puoi tornare a «Nessun filtro» quando vuoi.",
+        "tutorial.cursor.titulo": "Esercitati con il cursore a fotocamera",
+        "tutorial.cursor.texto": "Attiva il cursore, muovilo con la testa, il braccio o la mano e tienilo fermo su ogni pulsante: viene premuto da solo dopo un momento (1 s per impostazione predefinita).",
+        "tutorial.cursor.activar": "Attiva il cursore a fotocamera",
+        "tutorial.cursor.boton": "Pulsante {n}",
+        "tutorial.cursor.clic": "Puoi anche cliccare con un gesto: avvicina pollice e indice (pinza) con la mano, apri bene la bocca e richiudila con la testa, oppure chiudi il pugno e aspetta un momento. AdaptaPE non usa l’ammiccamento per cliccare. Nel pannello puoi regolare il tempo di attesa e l’attrazione verso i controlli.",
+        "tutorial.reabrir.titulo": "Torna quando vuoi",
+        "tutorial.reabrir.texto": "Per ripetere questo tutorial, premi «Tutorial» nel pannello di AdaptaPE o di’ «{palabra}, tutorial».",
+        "popup.alias": "Alias (fino a 3, separati da punto e virgola)",
+        "popup.aliasInvalido": "Usa fino a 3 alias validi e distinti, diversi dal nome, senza comandi o formule di cortesia.",
+        "popup.tambienComputadora": "Rispondere anche a Computadora",
+        "popup.modoConversacion": "Modalità conversazione (8 secondi dopo ogni successo)",
+        "popup.probarNombre": "Prova nome",
+        "popup.anadirAlias": "Aggiungi come alias",
+        "popup.diNombre": "Pronuncia solo il nome. La prossima frase sarà mostrata senza eseguire comandi.",
+        "popup.pruebaCaducada": "Il test è terminato senza sentire nulla. Le tue frasi tornano a essere comandi. Premi Prova nome per ripeterlo.",
         "popup.titulo": "Aiuti di AdaptaPE",
         "popup.tituloLite": "Aiuti di AdaptaPE Lite",
         "popup.introduccion": "Scegli gli aiuti che vuoi usare.",
@@ -3672,12 +7938,25 @@
         "popup.lectura": "Lettura ad alta voce",
         "popup.ayudaLectura": "Ascolta l’elemento che indichi.",
         "popup.voz": "Controllo vocale",
-        "popup.ayudaVoz": "Di’ «Computer» e aspetta il suono.",
+        "popup.ayudaVoz": "Di’ «{palabra}» e aspetta il suono.",
         "popup.idioma": "Lingua",
         "popup.ayudaIdioma": "Lingua di AdaptaPE e dei tuoi comandi vocali. «Automatico» usa la lingua del tuo computer.",
         "popup.automatico": "Automatico: {idioma}",
         "popup.ordenes": "Comandi e microfono",
         "popup.ejemplosVoz": "Dopo il suono, di’ «Apri YouTube», «Cerca gatti», «Scendi» o «Chiudi la scheda». Di’ «Aiuto» per ascoltare altri comandi.",
+        "popup.nombre": "Nome di attivazione",
+        "popup.ayudaNombre": "Dillo prima di ogni comando. Sostituisce «Computer». Da 3 a 24 lettere, fino a 3 parole.",
+        "popup.guardarNombre": "Salva nome",
+        "popup.restaurarNombre": "Usa «Computer»",
+        "popup.nombreGuardado": "Nome salvato.",
+        "popup.nombreRestaurado": "Verrà usato «Computer».",
+        "activacion.longitud": "Usa da 3 a 24 caratteri.",
+        "activacion.caracteres": "Usa solo lettere, spazi, trattino o apostrofo.",
+        "activacion.palabras": "Usa al massimo 3 parole.",
+        "activacion.letras": "Includi almeno 3 lettere.",
+        "activacion.orden": "Questo nome si confonde con un comando vocale. Scegline un altro.",
+        "activacion.mascota": "Questo è il nome di una mascotte. Scegline un altro.",
+        "activacion.muletilla": "Questa parola è un intercalare o una cortesia. Scegli un altro nome.",
         "popup.filtros": "Filtri colore",
         "popup.ayudaFiltro": "Scegli il tuo filtro per il daltonismo.",
         "popup.sinFiltro": "Nessun filtro",
@@ -3734,6 +8013,7 @@
         "popup.consultandoMicro": "Verifica dello stato del microfono…",
         "popup.configurarMicro": "Configura microfono",
         "popup.configNoAbrio": "La configurazione non si è aperta. Premi di nuovo Configura microfono.",
+        "popup.tutorialNoAbrio": "Il tutorial non si è aperto. Premi di nuovo Tutorial.",
         "popup.microNoConsulta": "Impossibile verificare il microfono. Chiudi e riapri il pannello.",
         "popup.activaVoz": "Attiva il Controllo vocale per ascoltare i tuoi comandi.",
         "bienvenida.titulo": "Benvenuto in AdaptaPE",
@@ -3746,7 +8026,7 @@
         "bienvenida.paso2Lite": "Se Chrome chiede il permesso per il microfono, scegli «Consenti».",
         "bienvenida.paso3": "Per avere il pannello a portata di mano, premi l’icona delle estensioni (pezzo di puzzle) accanto alla barra degli indirizzi e poi la puntina di AdaptaPE.",
         "bienvenida.paso3Lite": "Per avere il pannello a portata di mano, premi l’icona delle estensioni (pezzo di puzzle) accanto alla barra degli indirizzi e poi la puntina di AdaptaPE Lite.",
-        "bienvenida.ayudaVoz": "Di’ «Computer», aspetta il suono e dai il tuo comando, per esempio «Apri YouTube».",
+        "bienvenida.ayudaVoz": "Di’ «{palabra}», aspetta il suono e dai il tuo comando, per esempio «Apri YouTube».",
         "bienvenida.ayudaCursor": "Muovi il cursore con la testa o un arto. Per fare clic, resta fermo un secondo.",
         "bienvenida.final": "I filtri colore, la lingua e la mascotte sono nel pannello di AdaptaPE.",
         "bienvenida.finalLite": "I filtri colore, la lingua e la mascotte sono nel pannello di AdaptaPE Lite.",
@@ -3772,7 +8052,7 @@
         "permisos.eligeMicro": "Scegli «Consenti» nell’avviso di Chrome per autorizzare il microfono.",
         "permisos.eligeCamara": "Scegli «Consenti» nell’avviso di Chrome per autorizzare la fotocamera.",
         "permisos.camaraLista": "Fotocamera autorizzata. Ritorno alla tua pagina…",
-        "permisos.microActivo": "Microfono autorizzato. Puoi chiudere questa scheda e dire «Computer» per dare un comando.",
+        "permisos.microActivo": "Microfono autorizzato. Puoi chiudere questa scheda e dire «{palabra}» per dare un comando.",
         "permisos.microInactivo": "Microfono autorizzato. Attiva il Controllo vocale nel pannello di AdaptaPE per iniziare.",
         "permisos.denegadoMicro": "Permesso negato. Consenti il microfono nelle impostazioni di Chrome e riprova.",
         "permisos.denegadoCamara": "Permesso negato. Consenti la fotocamera nelle impostazioni di Chrome e riprova.",
@@ -3994,5 +8274,405 @@
       "texto": "riprendi cursore",
       "canonica": "reanudar cursor"
     }
-  ]
+  ],
+  "casosActivacion": {
+    "version": 1,
+    "activacion": [
+      {
+        "nombre": "Jarvis",
+        "texto": "yarbis abre YouTube",
+        "activa": true,
+        "canonica": "abre YouTube",
+        "intencion": "buscar_inteligente",
+        "sitio": "youtube"
+      },
+      {
+        "nombre": "Jarvis",
+        "texto": "Jar vis abre YouTube",
+        "activa": true
+      },
+      {
+        "nombre": "Jarvis",
+        "texto": "bonito cierra la pestaña",
+        "activa": false
+      },
+      {
+        "nombre": "Julia",
+        "texto": "yulia abre YouTube",
+        "activa": false
+      },
+      {
+        "nombre": "Alexa",
+        "texto": "aleksa abre YouTube",
+        "activa": true
+      },
+      {
+        "nombre": "Siri",
+        "texto": "siri abre YouTube",
+        "activa": true
+      },
+      {
+        "nombre": "Siri",
+        "texto": "ciri abre YouTube",
+        "activa": false
+      },
+      {
+        "nombre": "Max",
+        "texto": "mas abre YouTube",
+        "activa": false
+      },
+      {
+        "nombre": "Mike",
+        "alias": [
+          "maik"
+        ],
+        "texto": "maik abre YouTube",
+        "activa": true
+      },
+      {
+        "nombre": "George",
+        "alias": [
+          "yorch"
+        ],
+        "texto": "yorch abre YouTube",
+        "activa": true
+      },
+      {
+        "nombre": "Hey Google",
+        "alias": [
+          "ei gugol"
+        ],
+        "texto": "ei gugol abre YouTube",
+        "activa": true
+      },
+      {
+        "nombre": "Wayra",
+        "alias": [
+          "guaira"
+        ],
+        "texto": "guaira abre YouTube",
+        "activa": true
+      },
+      {
+        "nombre": "Killa",
+        "texto": "kiya abre YouTube",
+        "activa": false
+      },
+      {
+        "nombre": "Qori",
+        "alias": [
+          "kori"
+        ],
+        "texto": "kori abre YouTube",
+        "activa": true
+      },
+      {
+        "nombre": "Jarvis",
+        "texto": "busca Jarvis en Wikipedia",
+        "activa": false
+      },
+      {
+        "nombre": "Jarvis",
+        "texto": "Computadora abre YouTube",
+        "activa": false
+      },
+      {
+        "nombre": "Jarvis",
+        "tambienComputadora": true,
+        "texto": "Computadora abre YouTube",
+        "activa": true
+      },
+      {
+        "nombre": "Jarvis",
+        "tambienComputadora": true,
+        "idioma": "en-US",
+        "texto": "Computer open YouTube",
+        "activa": true
+      },
+      {
+        "nombre": "Jarvis",
+        "texto": "oye, Jarvis abre YouTube",
+        "activa": true
+      },
+      {
+        "nombre": "Jarvis",
+        "texto": "no Jarvis abre YouTube",
+        "activa": false
+      },
+      {
+        "nombre": "Hey Google",
+        "texto": "Hey Google abre YouTube",
+        "activa": true
+      },
+      {
+        "nombre": "Killa",
+        "texto": "kila abre YouTube",
+        "activa": false
+      },
+      {
+        "nombre": "Peña",
+        "texto": "pena abre YouTube",
+        "activa": false
+      },
+      {
+        "nombre": "Lucía",
+        "texto": "lusia abre YouTube",
+        "activa": true
+      },
+      {
+        "nombre": "Jarvis",
+        "idioma": "en-US",
+        "texto": "please Jarvis open YouTube",
+        "activa": true
+      },
+      {
+        "nombre": "",
+        "alias": [
+          "Jarvis"
+        ],
+        "texto": "Jarvis abre YouTube",
+        "activa": true,
+        "nota": "alias con el nombre predeterminado"
+      },
+      {
+        "nombre": "",
+        "alias": [
+          "Jarvis"
+        ],
+        "texto": "Computadora abre YouTube",
+        "activa": true
+      },
+      {
+        "nombre": "João",
+        "texto": "Joao abre YouTube",
+        "activa": true,
+        "nota": "cualquier marca vocálica se neutraliza"
+      },
+      {
+        "nombre": "Jarvis",
+        "texto": "oye Jarvis abre YouTube",
+        "esperando": true,
+        "activa": true,
+        "canonica": "abre YouTube",
+        "nota": "vocativo también tras el pitido o en conversación"
+      }
+    ],
+    "tolerancia": [
+      {
+        "idioma": "es",
+        "texto": "buscqr Perú en YouTube",
+        "corregida": "buscar Perú en YouTube",
+        "repetir": false,
+        "intencion": "buscar_inteligente",
+        "query": "Perú",
+        "sitio": "youtube"
+      },
+      {
+        "idioma": "en",
+        "texto": "searxh Peru on YouTube",
+        "corregida": "search Peru on YouTube",
+        "repetir": false,
+        "intencion": "buscar_inteligente",
+        "query": "Peru",
+        "sitio": "youtube"
+      },
+      {
+        "idioma": "es",
+        "texto": "recqrga",
+        "corregida": "recarga",
+        "repetir": false,
+        "intencion": "recargar"
+      },
+      {
+        "idioma": "es",
+        "texto": "cierqa ventana",
+        "corregida": null,
+        "repetir": true
+      },
+      {
+        "idioma": "en",
+        "texto": "closse window",
+        "corregida": null,
+        "repetir": true
+      },
+      {
+        "idioma": "es",
+        "texto": "limpiad el campo",
+        "corregida": null,
+        "repetir": true
+      },
+      {
+        "idioma": "es",
+        "texto": "borra texto",
+        "corregida": null,
+        "repetir": false
+      },
+      {
+        "idioma": "es",
+        "texto": "busca cierqa ventana",
+        "corregida": null,
+        "repetir": false
+      },
+      {
+        "idioma": "es",
+        "texto": "puscar gatos",
+        "corregida": null,
+        "repetir": false,
+        "nota": "ambiguo: buscar a 1, pulsar a 2"
+      },
+      {
+        "idioma": "es",
+        "texto": "bisca gatos",
+        "corregida": null,
+        "repetir": false,
+        "nota": "a 2 ediciones de buscar: no se corrige"
+      },
+      {
+        "idioma": "es",
+        "texto": "abrr YouTube",
+        "corregida": null,
+        "repetir": false,
+        "nota": "menos de 5 letras"
+      }
+    ],
+    "sitios": [
+      {
+        "idioma": "es",
+        "texto": "abre yutub",
+        "sitio": "youtube",
+        "anuncio": "Abriendo youtube.com."
+      },
+      {
+        "idioma": "es",
+        "texto": "abre amason",
+        "sitio": "amazon",
+        "anuncio": "Abriendo amazon.com."
+      },
+      {
+        "idioma": "es",
+        "texto": "abre facebuk",
+        "sitio": null
+      },
+      {
+        "idioma": "en",
+        "texto": "abre yutub",
+        "sitio": null
+      }
+    ],
+    "confirmacion": [
+      {
+        "texto": "cierra esta pestaña",
+        "accion": "cerrar_pestana",
+        "resultado": "confirmando",
+        "destino": {
+          "windowId": 7,
+          "tabId": 10,
+          "tabIds": [
+            10
+          ]
+        },
+        "caducidadMs": 8000,
+        "plazoDesde": "fin_tts"
+      },
+      {
+        "texto": "cierra las otras pestañas",
+        "accion": "cerrar_otras",
+        "resultado": "confirmando",
+        "destino": {
+          "windowId": 7,
+          "tabId": 10,
+          "tabIds": [
+            11,
+            12
+          ]
+        },
+        "caducidadMs": 8000,
+        "plazoDesde": "fin_tts"
+      },
+      {
+        "texto": "cierra ventana",
+        "accion": "cerrar_ventana",
+        "resultado": "confirmando",
+        "destino": {
+          "windowId": 7
+        },
+        "caducidadMs": 8000,
+        "plazoDesde": "fin_tts"
+      }
+    ],
+    "cancelacion": [
+      {
+        "idioma": "es-PE",
+        "texto": "cancelar"
+      },
+      {
+        "idioma": "en-US",
+        "texto": "cancel"
+      },
+      {
+        "idioma": "pt-BR",
+        "texto": "cancela"
+      },
+      {
+        "idioma": "de-DE",
+        "texto": "abbrechen"
+      },
+      {
+        "idioma": "fr-FR",
+        "texto": "annuler"
+      },
+      {
+        "idioma": "it-IT",
+        "texto": "annulla"
+      }
+    ],
+    "conversacion": [
+      {
+        "resultado": "ok",
+        "modo": true,
+        "tts": "end",
+        "renueva": true
+      },
+      {
+        "resultado": "fallo",
+        "modo": true,
+        "tts": "end",
+        "renueva": false
+      },
+      {
+        "resultado": "desconocida",
+        "modo": true,
+        "tts": "end",
+        "renueva": false
+      },
+      {
+        "resultado": "confirmando",
+        "modo": true,
+        "tts": "end",
+        "renueva": false
+      },
+      {
+        "resultado": "ok",
+        "modo": false,
+        "tts": "end",
+        "renueva": false
+      },
+      {
+        "resultado": "ok",
+        "modo": true,
+        "tts": "error",
+        "renueva": false
+      }
+    ],
+    "cierres": [
+      "gracias",
+      "listo",
+      "silencio"
+    ],
+    "contenido": [
+      "busca gracias",
+      "escribe listo",
+      "busca silencio en YouTube"
+    ]
+  }
 }

@@ -1,0 +1,902 @@
+/*
+ * AdaptaPE · Tutorial en video — tokens y estilos base.
+ *
+ * Marca: /Users/thealejo/WebstormProjects/adapta-pe/DESIGN.md
+ * Lienzo 1920×1080. Todo tamaño está pensado para leerse en video comprimido
+ * por personas con baja visión: cuerpo ≥ 40 px, títulos 80–120 px.
+ *
+ * Contrastes medidos (WCAG 2.x, luminancia relativa; mínimo exigido 4.5:1):
+ *   texto        #F1F5F9 / fondo #0F172A ............ 16.30:1
+ *   texto        #F1F5F9 / superficie #182233 ....... 14.57:1
+ *   texto        #F1F5F9 / superficie-2 #22304A ..... 12.06:1
+ *   secundario   #B9C5D5 / fondo #0F172A ............ 10.21:1
+ *   secundario   #B9C5D5 / superficie #182233 .......  9.13:1
+ *   secundario   #B9C5D5 / superficie-2 #22304A .....  7.56:1
+ *   verde        #86EFAC / fondo #0F172A ............ 12.71:1
+ *   verde        #86EFAC / superficie #182233 ....... 11.37:1
+ *   tinta        #0F172A / verde #86EFAC ............ 12.71:1
+ *   tinta        #0F172A / azul Base #93C5FD ........  9.90:1
+ *   tinta        #0F172A / amarillo Lite #FCD34D .... 12.38:1
+ *   claro texto  #17372F / claro fondo #F5F7F5 ...... 12.01:1
+ *   claro texto2 #52645D / claro fondo #F5F7F5 ......  5.84:1
+ *   claro verde  #176B56 / claro fondo #F5F7F5 ......  5.96:1
+ *   blanco       #FFFFFF / verde hondo #176B56 ......  6.41:1
+ *   cromo        #1F2937 / pestañas #DFE3E8 ......... 11.39:1
+ *   subtítulo    #F1F5F9 / franja #0B1220 ........... 17.09:1
+ */
+
+/* ── Fuentes locales (el lint exige @font-face a archivos del proyecto) ── */
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("../assets/fuentes/atkinson-hyperlegible-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("../assets/fuentes/atkinson-hyperlegible-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("../assets/fuentes/source-sans-3-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("../assets/fuentes/source-sans-3-latin-600-normal.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: "Source Sans 3";
+  src: url("../assets/fuentes/source-sans-3-latin-700-normal.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+
+:root {
+  /* ── Color: escenario oscuro (tema oscuro de la marca) ── */
+  --ap-fondo: #0f172a;
+  --ap-fondo-hondo: #0b1220;
+  --ap-superficie: #182233;
+  --ap-superficie-2: #22304a;
+  --ap-texto: #f1f5f9;
+  --ap-texto-2: #b9c5d5;
+  --ap-borde: #475569;
+  --ap-verde: #86efac; /* acción y foco en oscuro */
+  --ap-verde-suave: rgba(134, 239, 172, 0.18);
+  --ap-tinta: #0f172a; /* texto sobre rellenos claros (verde, azul, amarillo) */
+
+  /* Acentos de edición (vienen de los logos Base azul / Lite amarillo).
+     Nunca son el único indicador: los chips siempre llevan texto. */
+  --ap-azul-base: #93c5fd;
+  --ap-amarillo-lite: #fcd34d;
+  --ap-rojo-aviso: #fca5a5;
+
+  /* ── Color: ventanas y páginas falsas (tema claro de la marca) ── */
+  --ap-claro-fondo: #f5f7f5;
+  --ap-claro-superficie: #ffffff;
+  --ap-claro-texto: #17372f;
+  --ap-claro-texto-2: #52645d;
+  --ap-claro-verde: #176b56;
+  --ap-claro-borde: #cedbd5;
+  --ap-cromo: #dfe3e8; /* barra de pestañas tipo Chrome */
+  --ap-cromo-texto: #1f2937;
+
+  /* ── Tipografía ── */
+  --ap-fuente-titulo: "Atkinson Hyperlegible", system-ui, sans-serif;
+  --ap-fuente-texto: "Source Sans 3", system-ui, sans-serif;
+  --t-display: 120px; /* portada */
+  --t-titulo: 96px; /* título de capítulo */
+  --t-subtitulo: 64px;
+  --t-cuerpo: 44px; /* texto en pantalla y rótulos */
+  --t-rotulo: 40px; /* mínimo para texto de contenido */
+  --t-etiqueta: 36px; /* chips y metadatos cortos, siempre en negrita */
+  --t-subtitulos: 48px; /* franja de subtítulos */
+  --t-cromo: 30px; /* barra de progreso y textos de interfaz falsa */
+  --interlinea: 1.25;
+
+  /* ── Espaciado (múltiplos de 8) ── */
+  --e-1: 8px;
+  --e-2: 16px;
+  --e-3: 24px;
+  --e-4: 32px;
+  --e-5: 48px;
+  --e-6: 64px;
+  --e-7: 96px;
+  --e-8: 128px;
+
+  /* ── Radios y sombras suaves ── */
+  --r-s: 12px;
+  --r-m: 20px;
+  --r-l: 32px;
+  --r-pastilla: 999px;
+  --sombra-1: 0 12px 32px rgba(2, 6, 23, 0.35);
+  --sombra-2: 0 28px 72px rgba(2, 6, 23, 0.55);
+  --borde-grueso: 3px;
+
+  /* ── Zonas seguras (ver CONTRATO-ESCENAS.md) ── */
+  --zona-sup: 96px; /* barra de progreso: 0–96 px */
+  --zona-inf: 240px; /* subtítulos: 840–1080 px */
+  --margen-lateral: 96px;
+}
+
+/* ── Escenario base de cada escena ── */
+.ap-escena {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--ap-fondo);
+  color: var(--ap-texto);
+  font-family: var(--ap-fuente-texto);
+  font-size: var(--t-cuerpo);
+  line-height: var(--interlinea);
+}
+/* Área de contenido: entre la barra de progreso y la franja de subtítulos. */
+.ap-area {
+  position: absolute;
+  left: var(--margen-lateral);
+  right: var(--margen-lateral);
+  top: var(--zona-sup);
+  bottom: var(--zona-inf);
+}
+
+/* ── Tipografía utilitaria ── */
+.ap-display,
+.ap-titulo,
+.ap-subtitulo {
+  font-family: var(--ap-fuente-titulo);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.ap-display {
+  font-size: var(--t-display);
+}
+.ap-titulo {
+  font-size: var(--t-titulo);
+}
+.ap-subtitulo {
+  font-size: var(--t-subtitulo);
+}
+.ap-cuerpo {
+  font-size: var(--t-cuerpo);
+  font-weight: 600;
+  margin: 0;
+}
+.ap-secundario {
+  color: var(--ap-texto-2);
+}
+.ap-verde {
+  color: var(--ap-verde);
+}
+
+/* ── Ambiente (fondo decorativo compartido) ── */
+.ap-ambiente {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.ap-ambiente-halo {
+  position: absolute;
+  border-radius: 50%;
+  width: 1100px;
+  height: 1100px;
+  background: radial-gradient(circle, rgba(134, 239, 172, 0.2) 0%, rgba(134, 239, 172, 0) 65%);
+}
+.ap-ambiente-halo.azul {
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.16) 0%, rgba(96, 165, 250, 0) 65%);
+}
+.ap-ambiente-puntos {
+  position: absolute;
+  inset: -64px;
+  background-image: radial-gradient(rgba(185, 197, 213, 0.22) 2px, transparent 2.5px);
+  background-size: 64px 64px;
+}
+.ap-ambiente-viñeta {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(11, 18, 32, 0) 55%, rgba(11, 18, 32, 0.75) 100%);
+}
+
+/* ── Ventana de navegador (Chrome falso) ── */
+.ap-nav {
+  position: absolute;
+  border-radius: var(--r-m);
+  overflow: hidden;
+  background: var(--ap-claro-superficie);
+  box-shadow: var(--sombra-2);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--ap-fuente-texto);
+}
+.ap-nav-pestanas {
+  height: 64px;
+  background: var(--ap-cromo);
+  display: flex;
+  align-items: flex-end;
+  padding: 0 var(--e-3);
+  gap: var(--e-2);
+  flex: none;
+}
+.ap-nav-semaforo {
+  display: flex;
+  gap: 12px;
+  align-self: center;
+  margin-right: var(--e-2);
+}
+.ap-nav-semaforo i {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #b6bcc4;
+  display: block;
+}
+.ap-nav-pestana {
+  height: 50px;
+  min-width: 320px;
+  max-width: 460px;
+  background: var(--ap-claro-superficie);
+  border-radius: 14px 14px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 22px;
+  color: var(--ap-cromo-texto);
+  font-size: var(--t-cromo);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.ap-nav-pestana img,
+.ap-nav-pestana .ap-nav-favicon {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  flex: none;
+  object-fit: cover;
+}
+.ap-nav-favicon {
+  background: var(--ap-claro-verde);
+}
+.ap-nav-barra {
+  height: 76px;
+  background: var(--ap-claro-superficie);
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  padding: 0 var(--e-3);
+  border-bottom: 2px solid var(--ap-claro-borde);
+  flex: none;
+}
+.ap-nav-flechas {
+  display: flex;
+  gap: 18px;
+  color: #5f6b78;
+}
+.ap-nav-flechas svg {
+  width: 30px;
+  height: 30px;
+  display: block;
+}
+.ap-nav-url {
+  flex: 1;
+  height: 52px;
+  border-radius: var(--r-pastilla);
+  background: #eef1f4;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 24px;
+  color: var(--ap-cromo-texto);
+  font-size: var(--t-cromo);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.ap-nav-url svg {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  color: #5f6b78;
+}
+.ap-nav-extensiones {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.ap-nav-extension {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+.ap-nav-extension img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: block;
+}
+.ap-nav-extension svg {
+  width: 30px;
+  height: 30px;
+  color: #5f6b78;
+}
+.ap-nav-cuerpo {
+  position: relative;
+  flex: 1;
+  background: var(--ap-claro-fondo);
+  color: var(--ap-claro-texto);
+  overflow: hidden;
+}
+
+/* ── Ventana de app de escritorio ── */
+.ap-app {
+  position: absolute;
+  overflow: hidden;
+  box-shadow: var(--sombra-2);
+  display: flex;
+  flex-direction: column;
+  background: var(--ap-claro-fondo);
+  color: var(--ap-claro-texto);
+  font-family: var(--ap-fuente-texto);
+}
+.ap-app.windows {
+  border-radius: 12px;
+  border: 2px solid #c9ced6;
+}
+.ap-app.macos {
+  border-radius: 22px;
+  border: 2px solid #c3c7cd;
+}
+.ap-app-barra {
+  height: 64px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 0 0 22px;
+  background: #eceff3;
+  color: var(--ap-cromo-texto);
+  font-size: var(--t-cromo);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ap-app.macos .ap-app-barra {
+  justify-content: center;
+  position: relative;
+  padding: 0 22px;
+}
+.ap-app-barra img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+.ap-app-titulo {
+  flex: 1;
+}
+.ap-app.macos .ap-app-titulo {
+  flex: none;
+}
+.ap-app-controles {
+  display: flex;
+  height: 100%;
+}
+.ap-app-controles span {
+  width: 76px;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #374151;
+}
+.ap-app-controles svg {
+  width: 22px;
+  height: 22px;
+}
+.ap-app-semaforo {
+  position: absolute;
+  left: 24px;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.ap-app-semaforo i {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: block;
+}
+.ap-app-cuerpo {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── Panel tipo popup de la extensión ── */
+.ap-popup {
+  position: absolute;
+  width: 560px;
+  border-radius: var(--r-m);
+  background: var(--ap-superficie);
+  border: var(--borde-grueso) solid var(--ap-borde);
+  box-shadow: var(--sombra-2);
+  color: var(--ap-texto);
+  padding: var(--e-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-3);
+  font-family: var(--ap-fuente-texto);
+}
+.ap-popup-cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+}
+.ap-popup-cabecera img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+}
+.ap-popup-nombre {
+  font-family: var(--ap-fuente-titulo);
+  font-weight: 700;
+  font-size: 44px;
+  line-height: 1;
+}
+.ap-popup-edicion {
+  font-size: var(--t-cromo);
+  font-weight: 700;
+  color: var(--ap-texto-2);
+}
+.ap-interruptor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-3);
+  min-height: 76px;
+  padding: 0 var(--e-3);
+  border-radius: var(--r-s);
+  background: var(--ap-superficie-2);
+  font-size: 40px;
+  font-weight: 600;
+}
+.ap-interruptor-pista {
+  position: relative;
+  width: 96px;
+  height: 52px;
+  border-radius: var(--r-pastilla);
+  background: var(--ap-borde);
+  flex: none;
+}
+.ap-interruptor-relleno {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-pastilla);
+  background: var(--ap-verde);
+  opacity: 0;
+}
+.ap-interruptor-perilla {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--ap-texto);
+}
+.ap-interruptor-estado {
+  font-size: var(--t-cromo);
+  font-weight: 700;
+  color: var(--ap-texto-2);
+  min-width: 140px;
+  text-align: right;
+}
+
+/* ── Burbuja de comando de voz ── */
+.ap-voz {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: var(--e-4);
+  padding: var(--e-4) var(--e-5) var(--e-4) var(--e-4);
+  border-radius: var(--r-l);
+  background: var(--ap-superficie);
+  border: var(--borde-grueso) solid var(--ap-borde);
+  box-shadow: var(--sombra-2);
+  max-width: 1500px;
+}
+.ap-voz-mic {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--ap-verde);
+  color: var(--ap-tinta);
+  display: grid;
+  place-items: center;
+}
+.ap-voz-mic svg {
+  width: 56px;
+  height: 56px;
+  display: block;
+}
+.ap-voz-pitido {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 6px solid var(--ap-verde);
+  opacity: 0;
+}
+.ap-voz-cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  min-width: 0;
+}
+.ap-voz-texto {
+  font-family: var(--ap-fuente-titulo);
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--ap-texto);
+}
+.ap-voz-texto .ap-voz-palabra {
+  display: inline-block;
+}
+.ap-voz-texto .ap-voz-activacion {
+  color: var(--ap-verde);
+}
+.ap-voz-onda {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 56px;
+}
+.ap-voz-onda i {
+  display: block;
+  width: 10px;
+  height: 56px;
+  border-radius: 5px;
+  background: var(--ap-verde);
+  transform-origin: 50% 50%;
+}
+
+/* ── Cursor con anillo de permanencia (dwell) ── */
+.ap-cursor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  z-index: 50;
+}
+.ap-cursor-flecha {
+  position: absolute;
+  left: -4px;
+  top: -2px;
+  width: 64px;
+  height: 80px;
+  display: block;
+  filter: drop-shadow(0 6px 10px rgba(2, 6, 23, 0.45));
+}
+.ap-cursor-punto {
+  position: absolute;
+  left: -22px;
+  top: -22px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--ap-verde);
+  border: 5px solid var(--ap-tinta);
+  box-shadow: 0 0 0 4px var(--ap-verde), 0 8px 18px rgba(2, 6, 23, 0.45);
+}
+.ap-cursor-anillo {
+  position: absolute;
+  left: -60px;
+  top: -60px;
+  width: 120px;
+  height: 120px;
+  display: block;
+  opacity: 0;
+}
+.ap-cursor-onda {
+  position: absolute;
+  left: -50px;
+  top: -50px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 6px solid var(--ap-verde);
+  opacity: 0;
+}
+
+/* ── Tarjeta de paso numerado ── */
+.ap-paso {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: var(--e-4);
+  padding: var(--e-4) var(--e-5) var(--e-4) var(--e-4);
+  border-radius: var(--r-l);
+  background: var(--ap-superficie);
+  border: var(--borde-grueso) solid var(--ap-borde);
+  box-shadow: var(--sombra-1);
+  max-width: 1100px;
+}
+.ap-paso-numero {
+  width: 112px;
+  height: 112px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--ap-verde);
+  color: var(--ap-tinta);
+  font-family: var(--ap-fuente-titulo);
+  font-weight: 700;
+  font-size: 64px;
+  display: grid;
+  place-items: center;
+}
+.ap-paso-meta {
+  font-size: var(--t-etiqueta);
+  font-weight: 700;
+  color: var(--ap-texto-2);
+  letter-spacing: 0.02em;
+}
+.ap-paso-texto {
+  font-family: var(--ap-fuente-titulo);
+  font-weight: 700;
+  font-size: 56px;
+  line-height: 1.12;
+}
+
+/* ── Chip de edición / plataforma ── */
+.ap-chip {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  height: 72px;
+  padding: 0 30px 0 22px;
+  border-radius: var(--r-pastilla);
+  font-family: var(--ap-fuente-texto);
+  font-size: var(--t-etiqueta);
+  font-weight: 700;
+  color: var(--ap-tinta);
+  background: var(--ap-verde);
+  white-space: nowrap;
+}
+.ap-chip svg {
+  width: 34px;
+  height: 34px;
+  flex: none;
+}
+.ap-chip.base {
+  background: var(--ap-azul-base);
+}
+.ap-chip.lite {
+  background: var(--ap-amarillo-lite);
+}
+.ap-chip.plataforma {
+  background: var(--ap-superficie-2);
+  color: var(--ap-texto);
+  border: var(--borde-grueso) solid var(--ap-borde);
+}
+
+/* ── Título de capítulo ── */
+.ap-capitulo {
+  position: absolute;
+  left: var(--margen-lateral);
+  right: var(--margen-lateral);
+  top: var(--zona-sup);
+  bottom: var(--zona-inf);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--e-4);
+}
+.ap-capitulo-numero {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  font-family: var(--ap-fuente-texto);
+  font-size: var(--t-etiqueta);
+  font-weight: 700;
+  color: var(--ap-verde);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.ap-capitulo-regla {
+  display: block;
+  width: 160px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--ap-verde);
+  transform-origin: 0 50%;
+}
+.ap-capitulo-titulo {
+  font-family: var(--ap-fuente-titulo);
+  font-weight: 700;
+  font-size: var(--t-titulo);
+  line-height: 1.06;
+  max-width: 1500px;
+  margin: 0;
+}
+.ap-capitulo-sub {
+  font-size: var(--t-cuerpo);
+  font-weight: 600;
+  color: var(--ap-texto-2);
+  max-width: 1300px;
+  margin: 0;
+}
+
+/* ── Rótulo inferior (encima de la franja de subtítulos) ── */
+.ap-rotulo {
+  position: absolute;
+  left: var(--margen-lateral);
+  bottom: calc(var(--zona-inf) + var(--e-3));
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  padding: 20px 36px 20px 24px;
+  border-radius: var(--r-m);
+  background: var(--ap-superficie);
+  border: var(--borde-grueso) solid var(--ap-borde);
+  box-shadow: var(--sombra-1);
+  font-size: var(--t-cuerpo);
+  font-weight: 700;
+  max-width: 1300px;
+  white-space: nowrap;
+}
+.ap-rotulo.derecha {
+  left: auto;
+  right: var(--margen-lateral);
+}
+.ap-rotulo-marca {
+  display: block;
+  width: 10px;
+  height: 56px;
+  border-radius: 5px;
+  background: var(--ap-verde);
+  flex: none;
+}
+
+/* ── Foco / resaltado de zona ── */
+.ap-foco {
+  position: absolute;
+  pointer-events: none;
+}
+.ap-foco-velo {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 4000px rgba(11, 18, 32, 0.72);
+}
+.ap-foco-borde {
+  position: absolute;
+  inset: -10px;
+  border-radius: inherit;
+  border: 6px solid var(--ap-verde);
+}
+
+/* ── Flecha de anotación ── */
+.ap-flecha {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+.ap-flecha-etiqueta {
+  position: absolute;
+  padding: 14px 26px;
+  border-radius: var(--r-s);
+  background: var(--ap-verde);
+  color: var(--ap-tinta);
+  font-size: var(--t-rotulo);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ── Mascota (sprite del atlas) ── */
+.ap-mascota {
+  position: absolute;
+  background-repeat: no-repeat;
+  image-rendering: auto;
+}
+
+/* ── Subtítulos (franja inferior, generados en index.html) ── */
+.ap-subs {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--zona-inf);
+  z-index: 900;
+  pointer-events: none;
+}
+.ap-sub {
+  position: absolute;
+  left: 160px;
+  right: 160px;
+  bottom: 44px;
+  display: flex;
+  justify-content: center;
+}
+.ap-sub span {
+  display: block;
+  max-width: 1500px;
+  padding: 18px 40px 20px;
+  border-radius: var(--r-m);
+  background: rgba(11, 18, 32, 0.92);
+  color: var(--ap-texto);
+  font-family: var(--ap-fuente-texto);
+  font-size: var(--t-subtitulos);
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* ── Barra de progreso (generada en index.html) ── */
+.ap-progreso {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: var(--zona-sup);
+  z-index: 901;
+  pointer-events: none;
+}
+.ap-progreso-pista {
+  position: absolute;
+  left: var(--margen-lateral);
+  right: var(--margen-lateral);
+  top: 24px;
+  height: 8px;
+  display: flex;
+  gap: 6px;
+}
+.ap-progreso-seg {
+  position: relative;
+  height: 100%;
+  border-radius: 4px;
+  background: rgba(71, 85, 105, 0.75);
+  overflow: hidden;
+}
+.ap-progreso-relleno {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  background: var(--ap-verde);
+  transform-origin: 0 50%;
+}
+.ap-progreso-etiqueta {
+  position: absolute;
+  left: var(--margen-lateral);
+  top: 42px;
+  padding: 4px 16px 6px;
+  border-radius: var(--r-s);
+  background: rgba(11, 18, 32, 0.85);
+  color: var(--ap-texto-2);
+  font-family: var(--ap-fuente-texto);
+  font-size: var(--t-cromo);
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.ap-progreso-etiqueta b {
+  color: var(--ap-texto);
+  font-weight: 700;
+}

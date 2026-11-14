@@ -51,10 +51,67 @@
       <p id="ayudaLectura" class="descripcion" data-i18n="popup.ayudaLectura">Escucha el elemento que señalas.</p>
     </section>
 
+    <section class="tutorial" id="tutorial" aria-labelledby="tituloTutorial">
+      <h2 id="tituloTutorial" data-i18n="tutorial.titulo"></h2>
+      <p data-i18n="tutorial.intro"></p>
+      <ol>
+    <li class="tutorial-paso" data-paso="voz">
+      <h3 id="tutorial-voz-titulo" data-i18n="tutorial.voz.titulo"></h3>
+      <p data-i18n="tutorial.voz.texto"></p>
+      <button type="button" id="tutorial-activar-voz" data-i18n="tutorial.voz.boton"></button>
+      <p id="tutorial-voz-texto"></p>
+      <p class="tutorial-estado" role="status" data-i18n="tutorial.pendiente">Pendiente</p>
+    </li>
+    <li class="tutorial-paso" data-paso="nombre">
+      <h3 id="tutorial-nombre-titulo" data-i18n="tutorial.nombre.titulo"></h3>
+      <p data-i18n="tutorial.nombre.texto"></p>
+      <button type="button" id="tutorial-probar-nombre" data-i18n="popup.probarNombre"></button>
+      <p id="tutorial-nombre-resultado" role="status"></p>
+      <p class="tutorial-estado" role="status" data-i18n="tutorial.pendiente">Pendiente</p>
+    </li>
+    <li class="tutorial-paso" data-paso="baja">
+      <h3 id="tutorial-baja-titulo" data-i18n="tutorial.baja.titulo"></h3>
+      <p data-i18n="tutorial.baja.texto"></p>
+      <p class="tutorial-estado" role="status" data-i18n="tutorial.pendiente">Pendiente</p>
+    </li>
+    <li class="tutorial-paso" data-paso="selecciona">
+      <h3 id="tutorial-selecciona-titulo" data-i18n="tutorial.selecciona.titulo"></h3>
+      <p data-i18n="tutorial.selecciona.texto"></p>
+      <div class="tutorial-objetivos"><button type="button" id="tutorial-objetivo" data-i18n="tutorial.objetivo"></button></div>
+      <p class="tutorial-estado" role="status" data-i18n="tutorial.pendiente">Pendiente</p>
+    </li>
+    <li class="tutorial-paso" data-paso="clic">
+      <h3 id="tutorial-clic-titulo" data-i18n="tutorial.clic.titulo"></h3>
+      <p data-i18n="tutorial.clic.texto"></p>
+      <p class="tutorial-estado" role="status" data-i18n="tutorial.pendiente">Pendiente</p>
+    </li>
+    <li class="tutorial-paso" data-paso="filtro">
+      <h3 id="tutorial-filtro-titulo" data-i18n="tutorial.filtro.titulo"></h3>
+      <p data-i18n="tutorial.filtro.texto"></p>
+      <p class="filtro-unico" data-i18n="popup.unFiltro"></p>
+      <div role="radiogroup" id="tutorial-filtros" class="filtro-grupo" aria-labelledby="tutorial-filtro-titulo"></div>
+      <p class="tutorial-estado" role="status" data-i18n="tutorial.pendiente">Pendiente</p>
+    </li>
+    <li class="tutorial-paso" data-paso="cursor">
+      <h3 id="tutorial-cursor-titulo" data-i18n="tutorial.cursor.titulo"></h3>
+      <p data-i18n="tutorial.cursor.texto"></p>
+      <button type="button" id="tutorial-activar-cursor" data-i18n="tutorial.cursor.activar"></button>
+      <div class="tutorial-objetivos"><button type="button" class="tutorial-dwell"></button><button type="button" class="tutorial-dwell"></button><button type="button" class="tutorial-dwell"></button></div>
+      <p data-i18n="tutorial.cursor.clic"></p>
+      <p class="tutorial-estado" role="status" data-i18n="tutorial.pendiente">Pendiente</p>
+    </li>
+    <li class="tutorial-paso" data-paso="reabrir">
+      <h3 id="tutorial-reabrir-titulo" data-i18n="tutorial.reabrir.titulo"></h3>
+      <p data-i18n="tutorial.reabrir.texto"></p>
+    </li>
+      </ol>
+    </section>
+
     <p data-i18n="bienvenida.final">Los filtros de color, el idioma de voz y la mascota están en el panel de AdaptaPE.</p>
     <script src="textos.js"></script>
     <script src="sitios.js"></script>
     <script src="textos_paginas.js"></script>
+    <script src="filtros_ui.js"></script>
     <script src="bienvenida.js"></script>
   </main>
 </body>

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Lectura y filtros de color</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #cap09-raiz { position: absolute; inset: 0; font-family: var(--ap-fuente-texto); color: var(--ap-texto); }
+        .cap09-grupo { position: absolute; inset: 0; }
+        /* página falsa de la lectura en voz alta */
+        .cap09-pag-cab { position: absolute; left: 0; top: 0; right: 0; height: 84px; background: #17372f; color: #fff; font: 700 44px/84px var(--ap-fuente-titulo); padding-left: 80px; }
+        .cap09-pag-tit { position: absolute; left: 80px; top: 130px; font: 700 60px/1.1 var(--ap-fuente-titulo); color: #17372f; }
+        .cap09-pag-barra { position: absolute; left: 80px; height: 22px; border-radius: 11px; background: #cedbd5; }
+        .cap09-boton { position: absolute; width: 340px; height: 88px; border-radius: 16px; background: #176b56; color: #fff; font: 700 44px/88px var(--ap-fuente-texto); text-align: center; }
+        .cap09-boton.sec { background: #fff; color: #176b56; border: 3px solid #176b56; box-sizing: border-box; line-height: 82px; }
+        #cap09-contorno { position: absolute; left: 74px; top: 274px; width: 352px; height: 100px; box-sizing: border-box; border: 3px solid #E30613; border-radius: 14px; }
+        #cap09-ondas { position: absolute; left: 450px; top: 276px; width: 120px; height: 96px; }
+        #cap09-oido { position: absolute; left: 1140px; top: 260px; padding: 24px 32px; border-radius: 24px; background: var(--ap-superficie); border: 2px solid var(--ap-borde); display: flex; align-items: center; gap: 20px; font: 700 48px/1.1 var(--ap-fuente-titulo); }
+        #cap09-oido svg { width: 56px; height: 56px; color: var(--ap-verde); flex: none; }
+        /* tarjetas de filtros */
+        #cap09-titulo2 { position: absolute; left: 96px; top: 116px; font: 700 68px/1 var(--ap-fuente-titulo); }
+        #cap09-tarjetas { position: absolute; left: 96px; top: 220px; width: 1728px; display: flex; gap: 32px; }
+        .cap09-tarj { flex: 1; background: var(--ap-superficie); border: 2px solid var(--ap-borde); border-radius: 28px; padding: 28px 32px; }
+        .cap09-tarj.g1 { flex: 1.2; }
+        .cap09-tarj h3 { margin: 0 0 16px; font: 700 46px/1.15 var(--ap-fuente-titulo); color: var(--ap-verde); }
+        .cap09-fil { display: flex; align-items: center; gap: 18px; height: 90px; font: 600 50px/1 var(--ap-fuente-texto); }
+        .cap09-num { width: 52px; height: 52px; border-radius: 50%; background: var(--ap-verde); color: var(--ap-tinta); font: 700 34px/52px var(--ap-fuente-titulo); text-align: center; flex: none; }
+        #cap09-nota { position: absolute; left: 96px; top: 760px; font: 600 42px/1.2 var(--ap-fuente-texto); color: var(--ap-texto-2); }
+        /* página de colores */
+        .cap09-pal { position: absolute; width: 1024px; height: 640px; border-radius: 24px; overflow: hidden; background: #fff; box-shadow: var(--sombra-2); }
+        .cap09-pal-cab { height: 84px; background: #17372f; color: #fff; font: 700 44px/84px var(--ap-fuente-titulo); padding-left: 36px; }
+        .cap09-pal-rej { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 28px; }
+        .cap09-pal-rej i { display: block; height: 230px; border-radius: 18px; }
+        #cap09-marco { position: absolute; left: 800px; top: 150px; width: 1024px; height: 640px; border-radius: 24px; overflow: hidden; background: #fff; box-shadow: var(--sombra-2); }
+        #cap09-marco > * { position: absolute; left: 0; top: 0; width: 1024px; height: 640px; }
+        #cap09-marco img { object-fit: cover; }
+        .cap09-pildora { left: 24px !important; top: 548px !important; width: 440px !important; height: 70px !important; box-sizing: border-box; white-space: nowrap; padding: 8px 28px; border-radius: 999px; background: #0f172a; color: #fff; font: 700 44px/1.2 var(--ap-fuente-titulo); z-index: 5; }
+        #cap09-popup { position: absolute; left: 96px; top: 170px; width: 640px; height: 344px; border-radius: 20px; overflow: hidden; background: #fff; box-shadow: var(--sombra-2); }
+        #cap09-popup img { width: 640px; height: 344px; display: block; }
+        #cap09-quitar { position: absolute; left: 96px; top: 570px; padding: 0 40px; height: 88px; border-radius: 16px; background: var(--ap-verde); color: var(--ap-tinta); font: 700 46px/88px var(--ap-fuente-titulo); }
+      </style>
+
+      <div data-hf-id="hf-zn62" id="cap09-raiz" class="ap-escena" data-composition-id="cap09" data-width="1920" data-height="1080">
+        <svg data-hf-id="hf-30au" width="0" height="0" style="position:absolute" aria-hidden="true">
+          <filter data-hf-id="hf-e01s" id="cap09-ftri" color-interpolation-filters="sRGB">
+            <feColorMatrix data-hf-id="hf-wzfw" type="matrix" values="0.95 0.05 0 0 0  0 0.433 0.567 0 0  0 0.475 0.525 0 0  0 0 0 1 0" />
+          </filter>
+        </svg>
+      </div>
+
+      <script>
+        (function () {
+          const ID = "cap09";
+          const cap = AP.capitulo(ID);
+          const raiz = document.getElementById(ID + "-raiz");
+          const tl = gsap.timeline({ paused: true });
+          const f1 = AP.t(ID, "f1", 0.6);
+          const f2 = AP.t(ID, "f2", 11.7);
+          const f3 = AP.t(ID, "f3", 19.7);
+          const el = (tag, id, cls, html, padre) => {
+            const e = document.createElement(tag);
+            if (id) e.id = id;
+            if (cls) e.className = cls;
+            if (html != null) e.innerHTML = html;
+            (padre || raiz).appendChild(e);
+            return e;
+          };
+          const COLORES = ["#d62828", "#2a9d3a", "#1d4ed8", "#f4c20d", "#f77f00", "#7b2cbf", "#0ea5a4", "#ec4899"];
+          const paleta = (id) => {
+            const p = el("div", id, "cap09-pal", '<div class="cap09-pal-cab" data-layout-allow-overlap data-layout-allow-occlusion>Página de colores</div><div class="cap09-pal-rej">' + COLORES.map((c) => '<i style="background:' + c + '"></i>').join("") + "</div>");
+            return p;
+          };
+
+          AP.ambiente(tl, raiz, { duracion: cap.duracion, semilla: 10 });
+
+          // ───── f1: lectura en voz alta ─────
+          const g1 = el("div", "cap09-g1", "cap09-grupo");
+          const nav = AP.navegador(tl, g1, { id: "cap09-nav", x: 96, y: 120, ancho: 1000, alto: 680, pestana: "Tienda del barrio", url: "tienda.ejemplo", extension: "base", entrada: f1 });
+          const c = nav.cuerpo;
+          el("div", null, "cap09-pag-cab", "Tienda del barrio", c);
+          el("div", null, "cap09-pag-tit", "Entradas para el museo", c);
+          [[80, 214, 520], [80, 244, 420]].forEach((b) => {
+            const x = el("div", null, "cap09-pag-barra", null, c);
+            x.style.top = b[1] + "px"; x.style.width = b[2] + "px";
+          });
+          const b1 = el("div", null, "cap09-boton", "Comprar entrada", c); b1.style.left = "80px"; b1.style.top = "280px";
+          const b2 = el("div", null, "cap09-boton sec", "Ver horarios", c); b2.style.left = "80px"; b2.style.top = "410px";
+          const contorno = el("div", "cap09-contorno", null, null, c);
+          tl.fromTo(contorno, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, f1 + 2.6);
+          tl.to(contorno, { opacity: 0, duration: 0.3 }, f1 + 9.6);
+          const ondas = el("div", "cap09-ondas", null,
+            '<svg viewBox="0 0 120 96" width="120" height="96" fill="none" stroke="#176b56" stroke-width="8" stroke-linecap="round">' +
+            '<path class="cap09-arco" d="M20 28 Q40 48 20 68"/><path class="cap09-arco" d="M50 16 Q86 48 50 80"/><path class="cap09-arco" d="M80 4 Q132 48 80 92"/></svg>', c);
+          tl.fromTo(ondas, { opacity: 0 }, { opacity: 1, duration: 0.3 }, f1 + 2.8);
+          tl.to(ondas, { opacity: 0, duration: 0.3 }, f1 + 9.6);
+          ondas.querySelectorAll(".cap09-arco").forEach((a, j) => {
+            for (let k = 0; k < 5; k++) tl.fromTo(a, { opacity: 0.15 }, { opacity: 1, duration: 0.45, ease: "sine.inOut", yoyo: true, repeat: 1 }, f1 + 2.8 + k * 1.3 + j * 0.2);
+          });
+          const oido = el("div", "cap09-oido", null, AP.iconos.altavoz + "<span>«Comprar entrada»</span>", g1);
+          AP.entrar(tl, oido, f1 + 2.8, "derecha", 0.5);
+          tl.to(oido, { opacity: 0, duration: 0.3 }, f1 + 9.6);
+          AP.chip(tl, g1, { id: "cap09-chip1", tipo: "base", x: 1500, y: 130, entrada: f1 + 0.6 });
+          const cur = AP.cursor(tl, g1, { id: "cap09-cursor", x: 900, y: 330, entrada: f1 + 0.9 });
+          cur.mover(f1 + 1.3, 420, 612, 1.2, "power2.inOut");
+          cur.ocultar(f1 + 9.8);
+          AP.comandoVoz(tl, g1, { id: "cap09-voz", texto: "Computadora, silencio", x: 1140, y: 470, entrada: f1 + 8.0, pitido: f1 + 8.2, duracion: 1.8, salida: f2 - 0.45 });
+          tl.to(g1, { opacity: 0, duration: 0.35 }, f2 - 0.3);
+
+          // ───── f2: los siete filtros ─────
+          const g2 = el("div", "cap09-g2", "cap09-grupo");
+          const pal = paleta("cap09-pal2"); g2.appendChild(pal);
+          pal.style.left = "448px"; pal.style.top = "150px";
+          AP.entrar(tl, pal, f2, "escala", 0.6);
+          AP.rotulo(tl, g2, { id: "cap09-rot2", texto: "Distinguir mejor los colores", entrada: f2 + 0.8, salida: f2 + 3.3 });
+          tl.to(pal, { opacity: 0, duration: 0.4 }, f2 + 3.4);
+          const tit2 = el("div", "cap09-titulo2", null, "Siete filtros de color", g2);
+          AP.entrar(tl, tit2, f2 + 3.6, "subir", 0.5);
+          const GRUPOS = [
+            ["g1", "Rojo y verde", ["Deuteranomalía", "Protanomalía", "Deuteranopía", "Protanopía"]],
+            ["g2", "Azul y amarillo", ["Tritanomalía", "Tritanopía"]],
+            ["g3", "Escala de grises", ["Acromatopsia"]],
+          ];
+          const cont = el("div", "cap09-tarjetas", null, null, g2);
+          let n = 0;
+          GRUPOS.forEach((g, gi) => {
+            const t = el("div", null, "cap09-tarj " + g[0], "<h3>" + g[1] + "</h3>", cont);
+            AP.entrar(tl, t, f2 + 3.6 + gi * 0.15, "subir", 0.5);
+            g[2].forEach((nombre) => {
+              n++;
+              const fila = el("div", null, "cap09-fil", '<span class="cap09-num">' + n + "</span><span>" + nombre + "</span>", t);
+              AP.entrar(tl, fila, f2 + 3.9 + (n - 1) * 0.33, "izquierda", 0.4);
+            });
+          });
+          AP.chip(tl, g2, { id: "cap09-chip2", tipo: "ambos", x: 1500, y: 130, entrada: f2 + 5.6 });
+          const nota = el("div", "cap09-nota", null, "Ayuda visual de confort, no es un tratamiento médico.", g2);
+          AP.entrar(tl, nota, f2 + 6.4, "subir", 0.5);
+          tl.to(g2, { opacity: 0, duration: 0.35 }, f3 - 0.3);
+
+          // ───── f3: elegir, cambiar, quitar ─────
+          const g3 = el("div", "cap09-g3", "cap09-grupo");
+          const popup = el("div", "cap09-popup", null, '<img src="assets/capturas/popup-filtros.png" alt="Selector de filtros de color">', g3);
+          AP.entrar(tl, popup, f3, "izquierda", 0.5);
+          const marco = el("div", "cap09-marco", null, null, g3);
+          AP.entrar(tl, marco, f3 + 0.1, "derecha", 0.5);
+          const base = paleta("cap09-pal-base"); marco.appendChild(base); base.style.left = "0"; base.style.top = "0";
+          const imgDeut = el("img", "cap09-img-deut", null, null, marco); imgDeut.src = "assets/capturas/base-wikipedia-filtro-deuteranopia.png"; imgDeut.alt = "Wikipedia con filtro deuteranopía";
+          const palTri = paleta("cap09-pal-tri"); marco.appendChild(palTri); palTri.style.left = "0"; palTri.style.top = "0"; palTri.style.filter = "url(#cap09-ftri)"; palTri.style.borderRadius = "0";
+          const imgAcro = el("img", "cap09-img-acro", null, null, marco); imgAcro.src = "assets/capturas/base-wikipedia-filtro-acromatopsia.png"; imgAcro.alt = "Wikipedia con filtro acromatopsia";
+          [imgDeut, palTri, imgAcro].forEach((e) => tl.set(e, { opacity: 0 }, 0));
+          const NOMBRES = ["Sin filtro", "Deuteranopía", "Tritanopía", "Acromatopsia"];
+          const pils = NOMBRES.map((n, i) => { const e = el("div", "cap09-pildora-" + i, "cap09-pildora", n, marco); if (i) tl.set(e, { opacity: 0 }, 0); return e; });
+          const capas = [base, imgDeut, palTri, imgAcro];
+          const mostrar = (t, i) => {
+            capas.forEach((e, k) => tl.to(e, { opacity: k === i ? 1 : 0, duration: 0.5, ease: "power1.inOut" }, t));
+            pils.forEach((e, k) => tl.to(e, { opacity: k === i ? 1 : 0, duration: 0.4 }, t));
+          };
+          mostrar(f3 + 1.0, 1);
+          mostrar(f3 + 2.0, 2);
+          mostrar(f3 + 3.0, 3);
+          AP.foco(tl, g3, { id: "cap09-foco-sel", x: 96, y: 170 + 148, ancho: 640, alto: 100, oscurecer: false, latidos: 2, entrada: f3 + 0.5, salida: f3 + 1.9 });
+          const q = el("div", "cap09-quitar", null, "Quitar filtro", g3);
+          AP.entrar(tl, q, f3 + 4.1, "subir", 0.5);
+          AP.foco(tl, g3, { id: "cap09-foco-q", x: 80, y: 570 - 16, ancho: 360, alto: 120, oscurecer: false, latidos: 2, entrada: f3 + 4.3 });
+          const cur3 = AP.cursor(tl, g3, { id: "cap09-cursor3", x: 1000, y: 700, entrada: f3 + 4.1 });
+          cur3.mover(f3 + 4.3, 250, 625, 0.6, "power2.inOut").dwell(f3 + 4.9, 0.7);
+          mostrar(f3 + 5.6, 0);
+
+          window.__timelines[ID] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

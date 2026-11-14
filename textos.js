@@ -22,8 +22,9 @@ const TextosAdapta = {
         return texto.replace(/\{(\w+)\}/g, (_, nombre) => variables[nombre] ?? '');
     },
     // Páginas de la extensión: data-i18n (texto), data-i18n-<atributo> (aria-label, title, placeholder, alt).
-    traducirDocumento(raiz = document) {
-        for (const elemento of raiz.querySelectorAll('[data-i18n]')) elemento.textContent = TextosAdapta.t(elemento.dataset.i18n);
+    // `variables` rellena marcadores comunes a toda la página, como {palabra}.
+    traducirDocumento(raiz = document, variables = {}) {
+        for (const elemento of raiz.querySelectorAll('[data-i18n]')) elemento.textContent = TextosAdapta.t(elemento.dataset.i18n, variables);
         for (const atributo of ['aria-label', 'title', 'placeholder', 'alt']) {
             for (const elemento of raiz.querySelectorAll(`[data-i18n-${atributo}]`)) {
                 elemento.setAttribute(atributo, TextosAdapta.t(elemento.getAttribute(`data-i18n-${atributo}`)));

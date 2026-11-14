@@ -28,8 +28,9 @@ botonPermiso.addEventListener('click', async () => {
         const respuesta = await chrome.runtime.sendMessage({ accion: 'voz_reiniciar' });
         if (!respuesta?.ok) throw new Error('No se pudo activar la voz.');
         if (permisoCamara) {
-            ponerTexto(estadoPermiso, 'permisos.camaraLista');
-            await chrome.runtime.sendMessage({ accion: 'camara_permiso_listo' }); return;
+            const retorno = await chrome.runtime.sendMessage({ accion: 'camara_permiso_listo' });
+            if (!retorno?.ok) throw new Error('No se pudo volver a la página.');
+            ponerTexto(estadoPermiso, 'permisos.camaraLista'); return;
         }
         ponerTexto(estadoPermiso, respuesta.activa ? 'permisos.microActivo' : 'permisos.microInactivo');
     } catch (error) {

@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>cap00 · Intro</title>
+  </head>
+  <body>
+    <!--
+      cap00 · Intro (~16 s). Partículas three.js que forman una onda de voz,
+      el logo, una cabeza que guía el cursor, los tres modos de entrada y el
+      título. Sincronizado con las frases f1–f4 de datos/tiempos.json.
+      three.js corre en un <script type="module"> y se dibuja desde el timeline
+      GSAP (onUpdate de un reloj): mismo tiempo → mismos píxeles.
+    -->
+    <template>
+      <style>
+        #cap00-raiz {
+          position: absolute;
+          inset: 0;
+        }
+        #cap00-lienzo {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          display: block;
+        }
+        #cap00-logo {
+          position: absolute;
+          left: 810px;
+          top: 250px;
+          width: 300px;
+          height: 300px;
+          border-radius: 50%;
+          box-shadow: 0 0 0 10px rgba(134, 239, 172, 0.25), var(--sombra-2);
+        }
+        /* Fase B: ratón y teclado que se tachan; cabeza que guía el cursor. */
+        #cap00-perifericos {
+          position: absolute;
+          left: 560px;
+          top: 260px;
+          width: 800px;
+          height: 300px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 120px;
+          color: var(--ap-texto-2);
+        }
+        #cap00-perifericos svg {
+          display: block;
+        }
+        #cap00-tachado {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 800px;
+          height: 300px;
+          overflow: visible;
+        }
+        #cap00-cabeza {
+          position: absolute;
+          left: 300px;
+          top: 230px;
+          width: 340px;
+          height: 380px;
+          display: block;
+          transform-origin: 50% 80%;
+        }
+        #cap00-guia {
+          position: absolute;
+          left: 300px;
+          top: 640px;
+          width: 340px;
+          text-align: center;
+          font-size: var(--t-etiqueta);
+          font-weight: 700;
+          color: var(--ap-verde);
+        }
+        /* Fase C: tres modos de entrada. */
+        #cap00-modos {
+          position: absolute;
+          left: var(--margen-lateral);
+          right: var(--margen-lateral);
+          top: 220px;
+          display: flex;
+          justify-content: center;
+          gap: 72px;
+        }
+        .cap00-modo {
+          width: 340px;
+          height: 380px;
+          border-radius: var(--r-l);
+          background: var(--ap-superficie);
+          border: var(--borde-grueso) solid var(--ap-borde);
+          box-shadow: var(--sombra-1);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 28px;
+        }
+        .cap00-modo-icono {
+          width: 168px;
+          height: 168px;
+          border-radius: 50%;
+          background: var(--ap-verde-suave);
+          color: var(--ap-verde);
+          display: grid;
+          place-items: center;
+        }
+        .cap00-modo-icono svg {
+          width: 96px;
+          height: 96px;
+          display: block;
+        }
+        .cap00-modo-nombre {
+          font-family: var(--ap-fuente-titulo);
+          font-weight: 700;
+          font-size: var(--t-subtitulo);
+          line-height: 1;
+        }
+        /* Fase D: título. */
+        #cap00-portada {
+          position: absolute;
+          left: var(--margen-lateral);
+          right: var(--margen-lateral);
+          top: 170px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 28px;
+          text-align: center;
+        }
+        #cap00-portada h1 {
+          margin: 0;
+        }
+        #cap00-sub {
+          font-size: 56px;
+          font-weight: 600;
+          color: var(--ap-texto-2);
+          margin: 0;
+        }
+        #cap00-ediciones {
+          display: flex;
+          gap: 56px;
+          margin-top: 12px;
+        }
+        .cap00-edicion {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          font-family: var(--ap-fuente-titulo);
+          font-weight: 700;
+          font-size: 48px;
+        }
+        .cap00-edicion img {
+          width: 150px;
+          height: 150px;
+          display: block;
+        }
+      </style>
+
+      <div data-hf-id="hf-2bdi" id="cap00-raiz" class="ap-escena" data-composition-id="cap00" data-width="1920" data-height="1080">
+        <canvas data-hf-id="hf-39sd" id="cap00-lienzo" width="1920" height="1080" data-layout-ignore></canvas>
+
+        <img data-hf-id="hf-9wm7" id="cap00-logo" src="../assets/marca/adapta-pe.webp" alt="Logo de AdaptaPE" />
+
+        <div data-hf-id="hf-0e43" id="cap00-perifericos">
+          <!-- Ratón -->
+          <svg data-hf-id="hf-gcd3" width="180" height="260" viewBox="0 0 60 88" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" aria-label="Ratón">
+            <rect data-hf-id="hf-pes0" x="4" y="4" width="52" height="80" rx="26" />
+            <path data-hf-id="hf-0mxz" d="M30 4v26M4 32h52" />
+          </svg>
+          <!-- Teclado -->
+          <svg data-hf-id="hf-931e" width="420" height="220" viewBox="0 0 120 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-label="Teclado">
+            <rect data-hf-id="hf-3ggg" x="3" y="3" width="114" height="58" rx="8" />
+            <path data-hf-id="hf-cuvz" d="M16 18h6M30 18h6M44 18h6M58 18h6M72 18h6M86 18h6M100 18h6M16 32h6M30 32h6M44 32h6M58 32h6M72 32h6M86 32h6M100 32h6M28 46h64" />
+          </svg>
+          <svg data-hf-id="hf-pvje" id="cap00-tachado" viewBox="0 0 800 300" aria-hidden="true">
+            <path data-hf-id="hf-g0b7" id="cap00-tachado-linea" d="M90 260 L710 40" stroke="#fca5a5" stroke-width="16" stroke-linecap="round" fill="none" stroke-dasharray="660" stroke-dashoffset="660" />
+          </svg>
+        </div>
+
+        <svg data-hf-id="hf-p5bz" id="cap00-cabeza" viewBox="0 0 340 380" aria-label="Cabeza estilizada">
+          <path data-hf-id="hf-6wg9" d="M40 380 C50 300 110 270 170 270 C230 270 290 300 300 380 Z" fill="#22304a" stroke="#475569" stroke-width="4" />
+          <circle data-hf-id="hf-iu9g" cx="170" cy="150" r="104" fill="#182233" stroke="#86efac" stroke-width="8" />
+          <circle data-hf-id="hf-k5d0" cx="135" cy="140" r="11" fill="#f1f5f9" />
+          <circle data-hf-id="hf-zz2u" cx="205" cy="140" r="11" fill="#f1f5f9" />
+          <path data-hf-id="hf-zjsu" d="M140 192 Q170 212 200 192" stroke="#f1f5f9" stroke-width="7" stroke-linecap="round" fill="none" />
+        </svg>
+        <div data-hf-id="hf-9mk7" id="cap00-guia">Tu cabeza guía</div>
+
+        <div data-hf-id="hf-x45m" id="cap00-modos">
+          <div data-hf-id="hf-taq4" class="cap00-modo" id="cap00-modo-voz">
+            <div data-hf-id="hf-iwb7" class="cap00-modo-icono"><svg data-hf-id="hf-h0hq" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect data-hf-id="hf-yfem" x="9" y="2" width="6" height="12" rx="3" /><path data-hf-id="hf-6jsj" d="M5 10a7 7 0 0 0 14 0" /><path data-hf-id="hf-wew8" d="M12 17v4" /><path data-hf-id="hf-85wg" d="M8 21h8" /></svg></div>
+            <div data-hf-id="hf-1a37" class="cap00-modo-nombre">Voz</div>
+          </div>
+          <div data-hf-id="hf-xm6n" class="cap00-modo" id="cap00-modo-cabeza">
+            <div data-hf-id="hf-zxpv" class="cap00-modo-icono"><svg data-hf-id="hf-pmle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle data-hf-id="hf-jnj3" cx="12" cy="8" r="4" /><path data-hf-id="hf-wde6" d="M4 21c1-4 4.5-6 8-6s7 2 8 6" /></svg></div>
+            <div data-hf-id="hf-rqr0" class="cap00-modo-nombre">Cabeza</div>
+          </div>
+          <div data-hf-id="hf-8ttb" class="cap00-modo" id="cap00-modo-manos">
+            <div data-hf-id="hf-zjeu" class="cap00-modo-icono"><svg data-hf-id="hf-q0wf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-5uwt" d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12" /><path data-hf-id="hf-l69s" d="M11 11.5v-7a1.5 1.5 0 0 1 3 0V12" /><path data-hf-id="hf-jxri" d="M14 11.5V6a1.5 1.5 0 0 1 3 0v8" /><path data-hf-id="hf-ukc8" d="M8 13l-1.6-1.6a1.6 1.6 0 0 0-2.3 2.3L8 18c1.4 1.8 3 3 5.5 3H14a5 5 0 0 0 5-5V9.5a1.5 1.5 0 0 0-3 0" /></svg></div>
+            <div data-hf-id="hf-7uje" class="cap00-modo-nombre">Manos</div>
+          </div>
+        </div>
+
+        <div data-hf-id="hf-xx93" id="cap00-portada">
+          <h1 data-hf-id="hf-et3v" class="ap-display" id="cap00-titulo">Cómo usar AdaptaPE</h1>
+          <p data-hf-id="hf-ky9p" id="cap00-sub">Extensión y escritorio · Base y Lite</p>
+          <div data-hf-id="hf-kt1j" id="cap00-ediciones">
+            <div data-hf-id="hf-8pas" class="cap00-edicion" id="cap00-base"><img data-hf-id="hf-rvdq" src="../assets/marca/adapta-base-transparent.webp" alt="" /><span data-hf-id="hf-unfw">Base</span></div>
+            <div data-hf-id="hf-43qv" class="cap00-edicion" id="cap00-lite"><img data-hf-id="hf-1njo" src="../assets/marca/adapta-lite.webp" alt="" /><span data-hf-id="hf-tsm5">Lite</span></div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (function () {
+          const ID = "cap00";
+          const cap = AP.capitulo(ID);
+          const raiz = document.getElementById(ID + "-raiz");
+          const D = cap.duracion;
+          // Tiempos de las frases (con respaldo proporcional si cambia el guion).
+          const f1 = AP.t(ID, "f1", 0.6);
+          const f2 = AP.t(ID, "f2", D * 0.2);
+          const f3 = AP.t(ID, "f3", D * 0.46);
+          const f4 = AP.t(ID, "f4", D * 0.66);
+          // Hitos de partículas que lee el módulo three.js (s relativos a la escena).
+          window.__cap00Hitos = { f1, f2, f3, f4, D };
+
+          const tl = gsap.timeline({ paused: true });
+
+          // ── Reloj que dibuja three.js en cada seek ──
+          const reloj = { t: 0 };
+          tl.fromTo(
+            reloj,
+            { t: 0 },
+            {
+              t: D + 1,
+              duration: D + 1,
+              ease: "none",
+              onUpdate: () => window.__cap00Dibujar && window.__cap00Dibujar(reloj.t),
+            },
+            0
+          );
+          window.__cap00Reloj = reloj;
+          // El runtime espera a que la escena 3D esté lista antes de capturar.
+          window.__hf = window.__hf || {};
+          window.__hf.buildReady = window.__hf.buildReady || {};
+          window.__hf.buildReady["cap00-three"] = new Promise((ok) => (window.__cap00Listo = ok));
+
+          // ── f1: «¡Hola!» — logo sobre la onda ──
+          tl.fromTo("#cap00-logo", { opacity: 0, scale: 0.5, rotation: -8 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.8, ease: "back.out(1.6)" }, f1 + 1.0);
+          tl.to("#cap00-logo", { scale: 1.04, duration: 0.6, ease: "sine.inOut", yoyo: true, repeat: 1 }, f1 + 1.8);
+          tl.to("#cap00-logo", { opacity: 0, scale: 0.7, y: -40, duration: 0.5, ease: "power2.in" }, f2);
+
+          // ── f2: sin ratón ni teclado; la cabeza guía el cursor ──
+          const per = "#cap00-perifericos";
+          tl.fromTo(per, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, f2 + 0.3);
+          tl.fromTo("#cap00-tachado-linea", { attr: { "stroke-dashoffset": 660 } }, { attr: { "stroke-dashoffset": 0 }, duration: 0.45, ease: "power2.inOut" }, f2 + 1.3);
+          tl.to(per, { opacity: 0, scale: 0.9, duration: 0.4, ease: "power2.in" }, f2 + 1.95);
+
+          const tCab = f2 + 2.1;
+          tl.fromTo("#cap00-cabeza", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, tCab);
+          tl.fromTo("#cap00-guia", { opacity: 0 }, { opacity: 1, duration: 0.4 }, tCab + 0.2);
+          const cur = AP.cursor(tl, raiz, { id: ID + "-cursor", x: 1180, y: 430, tipo: "flecha", entrada: tCab + 0.25 });
+          // Cada giro de la cabeza mueve el cursor en la misma dirección.
+          const giros = [
+            { rot: 14, x: 1520, y: 400 },
+            { rot: -10, x: 1040, y: 560 },
+            { rot: 6, x: 1380, y: 660 },
+          ];
+          const tramo = Math.max(0.5, (f3 - 0.3 - (tCab + 0.6)) / giros.length);
+          giros.forEach((g, i) => {
+            const tt = tCab + 0.6 + i * tramo;
+            tl.to("#cap00-cabeza", { rotation: g.rot, duration: tramo * 0.8, ease: "sine.inOut" }, tt);
+            cur.mover(tt, g.x, g.y, tramo * 0.85, "sine.inOut");
+          });
+          tl.to(["#cap00-cabeza", "#cap00-guia"], { opacity: 0, duration: 0.35, ease: "power1.in" }, f3 - 0.1);
+          cur.ocultar(f3 - 0.1);
+
+          // ── f3: voz, cabeza o manos (una tarjeta por palabra) ──
+          const durF3 = AP.tFin(ID, "f3", f3 + 2.9) - f3;
+          ["#cap00-modo-voz", "#cap00-modo-cabeza", "#cap00-modo-manos"].forEach((sel, i) => {
+            const tt = f3 + 0.35 + i * (durF3 * 0.3);
+            tl.fromTo(sel, { opacity: 0, y: 60, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "back.out(1.5)" }, tt);
+            tl.fromTo(sel + " .cap00-modo-icono", { scale: 0.6 }, { scale: 1, duration: 0.6, ease: "elastic.out(1, 0.5)" }, tt + 0.1);
+          });
+          tl.to("#cap00-modos", { opacity: 0, y: -30, duration: 0.4, ease: "power2.in" }, f4 - 0.15);
+
+          // ── f4: título ──
+          tl.fromTo("#cap00-titulo", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.9, ease: "expo.out" }, f4 + 0.2);
+          tl.fromTo("#cap00-sub", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, f4 + 0.8);
+          tl.fromTo("#cap00-base", { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, f4 + 1.5);
+          tl.fromTo("#cap00-lite", { opacity: 0, x: 50 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, f4 + 1.7);
+          tl.fromTo(["#cap00-base img", "#cap00-lite img"], { rotation: -6 }, { rotation: 6, duration: 1.2, ease: "sine.inOut", yoyo: true, repeat: 1 }, f4 + 2.3);
+
+          window.__timelines[ID] = tl;
+        })();
+      </script>
+
+      <script type="module">
+        import * as THREE from "three";
+
+        const H = window.__cap00Hitos;
+        const lienzo = document.getElementById("cap00-lienzo");
+        const render = new THREE.WebGLRenderer({ canvas: lienzo, alpha: true, antialias: true, preserveDrawingBuffer: true });
+        render.setPixelRatio(1);
+        render.setSize(1920, 1080, false);
+        const escena = new THREE.Scene();
+        const camara = new THREE.PerspectiveCamera(35, 1920 / 1080, 0.1, 100);
+        camara.position.set(0, 0, 10);
+
+        // PRNG determinista (mismo que AP.azar).
+        const azar = window.AP.azar(2026);
+        const N = 2600;
+        const COL = 104; // columnas de la onda
+        const FIL = Math.ceil(N / COL);
+        const estrellas = new Float32Array(N * 3);
+        const anillo = new Float32Array(N * 3);
+        const retraso = new Float32Array(N);
+        const colores = new Float32Array(N * 3);
+        const verde = new THREE.Color("#86efac");
+        const blanco = new THREE.Color("#f1f5f9");
+        const amarillo = new THREE.Color("#fcd34d");
+        for (let i = 0; i < N; i++) {
+          estrellas[i * 3] = (azar() * 2 - 1) * 7.5;
+          estrellas[i * 3 + 1] = (azar() * 2 - 1) * 4.2;
+          estrellas[i * 3 + 2] = -6 + azar() * 8;
+          const a = azar() * Math.PI * 2;
+          const r = 3.1 + (azar() - 0.5) * 0.9;
+          anillo[i * 3] = Math.cos(a) * r * 1.35;
+          anillo[i * 3 + 1] = Math.sin(a) * r * 0.82;
+          anillo[i * 3 + 2] = (azar() - 0.5) * 2.4;
+          retraso[i] = azar();
+          const c = azar();
+          const col = c < 0.07 ? amarillo : c < 0.24 ? blanco : verde;
+          colores.set([col.r, col.g, col.b], i * 3);
+        }
+        const pos = new Float32Array(N * 3);
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+        geo.setAttribute("color", new THREE.BufferAttribute(colores, 3));
+
+        // Punto suave generado en un canvas (sin archivos externos).
+        const cv = document.createElement("canvas");
+        cv.width = cv.height = 64;
+        const cx = cv.getContext("2d");
+        const g = cx.createRadialGradient(32, 32, 0, 32, 32, 32);
+        g.addColorStop(0, "rgba(255,255,255,1)");
+        g.addColorStop(0.45, "rgba(255,255,255,0.85)");
+        g.addColorStop(1, "rgba(255,255,255,0)");
+        cx.fillStyle = g;
+        cx.fillRect(0, 0, 64, 64);
+        const textura = new THREE.CanvasTexture(cv);
+
+        const mat = new THREE.PointsMaterial({
+          size: 0.11,
+          map: textura,
+          vertexColors: true,
+          transparent: true,
+          depthWrite: false,
+          opacity: 0.95,
+          blending: THREE.AdditiveBlending,
+        });
+        const puntos = new THREE.Points(geo, mat);
+        escena.add(puntos);
+
+        const suave = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
+        const tramo = (t, a, b) => suave((t - a) / (b - a));
+
+        // Onda de voz: barras simétricas cuya altura late con el tiempo.
+        function onda(i, t, yBase, amp, ancho) {
+          const col = i % COL;
+          const fila = Math.floor(i / COL);
+          const u = col / (COL - 1);
+          const x = (u * 2 - 1) * ancho;
+          const env = Math.exp(-Math.pow(x / (ancho * 0.55), 2));
+          const late = 0.35 + 0.65 * Math.abs(Math.sin(t * 2.6 + col * 0.41) * Math.cos(t * 1.3 - col * 0.17));
+          const h = (0.08 + amp * env * late) * ((fila / (FIL - 1)) * 2 - 1);
+          return [x, yBase + h, (retraso[i] - 0.5) * 0.3];
+        }
+
+        function dibujar(t) {
+          // Mezclas por fase (ver comentario de la escena).
+          const aOnda = tramo(t, H.f1, H.f1 + 1.4); // estrellas → onda
+          const aAnillo = tramo(t, H.f2, H.f2 + 1.2); // onda → anillo
+          const aFinal = tramo(t, H.f4, H.f4 + 1.4); // anillo → onda final
+          for (let i = 0; i < N; i++) {
+            const d = retraso[i] * 0.35;
+            const k1 = suave((aOnda - d) / 0.65);
+            const k2 = suave((aAnillo - d) / 0.65);
+            const k3 = suave((aFinal - d) / 0.65);
+            // Estrellas a la deriva.
+            let x = estrellas[i * 3] + Math.sin(t * 0.25 + i) * 0.15;
+            let y = estrellas[i * 3 + 1] + Math.cos(t * 0.2 + i * 0.7) * 0.12;
+            let z = estrellas[i * 3 + 2];
+            const o1 = onda(i, t, -0.05, 1.25, 5.2);
+            x += (o1[0] - x) * k1;
+            y += (o1[1] - y) * k1;
+            z += (o1[2] - z) * k1;
+            // Anillo que gira despacio.
+            const ang = t * 0.12;
+            const ax = anillo[i * 3] * Math.cos(ang) - anillo[i * 3 + 2] * Math.sin(ang) * 0.3;
+            const ay = anillo[i * 3 + 1];
+            const az = anillo[i * 3 + 2] * Math.cos(ang) - 1.5;
+            x += (ax - x) * k2;
+            y += (ay - y) * k2;
+            z += (az - z) * k2;
+            // Onda final, baja y ancha, bajo el título.
+            const o3 = onda(i, t, -1.3, 0.4, 5.4);
+            x += (o3[0] - x) * k3;
+            y += (o3[1] - y) * k3;
+            z += (o3[2] - z) * k3;
+            pos[i * 3] = x;
+            pos[i * 3 + 1] = y;
+            pos[i * 3 + 2] = z;
+          }
+          geo.attributes.position.needsUpdate = true;
+          // Más tenue mientras hay contenido delante (fases B y C).
+          mat.opacity = 0.95 - 0.5 * aAnillo + 0.3 * aFinal;
+          puntos.rotation.z = Math.sin(t * 0.1) * 0.03;
+          render.render(escena, camara);
+        }
+
+        window.__cap00Dibujar = dibujar;
+        dibujar(window.__cap00Reloj ? window.__cap00Reloj.t : 0);
+        window.__cap00Listo && window.__cap00Listo();
+      </script>
+    </template>
+  </body>
+</html>

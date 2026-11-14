@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>cap01 · ¿Qué es AdaptaPE?</title>
+  </head>
+  <body>
+    <!--
+      cap01 · ¿Qué es AdaptaPE? Logo, tres personas, tarjeta Lite, tarjeta Base
+      (con las funciones de Lite + dos «Sólo Base») y tres plataformas.
+    -->
+    <template>
+      <style>
+        #cap01-raiz {
+          position: absolute;
+          inset: 0;
+        }
+        #cap01-logo {
+          position: absolute;
+          left: 810px;
+          top: 120px;
+          width: 300px;
+          height: 300px;
+          border-radius: 50%;
+          box-shadow: 0 0 0 10px rgba(134, 239, 172, 0.25), var(--sombra-2);
+        }
+        #cap01-nombre {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 448px;
+          text-align: center;
+          font-family: var(--ap-fuente-titulo);
+          font-weight: 700;
+          font-size: 110px;
+          line-height: 1;
+        }
+        .cap01-tarjeta {
+          position: absolute;
+          top: 190px;
+          width: 520px;
+          height: 470px;
+          border-radius: var(--r-l);
+          background: var(--ap-superficie);
+          border: var(--borde-grueso) solid var(--ap-borde);
+          box-shadow: var(--sombra-1);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 32px;
+          text-align: center;
+        }
+        .cap01-icono {
+          width: 210px;
+          height: 210px;
+          border-radius: 50%;
+          background: var(--ap-verde-suave);
+          color: var(--ap-verde);
+          display: grid;
+          place-items: center;
+        }
+        .cap01-icono svg {
+          width: 120px;
+          height: 120px;
+          display: block;
+        }
+        .cap01-etiqueta {
+          font-family: var(--ap-fuente-titulo);
+          font-weight: 700;
+          font-size: 52px;
+          line-height: 1.12;
+          padding: 0 28px;
+        }
+        .cap01-version {
+          position: absolute;
+          top: 120px;
+          width: 840px;
+          height: 700px;
+          border-radius: var(--r-l);
+          background: var(--ap-superficie);
+          border: var(--borde-grueso) solid var(--ap-borde);
+          box-shadow: var(--sombra-2);
+        }
+        .cap01-version img.cap01-logover {
+          position: absolute;
+          left: 36px;
+          top: 24px;
+          width: 110px;
+          height: 110px;
+          border-radius: 50%;
+        }
+        .cap01-version h2 {
+          position: absolute;
+          left: 170px;
+          top: 14px;
+          margin: 0;
+          font-family: var(--ap-fuente-titulo);
+          font-size: 60px;
+          font-weight: 700;
+          line-height: 1.1;
+        }
+        .cap01-fila {
+          position: absolute;
+          left: 36px;
+          width: 764px;
+          height: 80px;
+          display: flex;
+          align-items: center;
+          gap: 24px;
+          font-size: 44px;
+          font-weight: 700;
+        }
+        .cap01-fila svg,
+        .cap01-fila img {
+          width: 56px;
+          height: 56px;
+          flex: none;
+          color: var(--ap-verde);
+          object-fit: contain;
+        }
+        .cap01-plataforma {
+          position: absolute;
+          top: 190px;
+          width: 520px;
+          height: 440px;
+          border-radius: var(--r-l);
+          background: var(--ap-superficie);
+          border: var(--borde-grueso) solid var(--ap-borde);
+          box-shadow: var(--sombra-1);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 28px;
+        }
+        .cap01-plataforma .cap01-icono {
+          width: 190px;
+          height: 190px;
+        }
+        .cap01-plataforma .cap01-icono svg {
+          width: 108px;
+          height: 108px;
+        }
+        .cap01-plataforma span.cap01-nom {
+          font-family: var(--ap-fuente-titulo);
+          font-size: 56px;
+          font-weight: 700;
+        }
+        .cap01-chipcaja {
+          position: relative;
+          width: 360px;
+          height: 72px;
+        }
+      </style>
+
+      <div data-hf-id="hf-fcvu" id="cap01-raiz" class="ap-escena" data-composition-id="cap01" data-width="1920" data-height="1080"></div>
+
+      <script>
+        (function () {
+          const ID = "cap01";
+          const cap = AP.capitulo(ID);
+          const raiz = document.getElementById(ID + "-raiz");
+          const tl = gsap.timeline({ paused: true });
+          const f1 = AP.t(ID, "f1", 0.6);
+          const f2 = AP.t(ID, "f2", 5.2);
+          const f3 = AP.t(ID, "f3", 12.3);
+          const f4 = AP.t(ID, "f4", 20.5);
+          const f5 = AP.t(ID, "f5", 25.7);
+
+          function el(padre, clase, html, css) {
+            const e = document.createElement("div");
+            if (clase) e.className = clase;
+            if (html != null) e.innerHTML = html;
+            if (css) e.style.cssText = css;
+            padre.appendChild(e);
+            return e;
+          }
+          function fase(id, tin, tout) {
+            const e = el(raiz, null, null, "position:absolute;inset:0");
+            e.id = id;
+            if (tin != null) tl.fromTo(e, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, tin);
+            if (tout != null) tl.to(e, { opacity: 0, duration: 0.4, ease: "power1.in" }, tout);
+            return e;
+          }
+          function entra(e, t, dx) {
+            tl.fromTo(e, { opacity: 0, x: dx || -40 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, t);
+          }
+          const I = AP.iconos;
+          const mano =
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M11 10V3.5a1.5 1.5 0 0 1 3 0V10"/><path d="M14 10V5.5a1.5 1.5 0 0 1 3 0V14"/><path d="M8 13l-1.8-1.8a1.6 1.6 0 0 0-2.3 2.2L8.5 19c1.5 2 3 3 6 3a6 6 0 0 0 6-6v-4"/></svg>';
+          const familia =
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M2 20c.5-3.5 3-5 6-5s5.5 1.5 6 5"/><path d="M15 15c3 0 5.5 1.2 7 4"/></svg>';
+
+          AP.ambiente(tl, raiz, { duracion: cap.duracion, semilla: 2 });
+
+          // f1 · logo, nombre y rasgos
+          const A = fase(ID + "-f1", null, f2 - 0.3);
+          const logo = document.createElement("img");
+          logo.id = ID + "-logo";
+          logo.src = "assets/marca/adapta-pe.webp";
+          logo.alt = "";
+          A.appendChild(logo);
+          AP.entrar(tl, logo, f1, "rebote", 0.8);
+          const nombre = el(A, null, "AdaptaPE");
+          nombre.id = ID + "-nombre";
+          AP.entrar(tl, nombre, f1 + 0.4, "subir", 0.7);
+          AP.chip(tl, A, { id: ID + "-chip-gratis", tipo: "ambos", texto: "Gratuita", x: 640, y: 590, entrada: f1 + 2.2 });
+          AP.chip(tl, A, { id: ID + "-chip-peru", tipo: "ambos", texto: "Hecha en Perú", x: 930, y: 590, entrada: f1 + 3.0 });
+          AP.rotulo(tl, A, { id: ID + "-rotulo", texto: "Accesibilidad sin manos", entrada: f1 + 1.0, salida: f2 - 0.4 });
+
+          // f2 · tres personas
+          const B = fase(ID + "-f2", f2, f3 - 0.3);
+          [
+            [96, mano, "Poca movilidad en las manos", 0.2],
+            [700, I.ojo, "Baja visión o daltonismo", 1.6],
+            [1304, familia, "Y sus familias", 3.2],
+          ].forEach((p, i) => {
+            const c = el(B, "cap01-tarjeta", '<div class="cap01-icono">' + p[1] + '</div><div class="cap01-etiqueta">' + p[2] + "</div>", "left:" + p[0] + "px");
+            c.id = ID + "-persona" + (i + 1);
+            AP.entrar(tl, c, f2 + p[3], "subir", 0.7);
+          });
+
+          // f3 · Lite
+          const fila = (padre, y, icono, texto, t) => {
+            const f = el(padre, "cap01-fila", icono + "<span>" + texto + "</span>", "top:" + y + "px");
+            entra(f, t);
+            return f;
+          };
+          const mascotaImg = '<img src="assets/marca/tinku-ilustracion.webp" alt="">';
+          const C = fase(ID + "-f34", f3, f5 - 0.3);
+          const lite = el(C, "cap01-version", '<img class="cap01-logover" src="assets/marca/adapta-lite.webp" alt=""><h2>AdaptaPE Lite</h2>', "left:540px");
+          lite.id = ID + "-lite";
+          AP.entrar(tl, lite, f3 + 0.2, "subir", 0.7);
+          AP.chip(tl, lite, { id: ID + "-chip-lite", tipo: "lite", texto: "Versión ligera", x: 170, y: 80, entrada: f3 + 1.8 });
+          fila(lite, 190, I.mic, "Voz", f3 + 3.1);
+          fila(lite, 290, I.paleta, "Filtros de color", f3 + 4.0);
+          fila(lite, 390, mascotaImg, "Mascota", f3 + 5.0);
+
+          // f4 · Base: Lite desliza a la izquierda y entra Base
+          tl.to(lite, { x: -444, duration: 0.7, ease: "power3.inOut" }, f4);
+          const base = el(C, "cap01-version", '<img class="cap01-logover" src="assets/marca/adapta-base.webp" alt=""><h2>AdaptaPE Base</h2>', "left:984px");
+          base.id = ID + "-base";
+          AP.entrar(tl, base, f4 + 0.3, "derecha", 0.7);
+          AP.chip(tl, base, { id: ID + "-chip-base", tipo: "base", texto: "Todo incluido", x: 170, y: 80, entrada: f4 + 0.8 });
+          fila(base, 190, I.mic, "Voz", f4 + 0.8);
+          fila(base, 290, I.paleta, "Filtros de color", f4 + 1.0);
+          fila(base, 390, mascotaImg, "Mascota", f4 + 1.2);
+          fila(base, 490, I.cursor, "Cursor con cámara", f4 + 1.8);
+          AP.chip(tl, base, { id: ID + "-chip-cursor", tipo: "base", x: 540, y: 494, entrada: f4 + 2.2 });
+          fila(base, 590, I.altavoz, "Lectura en voz alta", f4 + 2.8);
+          AP.chip(tl, base, { id: ID + "-chip-lectura", tipo: "base", x: 540, y: 594, entrada: f4 + 3.2 });
+
+          // f5 · plataformas
+          const D = fase(ID + "-f5", f5, null);
+          [
+            [96, I.navegador, "Navegador", "extension", 0.3],
+            [700, I.monitor, "Windows", "windows", 2.2],
+            [1304, I.monitor, "macOS", "macos", 3.4],
+          ].forEach((p, i) => {
+            const c = el(D, "cap01-plataforma", '<div class="cap01-icono">' + p[1] + '</div><span class="cap01-nom">' + p[2] + '</span><div class="cap01-chipcaja"></div>', "left:" + p[0] + "px");
+            c.id = ID + "-plat" + (i + 1);
+            AP.entrar(tl, c, f5 + p[4], "subir", 0.7);
+            const ch = AP.chip(tl, c.querySelector(".cap01-chipcaja"), { id: ID + "-chip-plat" + (i + 1), tipo: p[3], x: 60, y: 0, entrada: f5 + p[4] + 0.5 });
+          });
+
+          window.__timelines[ID] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

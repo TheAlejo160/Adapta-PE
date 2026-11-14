@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Cómo usar AdaptaPE · Tutorial</title>
+    <!-- Todo local: nada se descarga durante el render. -->
+    <script src="shared/vendor/gsap.min.js"></script>
+    <script type="importmap">
+      { "imports": { "three": "./shared/vendor/three.module.min.js" } }
+    </script>
+    <link rel="stylesheet" href="shared/tema.css" />
+    <!-- Generado por tools/generar.mjs desde datos/tiempos.json (window.TIEMPOS). -->
+    <script src="datos/tiempos.js"></script>
+    <script src="shared/componentes.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: #0f172a;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #0f172a;
+      }
+      #root > div[data-composition-src] {
+        position: absolute;
+        inset: 0;
+      }
+      /* Las capas globales siempre por encima de las escenas. */
+      #el-progreso,
+      #el-subtitulos {
+        z-index: 900;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      NO edites a mano lo que hay entre los marcadores GENERADO: lo reescribe
+      `node tools/generar.mjs` a partir de datos/tiempos.json (también el
+      data-duration de #root). El resto del archivo sí es editable.
+    -->
+    <div data-hf-id="hf-0z1l" id="root" data-composition-id="main" data-start="0" data-duration="456.468" data-width="1920" data-height="1080">
+      <!-- GENERADO:escenas -->
+      <div data-hf-id="hf-ldu8" id="el-cap00" data-composition-id="cap00" data-composition-src="scenes/cap00-intro.html" data-start="0" data-duration="15.573" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-yn9k" id="el-cap01" data-composition-id="cap01" data-composition-src="scenes/cap01-que-es.html" data-start="14.973" data-duration="32.088" data-track-index="2" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-gk77" id="el-cap02" data-composition-id="cap02" data-composition-src="scenes/cap02-instalar-extension.html" data-start="46.461" data-duration="32.503" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-yuvt" id="el-cap03" data-composition-id="cap03" data-composition-src="scenes/cap03-bienvenida-permisos.html" data-start="78.364" data-duration="32.904" data-track-index="2" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-gcp5" id="el-cap04" data-composition-id="cap04" data-composition-src="scenes/cap04-panel.html" data-start="110.668" data-duration="26.543" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-jvd3" id="el-cap05" data-composition-id="cap05" data-composition-src="scenes/cap05-voz-basico.html" data-start="136.611" data-duration="34.602" data-track-index="2" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-ttx5" id="el-cap06" data-composition-id="cap06" data-composition-src="scenes/cap06-voz-ordenes.html" data-start="170.613" data-duration="36.937" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-8amm" id="el-cap07" data-composition-id="cap07" data-composition-src="scenes/cap07-camara-modos.html" data-start="206.95" data-duration="47.819" data-track-index="2" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-0jjw" id="el-cap08" data-composition-id="cap08" data-composition-src="scenes/cap08-clic-sin-manos.html" data-start="254.169" data-duration="34.475" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-lts7" id="el-cap09" data-composition-id="cap09" data-composition-src="scenes/cap09-lectura-filtros.html" data-start="288.044" data-duration="23.834" data-track-index="2" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-180x" id="el-cap10" data-composition-id="cap10" data-composition-src="scenes/cap10-mascotas-pestana.html" data-start="311.278" data-duration="30.244" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-eumu" id="el-cap11" data-composition-id="cap11" data-composition-src="scenes/cap11-windows.html" data-start="340.922" data-duration="45.242" data-track-index="2" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-uzfa" id="el-cap12" data-composition-id="cap12" data-composition-src="scenes/cap12-macos.html" data-start="385.564" data-duration="44.907" data-track-index="1" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-kjai" id="el-cap13" data-composition-id="cap13" data-composition-src="scenes/cap13-cierre.html" data-start="429.871" data-duration="26.597" data-track-index="2" data-width="1920" data-height="1080"></div>
+      <!-- /GENERADO:escenas -->
+
+      <!-- GENERADO:audio -->
+      <audio data-hf-id="hf-v2qs" id="voz-cap00" src="assets/audio/cap00.wav" data-start="0" data-duration="14.973" data-track-index="10" data-volume="1" data-audio-group="voiceover"></audio>
+      <audio data-hf-id="hf-pi2s" id="voz-cap01" src="assets/audio/cap01.wav" data-start="14.973" data-duration="31.488" data-track-index="10" data-volume="1" data-audio-group="voiceover"></audio>
+      <audio data-hf-id="hf-6k25" id="voz-cap02" src="assets/audio/cap02.wav" data-start="46.461" data-duration="31.903" data-track-index="10" data-volume="1" data-audio-group="voiceover"></audio>
+      <audio data-hf-id="hf-d83o" id="voz-cap03" src="assets/audio/cap03.wav" data-start="78.364" data-duration="32.304" data-track-index="10" data-volume="1" data-audio-group="voiceover"></audio>
+      <audio data-hf-id="hf-4zyn" id="voz-cap04" src="assets/audio/cap04.wav" data-start="110.668" data-duration="25.943" data-track-index="10" data-volume="1" data-audio-group="voiceover"></audio>
+      <audio data-hf-id="hf-csej" id="voz-cap05" src="assets/audio/cap05.wav" data-start="136.611" data-duration="34.002" data-track-index="10" data-volume="1" data-audio-group="voiceover"></audio>
+      <audio data-hf-id="hf-h6om" id="voz-cap06" src="assets/audio/cap06.wav" data-start="170.613" data-duration="36.337" data-track-index="10" data-volume="1" data-audio-group="voiceover"></audio>
+      <audio data-hf-id="hf-pwlt" id="voz-cap07" src="assets/audio/cap07.wav" data-start="206.95" data-duration="47.219" data-track-index="10" data-volume="1" data-audio-group="voiceover"></audio>
+      <audio data-hf-id="hf-jhbf" id="voz-cap08" src="assets/audio/cap08.wav" data-start="254.169" data-duration="33.875" data-track-index="10" data-volume="1" data-audio-group="voiceover"></audio>
+      <audio data-hf-id="hf-eur4" id="voz-cap09" src="assets/audio/cap09.wav" data-start="288.044" data-duration="23.234" data-track-index="10" data-volume="1" data-audio-group="voiceover"></audio>
+      <audio data-hf-id="hf-14e1" id="voz-cap10" src="assets/audio/cap10.wav" data-start="311.278" data-duration="29.644" data-track-index="10" data-volume="1" data-audio-group="voiceover"></audio>
+      <audio data-hf-id="hf-y3x8" id="voz-cap11" src="assets/audio/cap11.wav" data-start="340.922" data-duration="44.642" data-track-index="10" data-volume="1" data-audio-group="voiceover"></audio>
+      <audio data-hf-id="hf-wv0t" id="voz-cap12" src="assets/audio/cap12.wav" data-start="385.564" data-duration="44.307" data-track-index="10" data-volume="1" data-audio-group="voiceover"></audio>
+      <audio data-hf-id="hf-tk3y" id="voz-cap13" src="assets/audio/cap13.wav" data-start="429.871" data-duration="26.597" data-track-index="10" data-volume="1" data-audio-group="voiceover"></audio>
+      <audio data-hf-id="hf-5lcy" id="musica-1" src="assets/audio/musica.mp3" data-start="0" data-duration="163.96" data-media-start="0" data-track-index="11" data-volume="1" data-audio-group="music" data-automation="{&quot;version&quot;:1,&quot;lanes&quot;:[{&quot;target&quot;:&quot;volume&quot;,&quot;points&quot;:[{&quot;t&quot;:0,&quot;v&quot;:0},{&quot;t&quot;:1.5,&quot;v&quot;:0.12},{&quot;t&quot;:160.96,&quot;v&quot;:0.12},{&quot;t&quot;:163.96,&quot;v&quot;:0}]}]}"></audio>
+      <audio data-hf-id="hf-46ot" id="musica-2" src="assets/audio/musica.mp3" data-start="160.96" data-duration="163.96" data-media-start="0" data-track-index="12" data-volume="1" data-audio-group="music" data-automation="{&quot;version&quot;:1,&quot;lanes&quot;:[{&quot;target&quot;:&quot;volume&quot;,&quot;points&quot;:[{&quot;t&quot;:0,&quot;v&quot;:0},{&quot;t&quot;:3,&quot;v&quot;:0.12},{&quot;t&quot;:160.96,&quot;v&quot;:0.12},{&quot;t&quot;:163.96,&quot;v&quot;:0}]}]}"></audio>
+      <audio data-hf-id="hf-35s0" id="musica-3" src="assets/audio/musica.mp3" data-start="321.92" data-duration="134.548" data-media-start="0" data-track-index="11" data-volume="1" data-audio-group="music" data-automation="{&quot;version&quot;:1,&quot;lanes&quot;:[{&quot;target&quot;:&quot;volume&quot;,&quot;points&quot;:[{&quot;t&quot;:0,&quot;v&quot;:0},{&quot;t&quot;:3,&quot;v&quot;:0.12},{&quot;t&quot;:131.548,&quot;v&quot;:0.12},{&quot;t&quot;:134.548,&quot;v&quot;:0}]}]}"></audio>
+      <!-- /GENERADO:audio -->
+
+      <!-- Capas globales (sub-composiciones generadas): barra de progreso arriba
+           (zona 0–96 px) y subtítulos abajo (zona 840–1080 px). -->
+      <!-- GENERADO:capas -->
+      <div data-hf-id="hf-reg6" id="el-progreso" data-composition-id="progreso" data-composition-src="capas/progreso.html" data-start="0" data-duration="456.468" data-track-index="20" data-width="1920" data-height="1080"></div>
+      <div data-hf-id="hf-oplw" id="el-subtitulos" data-composition-id="subtitulos" data-composition-src="capas/subtitulos.html" data-start="0" data-duration="456.468" data-track-index="21" data-width="1920" data-height="1080"></div>
+      <!-- /GENERADO:capas -->
+    </div>
+
+    <script>
+      (function () {
+        const T = window.TIEMPOS;
+        const caps = T.capitulos;
+        const FUNDIDO = T.fundido; // s de solape entre capítulos (lo escribe generar.mjs)
+        const tl = gsap.timeline({ paused: true });
+
+        // Transición suave entre capítulos: el entrante aparece sobre el saliente
+        // (que sigue visible FUNDIDO s más; ver generar.mjs). Sin salidas propias.
+        caps.forEach((c, i) => {
+          if (i === 0) return;
+          tl.fromTo(
+            "#el-" + c.id,
+            { opacity: 0, scale: 1.015 },
+            { opacity: 1, scale: 1, duration: FUNDIDO, ease: "sine.inOut" },
+            c.inicio
+          );
+        });
+
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

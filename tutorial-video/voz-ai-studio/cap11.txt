@@ -1,0 +1,13 @@
+¿Quieres controlar toda tu computadora, no solo el navegador? Usa la app de escritorio.
+
+En Windows 10 u 11, descarga el instalador de base o de Lite desde adaptape punto ce ce y ábrelo.
+
+Si aparece «Windows protegió su PC» y confías en el archivo, pulsa «Más información» y «Ejecutar de todas formas».
+
+Sigue los pasos, elige si quieres accesos directos, y al final, «Abrir Adapta PE».
+
+La app vive junto al reloj, en la bandeja, y tiene un panel flotante. Enciende «Activar voz» y prueba: «Computadora, abre Bloc de notas».
+
+En base, también activas el cursor con cámara y el clic por permanencia. Lite se queda con la voz, los filtros y la mascota.
+
+Para parar todo, usa «Detener todo», o el atajo Control, Shift y la letra S.

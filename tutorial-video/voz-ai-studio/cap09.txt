@@ -1,0 +1,5 @@
+La lectura en voz alta, en base, lee lo que señalas. Pasa el cursor sobre un texto o botón y escucharás lo que dice. Para callarla, di «Computadora, silencio».
+
+Los filtros de color ayudan a las personas con daltonismo a distinguir mejor los colores. Hay siete, y están en base y Lite.
+
+Elige uno en el panel y la página cambia al instante. Para volver a la normalidad, pulsa «Quitar filtro».

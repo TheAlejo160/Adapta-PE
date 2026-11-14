@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>cap02 · Instalar la extensión</title>
+  </head>
+  <body>
+    <!--
+      cap02 · Instalar la extensión. Navegador falso: Chrome Web Store
+      (búsqueda, «Añadir a Chrome»), diálogo «Añadir extensión», menú de la
+      pieza con alfiler; luego chrome://extensions con Modo de desarrollador.
+      Coordenadas absolutas: nav en (96,290) 1728×520; cuerpo en (96,430) 1728×380.
+    -->
+    <template>
+      <style>
+        #cap02-raiz {
+          position: absolute;
+          inset: 0;
+        }
+        .cap02-cuerpo {
+          position: absolute;
+          inset: 0;
+          color: var(--ap-claro-texto);
+          font-family: var(--ap-fuente-texto);
+        }
+        .cap02-a {
+          position: absolute;
+          display: flex;
+          align-items: center;
+          white-space: nowrap;
+        }
+        .cap02-tienda-barra {
+          left: 0;
+          top: 0;
+          width: 1728px;
+          height: 92px;
+          background: #ffffff;
+          border-bottom: 2px solid var(--ap-claro-borde);
+          padding-left: 40px;
+          box-sizing: border-box;
+          font-family: var(--ap-fuente-titulo);
+          font-weight: 700;
+          font-size: 44px;
+        }
+        .cap02-buscar {
+          left: 360px;
+          top: 120px;
+          width: 1000px;
+          height: 90px;
+          box-sizing: border-box;
+          padding: 0 36px;
+          border-radius: 999px;
+          background: #ffffff;
+          border: 3px solid #9aa7a1;
+          font-size: 44px;
+          font-weight: 600;
+        }
+        .cap02-resultado {
+          left: 360px;
+          width: 1000px;
+          height: 80px;
+          box-sizing: border-box;
+          padding: 0 24px;
+          gap: 24px;
+          font-size: 44px;
+          font-weight: 700;
+          background: #ffffff;
+          border-radius: 20px;
+          border: 2px solid var(--ap-claro-borde);
+        }
+        .cap02-resultado img {
+          width: 56px;
+          height: 56px;
+          border-radius: 50%;
+        }
+        .cap02-ficha-logo {
+          left: 120px;
+          top: 90px;
+          width: 200px;
+          height: 200px;
+          border-radius: 50%;
+        }
+        .cap02-ficha-nombre {
+          left: 360px;
+          top: 100px;
+          font-family: var(--ap-fuente-titulo);
+          font-weight: 700;
+          font-size: 80px;
+        }
+        .cap02-ficha-sub {
+          left: 360px;
+          top: 210px;
+          font-size: 40px;
+          font-weight: 600;
+          color: var(--ap-claro-texto-2);
+        }
+        .cap02-azul {
+          justify-content: center;
+          background: #1a73e8;
+          color: #ffffff;
+          font-weight: 700;
+          font-size: 44px;
+          border-radius: 999px;
+        }
+        .cap02-dialogo {
+          position: absolute;
+          left: 340px;
+          top: 440px;
+          width: 800px;
+          height: 280px;
+          box-sizing: border-box;
+          border-radius: 24px;
+          background: #ffffff;
+          color: var(--ap-claro-texto);
+          box-shadow: var(--sombra-2);
+          border: 2px solid var(--ap-claro-borde);
+          font-family: var(--ap-fuente-texto);
+        }
+        .cap02-menu {
+          position: absolute;
+          left: 1260px;
+          top: 442px;
+          width: 540px;
+          height: 190px;
+          box-sizing: border-box;
+          border-radius: 24px;
+          background: #ffffff;
+          color: var(--ap-claro-texto);
+          box-shadow: var(--sombra-2);
+          border: 2px solid var(--ap-claro-borde);
+          font-family: var(--ap-fuente-texto);
+        }
+        .cap02-chip-nav {
+          position: absolute;
+          height: 84px;
+          padding: 0 36px;
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          border-radius: 999px;
+          background: #ffffff;
+          border: 3px solid var(--ap-claro-borde);
+          font-size: 44px;
+          font-weight: 700;
+          color: var(--ap-claro-texto);
+        }
+        .cap02-chip-nav svg {
+          width: 44px;
+          height: 44px;
+          color: var(--ap-claro-verde);
+        }
+        .cap02-gris {
+          justify-content: flex-start;
+          box-sizing: border-box;
+          padding: 0 28px;
+          border-radius: 16px;
+          background: #ffffff;
+          border: 3px solid var(--ap-claro-borde);
+          font-size: 36px;
+          font-weight: 700;
+        }
+        #cap02-titulo-f1 {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 120px;
+          text-align: center;
+          font-family: var(--ap-fuente-titulo);
+          font-weight: 700;
+          font-size: 84px;
+          line-height: 1.1;
+        }
+      </style>
+
+      <div data-hf-id="hf-f3b6" id="cap02-raiz" class="ap-escena" data-composition-id="cap02" data-width="1920" data-height="1080"></div>
+
+      <script>
+        (function () {
+          const ID = "cap02";
+          const cap = AP.capitulo(ID);
+          const raiz = document.getElementById(ID + "-raiz");
+          const tl = gsap.timeline({ paused: true });
+          const f1 = AP.t(ID, "f1", 0.6);
+          const f2 = AP.t(ID, "f2", 8);
+          const f3 = AP.t(ID, "f3", 14.9);
+          const f4 = AP.t(ID, "f4", 18.8);
+          const f5 = AP.t(ID, "f5", 26.1);
+          const I = AP.iconos;
+
+          function el(padre, clase, html, css) {
+            const e = document.createElement("div");
+            if (clase) e.className = clase;
+            if (html != null) e.innerHTML = html;
+            if (css) e.style.cssText = css;
+            padre.appendChild(e);
+            return e;
+          }
+          function fase(id, tin, tout) {
+            const e = el(raiz, null, null, "position:absolute;inset:0");
+            e.id = id;
+            if (tin != null) tl.fromTo(e, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, tin);
+            if (tout != null) tl.to(e, { opacity: 0, duration: 0.4, ease: "power1.in" }, tout);
+            return e;
+          }
+          // Aparece en t y se va en t2 (opacidad).
+          function ventana(e, t, t2) {
+            tl.fromTo(e, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, t);
+            if (t2 != null) tl.to(e, { opacity: 0, duration: 0.35, ease: "power1.in" }, t2);
+          }
+          const NAV = { x: 96, y: 290, ancho: 1728, alto: 520 };
+          const pin =
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3z"/><path d="M12 14v7"/></svg>';
+          const carpeta =
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h7l2 2h9v11H3z"/></svg>';
+
+          AP.ambiente(tl, raiz, { duracion: cap.duracion, semilla: 3 });
+
+          // ───────── Fase A: tienda (f1–f4) ─────────
+          const A = fase(ID + "-A", null, f5 - 0.3);
+          const t1 = el(A, null, "Chrome, Edge o Brave");
+          t1.id = "cap02-titulo-f1";
+          AP.entrar(tl, t1, f1 + 0.3, "subir", 0.7);
+          tl.to(t1, { opacity: 0, duration: 0.4 }, f2 - 0.4);
+
+          const nav = AP.navegador(tl, A, { id: ID + "-nav", x: NAV.x, y: NAV.y, ancho: NAV.ancho, alto: NAV.alto, pestana: "Chrome Web Store", url: "Busca o escribe una URL", extension: null, entrada: f1, efecto: "escala" });
+          nav.escribirUrl(f2 + 0.2, "chromewebstore.google.com", 1.2);
+
+          // f1 · navegadores compatibles
+          const cuerpoF1 = el(nav.cuerpo, "cap02-cuerpo");
+          ventana(cuerpoF1, f1 + 0.2, f2 - 0.2);
+          [
+            ["Google Chrome", 346, f1 + 2.2],
+            ["Microsoft Edge", 836, f1 + 3.2],
+            ["Brave", 1326, f1 + 4.2],
+          ].forEach((p, i) => {
+            const c = el(cuerpoF1, "cap02-chip-nav", I.navegador + "<span>" + p[0] + "</span>", "left:" + (p[1] - 96) + "px;top:60px");
+            c.id = ID + "-nav" + (i + 1);
+            AP.entrar(tl, c, p[2], "rebote", 0.5);
+          });
+          const v119 = el(cuerpoF1, "cap02-chip-nav", I.check + "<span>Versión 119 o más reciente</span>", "left:420px;top:210px;background:#176b56;border-color:#176b56;color:#ffffff");
+          v119.querySelector("svg").style.color = "#ffffff";
+          v119.id = ID + "-v119";
+          AP.entrar(tl, v119, f1 + 5.4, "subir", 0.6);
+
+          // f2 · búsqueda y botón «Añadir a Chrome»
+          const tienda = el(nav.cuerpo, "cap02-cuerpo");
+          ventana(tienda, f2 + 0.3, f2 + 4.0);
+          el(tienda, "cap02-a cap02-tienda-barra", "Chrome Web Store");
+          const buscar = el(tienda, "cap02-a cap02-buscar", "<span></span>");
+          AP.escribir(tl, buscar.firstChild, f2 + 1.4, "AdaptaPE", 0.9);
+          [
+            ["adapta-base.webp", "AdaptaPE", 232, f2 + 2.5],
+            ["adapta-lite.webp", "AdaptaPE Lite", 296, f2 + 3.0],
+          ].forEach((p, i) => {
+            const r = el(tienda, "cap02-a cap02-resultado", '<img src="assets/marca/' + p[0] + '" alt=""><span>' + p[1] + "</span>", "top:" + p[2] + "px");
+            r.id = ID + "-res" + (i + 1);
+            AP.entrar(tl, r, p[3], "subir", 0.5);
+          });
+          // 1/2 de la ficha: el bloque se ve completo hasta f3 (la ventana se cierra en f4).
+          const ficha = el(nav.cuerpo, "cap02-cuerpo");
+          ventana(ficha, f2 + 4.0, f3);
+          el(ficha, "cap02-a cap02-ficha-logo", '<img src="assets/marca/adapta-base.webp" alt="" style="width:200px;height:200px;border-radius:50%">');
+          el(ficha, "cap02-a cap02-ficha-nombre", "AdaptaPE");
+          el(ficha, "cap02-a cap02-ficha-sub", "Accesibilidad sin manos");
+          el(ficha, "cap02-a cap02-azul", "Añadir a Chrome", "left:1080px;top:140px;width:520px;height:100px");
+          AP.paso(tl, A, { id: ID + "-p1", n: 1, total: 3, texto: "Pulsa «Añadir a Chrome»", x: 96, y: 110, entrada: f2 + 0.2, salida: f3 - 0.3 });
+          AP.foco(tl, A, { id: ID + "-foco1", x: 1176, y: 570, ancho: 520, alto: 100, radio: 50, entrada: f2 + 4.9, salida: f3 - 0.2 });
+
+          // f3 · diálogo «Añadir extensión»
+          const dlg = el(A, "cap02-dialogo");
+          dlg.id = ID + "-dialogo";
+          el(dlg, "cap02-a", "¿Añadir AdaptaPE?", "left:40px;top:40px;font-family:var(--ap-fuente-titulo);font-weight:700;font-size:52px");
+          el(dlg, "cap02-a cap02-gris", "Cancelar", "left:100px;top:170px;width:260px;height:80px;justify-content:center");
+          el(dlg, "cap02-a cap02-azul", "Añadir extensión", "left:400px;top:170px;width:360px;height:80px;font-size:40px");
+          ventana(dlg, f3 + 0.3, f4 - 0.3);
+          AP.paso(tl, A, { id: ID + "-p2", n: 2, total: 3, texto: "Pulsa «Añadir extensión»", x: 96, y: 110, entrada: f3 + 0.2, salida: f4 - 0.3 });
+          AP.foco(tl, A, { id: ID + "-foco2", x: 740, y: 610, ancho: 360, alto: 80, radio: 40, entrada: f3 + 1.8, salida: f4 - 0.2 });
+
+          // f4 · pieza de rompecabezas y alfiler
+          const icono = document.createElement("span");
+          icono.className = "ap-nav-extension ap-nav-adapta";
+          icono.innerHTML = '<img src="assets/marca/adapta-base-transparent.webp" alt="AdaptaPE">';
+          const caja = nav.el.querySelector(".ap-nav-extensiones");
+          caja.insertBefore(icono, caja.lastElementChild);
+          tl.set(icono, { opacity: 0 }, 0);
+          tl.fromTo(icono, { opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(2.4)" }, f4 + 4.6);
+          AP.paso(tl, A, { id: ID + "-p3", n: 3, total: 3, texto: "Fija AdaptaPE con el alfiler", x: 96, y: 110, entrada: f4 + 0.1, salida: f5 - 0.4 });
+          AP.foco(tl, A, { id: ID + "-foco3", x: 1745, y: 360, ancho: 64, alto: 64, radio: 32, entrada: f4 + 0.4, salida: f4 + 1.9 });
+          const menu = el(A, "cap02-menu");
+          menu.id = ID + "-menu";
+          el(menu, "cap02-a", "Extensiones", "left:40px;top:16px;height:64px;font-family:var(--ap-fuente-titulo);font-weight:700;font-size:40px");
+          el(menu, "cap02-a", '<img src="assets/marca/adapta-base-transparent.webp" alt="" style="width:64px;height:64px;border-radius:50%"><span style="margin-left:20px;font-size:44px;font-weight:700">AdaptaPE</span>', "left:40px;top:100px;height:64px");
+          const pinCaja = el(menu, "cap02-a", pin, "left:452px;top:98px;width:64px;height:64px;justify-content:center;color:#5f6b78");
+          pinCaja.firstChild.style.cssText = "width:48px;height:48px";
+          const pinOn = el(menu, "cap02-a", pin, "left:452px;top:98px;width:64px;height:64px;justify-content:center;color:#176b56");
+          pinOn.firstChild.style.cssText = "width:48px;height:48px;fill:#176b56";
+          tl.fromTo(pinOn, { opacity: 0 }, { opacity: 1, duration: 0.3 }, f4 + 3.6);
+          ventana(menu, f4 + 1.3, null);
+          AP.foco(tl, A, { id: ID + "-foco4", x: 1712, y: 540, ancho: 64, alto: 64, radio: 32, entrada: f4 + 3.0, salida: f4 + 5.2 });
+
+          // ───────── Fase B: alternativa por carpeta (f5) ─────────
+          const B = fase(ID + "-B", f5 - 0.3, null);
+          const nav2 = AP.navegador(tl, B, { id: ID + "-nav2", x: NAV.x, y: NAV.y, ancho: NAV.ancho, alto: NAV.alto, pestana: "Extensiones", url: "", extension: null, entrada: null });
+          nav2.escribirUrl(f5 + 0.3, "chrome://extensions", 1.0);
+          AP.paso(tl, B, { id: ID + "-p4", n: "B", etiqueta: "Alternativa", texto: "Carga la carpeta del proyecto", x: 96, y: 110, entrada: f5 + 0.1, efecto: "izquierda" });
+          const ext = el(nav2.cuerpo, "cap02-cuerpo");
+          ext.style.background = "#f1f3f4";
+          el(ext, "cap02-a", "Extensiones", "left:40px;top:0;height:100px;font-family:var(--ap-fuente-titulo);font-weight:700;font-size:48px");
+          el(ext, "cap02-a", "Modo de desarrollador", "left:900px;top:0;width:660px;height:100px;justify-content:flex-end;font-size:40px;font-weight:700");
+          const pista = el(ext, null, null, "position:absolute;left:1592px;top:24px;width:96px;height:52px;border-radius:999px;background:#9aa0a6");
+          const relleno = el(pista, null, null, "position:absolute;inset:0;border-radius:999px;background:#1a73e8;opacity:0");
+          const perilla = el(pista, null, null, "position:absolute;left:6px;top:6px;width:40px;height:40px;border-radius:50%;background:#ffffff");
+          tl.to(relleno, { opacity: 1, duration: 0.3 }, f5 + 3.1);
+          tl.to(perilla, { x: 44, duration: 0.3, ease: "power2.out" }, f5 + 3.1);
+          AP.foco(tl, B, { id: ID + "-foco5", x: 1130, y: 444, ancho: 670, alto: 76, radio: 20, entrada: f5 + 2.4, salida: f5 + 4.0 });
+          const barra = el(ext, null, null, "position:absolute;left:0;top:110px;width:1728px;height:130px;background:#e3e8ee");
+          el(barra, "cap02-a cap02-azul", "Cargar descomprimida", "left:40px;top:23px;width:520px;height:84px;font-size:38px;border-radius:16px");
+          el(barra, "cap02-a cap02-gris", "Empaquetar extensión", "left:590px;top:23px;width:520px;height:84px;font-size:38px");
+          el(barra, "cap02-a cap02-gris", "Actualizar", "left:1140px;top:23px;width:340px;height:84px;font-size:38px");
+          ventana(barra, f5 + 3.7, f5 + 6.0);
+          AP.foco(tl, B, { id: ID + "-foco6", x: 136, y: 563, ancho: 520, alto: 84, radio: 16, oscurecer: false, entrada: f5 + 4.8, salida: f5 + 6.0 });
+          const sel = el(B, null, null, "position:absolute;left:440px;top:460px;width:720px;height:340px;box-sizing:border-box;border-radius:24px;background:#ffffff;color:#17372f;box-shadow:var(--sombra-2);border:2px solid #cedbd5;font-family:var(--ap-fuente-texto)");
+          sel.id = ID + "-selector";
+          el(sel, "cap02-a", "Carpeta de la extensión", "left:40px;top:24px;font-family:var(--ap-fuente-titulo);font-weight:700;font-size:44px");
+          el(sel, "cap02-a", carpeta + "<span style='margin-left:20px'>extensión</span>", "left:40px;top:120px;width:320px;height:90px;box-sizing:border-box;padding:0 24px;border-radius:16px;background:#d7efe6;border:4px solid #176b56;font-size:44px;font-weight:700").firstChild.style.cssText = "width:48px;height:48px;color:#176b56;flex:none";
+          const lista = el(sel, "cap02-a", null, "left:380px;top:100px;flex-direction:column;align-items:flex-start;gap:6px;font-size:40px;font-weight:600;color:#52645d");
+          lista.innerHTML = '<span style="color:#17372f;font-weight:700;background:#fff3b0;padding:2px 14px;border-radius:10px">manifest.json</span><span style="padding:2px 14px">popup.html</span><span style="padding:2px 14px">background.js</span>';
+          ventana(sel, f5 + 6.0, null);
+          AP.foco(tl, B, { id: ID + "-foco7", x: 820, y: 556, ancho: 290, alto: 56, radio: 12, oscurecer: false, entrada: f5 + 6.6, salida: null, latidos: 1 });
+
+          window.__timelines[ID] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

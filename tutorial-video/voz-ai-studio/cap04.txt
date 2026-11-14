@@ -1,0 +1,9 @@
+Toca el ícono de Adapta Pe y se abre su panel. Aquí está todo.
+
+Arriba, la lectura en voz alta y el control por voz, con su idioma: español, inglés, portugués, alemán, francés o italiano.
+
+Más abajo, los filtros de color, el cursor con cámara y tu mascota.
+
+Los cambios se guardan solos, y se aplican al instante, sin recargar la página.
+
+En Lite verás el mismo panel, pero sin cámara ni lectura.

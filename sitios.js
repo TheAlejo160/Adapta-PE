@@ -67,7 +67,8 @@ const IdiomasVoz = {
             [/^(?:calibra|centra)(?: el)? cursor$/, 'calibrar cursor'],
             [/^(?:pausa|deten|para)(?: el)? cursor$/, 'pausar cursor'],
             [/^(?:reanuda|sigue)(?: con)?(?: el)? cursor$/, 'reanudar cursor'],
-            [/^(?:(?:da|dale|haz|hazle) )?cli(?:c|ck) derecho$/, 'clic derecho']
+            [/^(?:(?:da|dale|haz|hazle) )?cli(?:c|ck) derecho$/, 'clic derecho'],
+            [/^(?:(?:abre|muestra|inicia|empieza)(?: el)? )?tutorial$/, 'tutorial']
         ]
     },
     en: {
@@ -99,6 +100,7 @@ const IdiomasVoz = {
             [/^(?:(?:wake (?:up )?(?:the )?pet|wake (?:the )?pet up))$/, 'despierta mascota'],
             [/^(?:pet|(?:choose|select|change to)(?: the)? pet) /, 'mascota '],
             [/^(?:help|what can i say|what can you do|(?:show )?commands)$/, 'ayuda'],
+            [/^(?:(?:open|show|start) (?:the )?)?tutorial$/, 'tutorial'],
             [/^(?:cancel|never ?mind|forget it)$/, 'cancelar'],
             [/^(?:stop talking|stop reading|be quiet|shut up|silence|quiet)$/, 'calla'],
             [/^(?:(?:open|create) )?(?:a )?new tab$/, 'nueva pestaña'], [/^(?:(?:open|create) )?(?:a )?new window$/, 'nueva ventana'],
@@ -155,6 +157,7 @@ const IdiomasVoz = {
             [/^(?:(?:clica|clique) (?:na |a )?selecao)$/, 'dale clic'],
             [/^(?:mascote|(?:escolhe|escolha|seleciona)(?: o)? mascote) /, 'mascota '],
             [/^(?:ajuda|o que (?:eu )?posso dizer|comandos)$/, 'ayuda'],
+            [/^(?:(?:abre|abrir|mostra|inicia) (?:o )?)?tutorial$/, 'tutorial'],
             [/^(?:cancela|cancelar|esquece|deixa pra la)$/, 'cancelar'],
             [/^(?:para de falar|para de ler|cala a boca|silencio|chega)$/, 'calla'],
             [/^(?:(?:abre|abrir|abra) )?(?:uma )?nova (?:aba|guia)$/, 'nueva pestaña'], [/^(?:(?:abre|abrir|abra) )?(?:uma )?nova janela$/, 'nueva ventana'],
@@ -214,6 +217,7 @@ const IdiomasVoz = {
             [/^(?:auswahl anklicken)$/, 'dale clic'],
             [/^(?:(?:haustier|maskottchen) |(?:wahle (?:das )?(?:haustier|maskottchen)) )/, 'mascota '],
             [/^(?:hilfe|was kann ich sagen|befehle)$/, 'ayuda'],
+            [/^(?:(?:offne|zeige|starte) (?:das |die )?)?(?:tutorial|anleitung)$/, 'tutorial'],
             [/^(?:abbrechen|abbruch|vergiss es)$/, 'cancelar'],
             [/^(?:sei still|ruhe|stopp|hor auf zu (?:reden|lesen))$/, 'calla'],
             [/^(?:(?:offne|mach) )?(?:einen |ein )?neue[nrs]? (?:tab|registerkarte)$/, 'nueva pestaña'], [/^(?:(?:offne|mach) )?(?:ein )?neues fenster$/, 'nueva ventana'],
@@ -275,6 +279,7 @@ const IdiomasVoz = {
             [/^(?:clique (?:sur )?(?:la )?selection)$/, 'dale clic'],
             [/^(?:mascotte|(?:choisis|choisir)(?: la)? mascotte) /, 'mascota '],
             [/^(?:aide|que puis-je dire|qu'est-ce que je peux dire|commandes)$/, 'ayuda'],
+            [/^(?:(?:ouvre|montre|lance) (?:le )?)?tutoriel$/, 'tutorial'],
             [/^(?:annule|annuler|laisse tomber|oublie)$/, 'cancelar'],
             [/^(?:tais-toi|silence|stop|arrete de (?:parler|lire))$/, 'calla'],
             [/^(?:(?:ouvre|ouvrir) )?(?:un )?nouvel onglet$/, 'nueva pestaña'], [/^(?:(?:ouvre|ouvrir) )?(?:une )?nouvelle fenetre$/, 'nueva ventana'],
@@ -332,6 +337,7 @@ const IdiomasVoz = {
             [/^(?:clicca (?:sulla |la )?selezione)$/, 'dale clic'],
             [/^(?:mascotte|(?:scegli|seleziona)(?: la)? mascotte) /, 'mascota '],
             [/^(?:aiuto|cosa posso dire|comandi)$/, 'ayuda'],
+            [/^(?:(?:apri|mostra|avvia) (?:il )?)?tutorial$/, 'tutorial'],
             [/^(?:annulla|lascia stare|lascia perdere)$/, 'cancelar'],
             [/^(?:zitto|stai zitto|silenzio|basta|smetti di (?:parlare|leggere))$/, 'calla'],
             [/^(?:apri )?(?:una )?nuova scheda$/, 'nueva pestaña'], [/^(?:apri )?(?:una )?nuova finestra$/, 'nueva ventana'],
@@ -386,4 +392,235 @@ function detectarIdiomaVoz(preferidos) {
     return 'es-PE';
 }
 globalThis.CodigosVoz = CodigosVoz; globalThis.detectarIdiomaVoz = detectarIdiomaVoz;
+
+// Nombre de activación configurable (`nombreActivacion` en storage.local). Ausente, vacío o inválido:
+// «Computadora» y la palabra del idioma. Uno válido las sustituye a ambas en los seis idiomas.
+// Clave de comparación: minúsculas, sin diacríticos ni separadores y sin letras repetidas («Jar vis», «Lucía», «Yatti»).
+// Quita cualquier marca de las vocales (á, ã, ü…) y conserva ñ, ç, ll y rr.
+const letrasActivacion = texto => String(texto || '').toLowerCase().normalize('NFD').replace(/([aeiou])\p{M}+/gu, '$1').normalize('NFC')
+    .replace(/[^\p{L}\p{N}]/gu, '');
+const claveActivacion = texto => letrasActivacion(texto).replace(/(\p{L})\1+/gu, (grupo, letra) => /[lr]/.test(letra) ? letra + letra : letra);
+// Contrato portable: las plataformas consumen estos datos, no las APIs de Chrome.
+const ParidadVoz = {
+    // Secuencia del tutorial práctico (misma en todas las ediciones; `soloBase` requiere cursor con cámara).
+    // Textos en textos_paginas.js: `tutorial.<id>.titulo` y `tutorial.<id>.texto`. `orden` es la orden canónica a practicar.
+    tutorial: {
+        version: 1, orden: 'tutorial',
+        pasos: [
+            { id: 'voz' }, { id: 'nombre' }, { id: 'baja', orden: 'baja' }, { id: 'selecciona', orden: 'selecciona Siguiente' },
+            { id: 'clic', orden: 'dale clic' }, { id: 'filtro' }, { id: 'cursor', soloBase: true }, { id: 'reabrir', orden: 'tutorial' }
+        ]
+    },
+    confirmaciones: {
+        es: { verbo: 'confirmo', cerrar_pestana: 'cerrar esta pestaña', cerrar_otras: 'cerrar otras pestañas', cerrar_ventana: 'cerrar ventana', pregunta: 'Di exactamente: {frase}. Caduca en 8 segundos.' },
+        en: { verbo: 'confirm', cerrar_pestana: 'close this tab', cerrar_otras: 'close other tabs', cerrar_ventana: 'close window', pregunta: 'Say exactly: {frase}. Expires in 8 seconds.' },
+        pt: { verbo: 'confirmo', cerrar_pestana: 'fechar esta aba', cerrar_otras: 'fechar outras abas', cerrar_ventana: 'fechar janela', pregunta: 'Diga exatamente: {frase}. Expira em 8 segundos.' },
+        de: { verbo: 'bestätige', cerrar_pestana: 'diesen Tab schließen', cerrar_otras: 'andere Tabs schließen', cerrar_ventana: 'Fenster schließen', pregunta: 'Sagen Sie genau: {frase}. Gilt 8 Sekunden.' },
+        fr: { verbo: 'confirme', cerrar_pestana: 'fermer cet onglet', cerrar_otras: 'fermer les autres onglets', cerrar_ventana: 'fermer la fenêtre', pregunta: 'Dites exactement : {frase}. Expire dans 8 secondes.' },
+        it: { verbo: 'confermo', cerrar_pestana: 'chiudere questa scheda', cerrar_otras: 'chiudere altre schede', cerrar_ventana: 'chiudere finestra', pregunta: 'Di esattamente: {frase}. Scade tra 8 secondi.' }
+    },
+    activacion: {
+        version: 1, validacion: { minimo: 3, maximo: 24, palabras: 3, letras: 3 }, maxAlias: 3,
+        fragmentosPorPalabra: 3, pluralLiteral: true, tambienComputadora: false,
+        posicion: 'inicio_o_envoltorio', compuestosVocativos: ['Hey Google'],
+        vocativos: { es: ['oye', 'oe', 'hola'], en: ['hey', 'hello'], pt: ['oi', 'ola'], de: ['hallo'], fr: ['salut'], it: ['ciao'] },
+        cierres: { es: ['gracias', 'listo', 'silencio'], en: ['thanks', 'done', 'silence'], pt: ['obrigado', 'pronto', 'silencio'], de: ['danke', 'fertig', 'ruhe'], fr: ['merci', 'termine', 'silence'], it: ['grazie', 'fatto', 'silenzio'] },
+        interrupciones: { es: ['calla', 'silencio', 'deja de hablar'], en: ['silence', 'stop speaking'], pt: ['silencio', 'para de falar'], de: ['ruhe', 'nicht sprechen'], fr: ['silence', 'arrete de parler'], it: ['silenzio', 'smetti di parlare'] },
+        pronunciaciones: { jarvis: ['yarbis', 'yarvis', 'jarbis'], alexa: ['aleksa'], mike: ['maik'], george: ['yorch'] },
+        perfilEspanol: { minimoLetras: 5, reglas: [
+            { patron: 'c(?=[ei])', flags: 'g', reemplazo: 's' },
+            { patron: 'qu(?=[ei])', flags: 'g', reemplazo: 'k' },
+            { patron: 'c(?!h)', flags: 'g', reemplazo: 'k' },
+            { patron: 'ph', flags: 'g', reemplazo: 'f' },
+            { patron: 'v', flags: 'g', reemplazo: 'b' },
+            { patron: 'z', flags: 'g', reemplazo: 's' },
+            { patron: 'x', flags: 'g', reemplazo: 'ks' }
+        ] }
+    },
+    tolerancia: {
+        prefijoTokens: 1, minimoLetras: 5, distanciaMaxima: 1, distanciaSegundo: 3, combinarEdicionFonetica: false,
+        verbos: { es: ['buscar', 'recarga', 'actualiza', 'refresca', 'aumenta', 'reduce', 'selecciona'], en: ['search', 'reload', 'refresh', 'select'], pt: ['busca', 'pesquisa', 'recarrega', 'seleciona'], de: ['suche', 'aktualisiere'], fr: ['cherche', 'recharge'], it: ['cerca', 'ricarica', 'seleziona'] },
+        excluidos: {
+            es: ['cerrar', 'cierra', 'salir', 'terminar', 'borrar', 'borra', 'eliminar', 'vaciar', 'limpiar', 'enviar', 'envia', 'publicar', 'comprar', 'ejecutar', 'ejecuta', 'pulsar', 'pulsa', 'clic', 'enter', 'atajos', 'apagar', 'desactivar'],
+            en: ['close', 'exit', 'quit', 'finish', 'delete', 'erase', 'empty', 'clear', 'send', 'publish', 'buy', 'run', 'execute', 'press', 'click', 'enter', 'shortcut', 'disable', 'stop'],
+            pt: ['fechar', 'fecha', 'sair', 'terminar', 'apagar', 'eliminar', 'esvaziar', 'limpar', 'enviar', 'publicar', 'comprar', 'executar', 'pressionar', 'clicar', 'enter', 'atalho', 'desativar'],
+            de: ['schliessen', 'beenden', 'verlassen', 'loschen', 'leeren', 'bereinigen', 'senden', 'veroffentlichen', 'kaufen', 'ausfuhren', 'drucken', 'klicken', 'eingabe', 'tastenkurzel', 'ausschalten', 'deaktivieren'],
+            fr: ['fermer', 'quitter', 'terminer', 'supprimer', 'effacer', 'vider', 'nettoyer', 'envoyer', 'publier', 'acheter', 'executer', 'appuyer', 'cliquer', 'entree', 'raccourci', 'eteindre', 'desactiver'],
+            it: ['chiudere', 'chiudi', 'uscire', 'terminare', 'cancellare', 'eliminare', 'svuotare', 'pulire', 'inviare', 'pubblicare', 'comprare', 'eseguire', 'premere', 'clic', 'invio', 'scorciatoia', 'spegnere', 'disattivare']
+        },
+        sitios: { youtube: ['yutub'] }
+    },
+    comportamiento: { version: 1, capacidades: ['activacion-posicional', 'alias-explicitos', 'prueba-sin-ejecucion', 'resultado-ejecucion', 'confirmacion-destino', 'conversacion-tts', 'tolerancia-benigna'],
+        estados: ['inactivo', 'esperando', 'ejecutando', 'hablando', 'confirmando'], resultados: ['ok', 'fallo', 'desconocida', 'confirmando'],
+        modoConversacion: false, ventanaMs: 8000, confirmacionMs: 8000, destructivas: ['cerrar_pestana', 'cerrar_otras', 'cerrar_ventana'] }
+};
+globalThis.ParidadVoz = ParidadVoz;
+globalThis.reservadasNombreActivacion = () => Object.fromEntries(palabrasReservadasActivacion());
+// Órdenes de una palabra del parser de páginas (VoiceAssistant) que no aparecen en IdiomasVoz.
+// Los infinitivos de toda orden («refrescar», «retroceder») se derivan en palabrasReservadasActivacion().
+const OrdenesParser = 'elige detente deten detener deja olvidalo olvida nada dejalo deselecciona crea pon poner ponme ponerme agrega anade dame clona ' +
+    'enmudece corta devuelve reactiva desmutea desilencia salta sal salir restablece desciende asciende scrollea desplazate desplaza desliza ' +
+    'muevete abajo arriba intro envia continua ejecuta llevame dirigete accede muestrame busqueda realiza encuentra consulta investiga ' +
+    'averigua vacia recalibra descansa acomoda';
+let reservadasActivacion = null;
+// Palabras que un nombre no puede contener, derivadas de las reglas de voz de los seis idiomas.
+function palabrasReservadasActivacion() {
+    if (reservadasActivacion) return reservadasActivacion;
+    const mapa = new Map();
+    const anotar = (texto, motivo) => {
+        for (const palabra of normalizarVoz(String(texto).replace(/\\[a-z]/gi, ' ')).split(/[^a-z]+/)) {
+            if (palabra.length < 3) continue;
+            mapa.set(claveActivacion(palabra), motivo);
+            if (motivo !== 'orden') continue;
+            // Infinitivo de cada imperativo: busca → buscar, retrocede → retroceder/retrocedir.
+            if (palabra.endsWith('a')) mapa.set(claveActivacion(palabra + 'r'), motivo);
+            if (palabra.endsWith('e')) for (const final of ['er', 'ir']) mapa.set(claveActivacion(palabra.slice(0, -1) + final), motivo);
+        }
+    };
+    for (const idioma of Object.values(IdiomasVoz)) for (const [patron, reemplazo] of idioma.frases) { anotar(patron.source, 'orden'); anotar(reemplazo, 'orden'); }
+    for (const [forma, canonico] of Object.entries(IdiomasVoz.es.verbos)) { anotar(forma, 'orden'); anotar(canonico, 'orden'); }
+    anotar(OrdenesParser, 'orden');
+    for (const idioma of Object.values(IdiomasVoz)) { anotar(idioma.envoltorios.source, 'muletilla'); anotar(idioma.finales.source, 'muletilla'); }
+    for (const mascota of ['tinku', 'cuchu', 'yati']) mapa.set(claveActivacion(mascota), 'mascota');
+    return reservadasActivacion = mapa;
+}
+// Devuelve { ok, nombre, motivo }; motivo es una clave de texto traducible (`activacion.*`).
+function validarNombreActivacion(texto) {
+    const nombre = typeof texto === 'string' ? texto.normalize('NFC').replace(/\s+/g, ' ').trim() : '';
+    const fallo = motivo => ({ ok: false, nombre, motivo: 'activacion.' + motivo });
+    // Sólo cadenas: false, números o listas guardados por error vuelven a «Computadora».
+    if (nombre.length < 3 || nombre.length > 24) return fallo('longitud');
+    if (!/^[\p{L}\p{M}' ’-]+$/u.test(nombre)) return fallo('caracteres');
+    if (nombre.split(' ').length > 3) return fallo('palabras');
+    if ((nombre.match(/\p{L}/gu) || []).length < 3) return fallo('letras');
+    const reservadas = palabrasReservadasActivacion();
+    if (ParidadVoz.activacion.compuestosVocativos.some(compuesto => compuesto.toLowerCase() === nombre.toLowerCase())) return { ok: true, nombre, motivo: null };
+    for (const parte of [nombre, ...nombre.split(/[\s'’-]+/)]) {
+        const motivo = reservadas.get(claveActivacion(parte));
+        if (motivo) return fallo(motivo);
+    }
+    return { ok: true, nombre, motivo: null };
+}
+// Nombre que se muestra al usuario: el personalizado válido o la palabra del idioma.
+function palabraActivacion(nombre, idioma = 'es') {
+    const validado = validarNombreActivacion(nombre);
+    return validado.ok ? validado.nombre : (IdiomasVoz[String(idioma).slice(0, 2).toLowerCase()] || IdiomasVoz.es).palabra;
+}
+const patronesActivacion = new Map();
+function perfilEspanol(texto) {
+    return ParidadVoz.activacion.perfilEspanol.reglas.reduce((valor, regla) => valor.replace(new RegExp(regla.patron, regla.flags), regla.reemplazo), letrasActivacion(texto));
+}
+function validarAliasActivacion(alias, nombre) {
+    if (!Array.isArray(alias) || alias.length > ParidadVoz.activacion.maxAlias) return { ok: false, alias: [] };
+    const vistos = new Set([claveActivacion(nombre)]), resultado = [];
+    for (const valor of alias) {
+        const validado = validarNombreActivacion(valor), clave = claveActivacion(valor);
+        if (!validado.ok || vistos.has(clave)) return { ok: false, alias: [] };
+        vistos.add(clave); resultado.push(validado.nombre);
+    }
+    return { ok: true, alias: resultado };
+}
+function prefijoActivacionValido(texto, idioma) {
+    let restante = normalizarVoz(texto).replace(/^[\s,.:;!?¿¡]+/, '');
+    const datos = IdiomasVoz[idioma] || IdiomasVoz.es;
+    for (let vuelta = 0; vuelta < 8 && restante; vuelta++) {
+        const anterior = restante;
+        restante = (restante + ' ').replace(datos.envoltorios, '').trim();
+        for (const vocativo of ParidadVoz.activacion.vocativos[idioma] || []) {
+            if (restante === vocativo || restante.startsWith(vocativo + ' ')) restante = restante.slice(vocativo.length).trim();
+        }
+        restante = restante.replace(/^[\s,.:;!?]+/, '');
+        if (restante === anterior) break;
+    }
+    return !restante;
+}
+// Busca el nombre alineado por palabras, con límites Unicode, al inicio o tras muletillas/vocativos
+// (también durante la espera tras el pitido). Devuelve dónde termina en el texto original, para
+// recortar conservando mayúsculas y acentos, o -1.
+function buscarActivacion(texto, nombre, idioma = 'es', opciones = {}) {
+    const fragmentos = [...String(texto || '').matchAll(/[\p{L}\p{M}\p{N}]+/gu)];
+    const base = String(idioma).slice(0, 2).toLowerCase();
+    const limite = Math.min(fragmentos.length, 32);
+    const fin = indice => fragmentos[indice].index + fragmentos[indice][0].length;
+    const validado = validarNombreActivacion(nombre);
+    const inicios = fragmentos.slice(0, limite).map((_, indice) => indice).filter(indice =>
+        prefijoActivacionValido(String(texto).slice(0, fragmentos[indice].index), base));
+    if (!validado.ok || opciones.tambienComputadora === true) {
+        // Predeterminado: una palabra exacta de `activacion` (español siempre y la del idioma), como antes.
+        if (!patronesActivacion.has(base)) {
+            const formas = [IdiomasVoz.es.activacion, IdiomasVoz[base]?.activacion].filter(Boolean);
+            patronesActivacion.set(base, new RegExp('^(?:' + formas.join('|') + ')$'));
+        }
+        const patron = patronesActivacion.get(base);
+        for (const inicio of inicios) if (patron.test(letrasActivacion(fragmentos[inicio][0]))) return fin(inicio);
+    }
+    // Personalizado: sin diacríticos, separadores ni letras repetidas; admite el nombre partido en
+    // sílabas («Jar vis», «An n») y una «s» final. Sin ediciones: «bonito» nunca activa a «Benito».
+    const letras = fragmentos.map(fragmento => letrasActivacion(fragmento[0])); // Una vez por fragmento.
+    const alias = validarAliasActivacion(opciones.aliasActivacion || [], validado.nombre).alias;
+    // Los alias también valen con el nombre predeterminado.
+    for (const elegido of [...(validado.ok ? [validado.nombre] : []), ...alias]) {
+      const objetivo = claveActivacion(elegido);
+      const tabla = ParidadVoz.activacion.pronunciaciones[objetivo] || [];
+      const admitePerfil = base === 'es' && letrasActivacion(elegido).length >= ParidadVoz.activacion.perfilEspanol.minimoLetras;
+      const coincide = clave => clave === objetivo || clave === objetivo + 's' || tabla.includes(clave) ||
+          (admitePerfil && perfilEspanol(clave) === perfilEspanol(objetivo));
+      const maximoFragmentos = elegido.split(' ').length * ParidadVoz.activacion.fragmentosPorPalabra;
+      for (const inicio of inicios) {
+        let unidas = '', mejor = -1;
+        for (let indice = inicio; indice < fragmentos.length && indice < inicio + maximoFragmentos; indice++) {
+            unidas += letras[indice];
+            const clave = claveActivacion(unidas);
+            if (coincide(clave)) mejor = indice;
+            else if (mejor >= 0) break;
+        }
+        if (mejor >= 0) return fin(mejor);
+      }
+    }
+    return -1;
+}
+// Confirmación hablada de una acción destructiva: «confirmo …» en cualquiera de los seis idiomas.
+const esConfirmacionVoz = texto => Object.values(ParidadVoz.confirmaciones).some(datos => normalizarVoz(texto).startsWith(normalizarVoz(datos.verbo) + ' '));
+// Distancia de edición (Levenshtein) con dos filas.
+function distanciaEdicion(a, b) {
+    let previa = Array.from({ length: b.length + 1 }, (_, j) => j);
+    for (let i = 1; i <= a.length; i++) {
+        const fila = [i];
+        for (let j = 1; j <= b.length; j++) fila[j] = Math.min(previa[j] + 1, fila[j - 1] + 1, previa[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        previa = fila;
+    }
+    return previa[b.length];
+}
+// Tolerancia, sólo como respaldo cuando el parser exacto no entendió: corrige el primer token con
+// una edición (sin fonética) hacia un verbo benigno del idioma. Devuelve { texto } corregido,
+// { repetir: true } si se parece a una orden excluida (cerrar, borrar, enviar…) o null (sin candidato o ambiguo).
+function corregirOrden(texto, idioma = 'es') {
+    const reglas = ParidadVoz.tolerancia, original = String(texto || '').trim();
+    const token = /^\S+/.exec(original)?.[0], palabra = normalizarVoz(token);
+    if (!token || palabra.length < reglas.minimoLetras) return null;
+    const candidatos = [...(reglas.verbos[String(idioma).slice(0, 2).toLowerCase()] || []).map(verbo => [verbo, false]),
+        ...Object.values(reglas.excluidos).flat().map(verbo => [verbo, true])]
+        .map(([verbo, excluido]) => ({ verbo, excluido, distancia: distanciaEdicion(palabra, verbo) })).sort((a, b) => a.distancia - b.distancia);
+    const excluido = candidatos.find(candidato => candidato.excluido);
+    if (excluido.distancia === 0) return null; // Orden exacta: la decide el parser.
+    if (excluido.distancia <= reglas.distanciaMaxima) return { repetir: true };
+    if (palabrasReservadasActivacion().has(claveActivacion(palabra))) return null; // Palabra conocida: nada que corregir.
+    const [mejor, segundo] = candidatos;
+    if (mejor.excluido || mejor.distancia > reglas.distanciaMaxima || mejor.verbo.length < reglas.minimoLetras ||
+        (segundo && segundo.distancia < reglas.distanciaSegundo)) return null;
+    return { texto: mejor.verbo + original.slice(token.length) };
+}
+// Sitio por tabla cerrada o perfil español acotado (≥5 letras, sin ediciones). Sólo uno; si no, null.
+function sitioTolerante(texto, idioma = 'es') {
+    const clave = claveActivacion(texto);
+    if (String(idioma).slice(0, 2).toLowerCase() !== 'es' || clave.length < ParidadVoz.tolerancia.minimoLetras) return null;
+    const perfil = perfilEspanol(clave);
+    const hallados = Object.keys(SitiosVoz).filter(sitio => (ParidadVoz.tolerancia.sitios[sitio] || []).includes(clave) ||
+        SitiosVoz[sitio].alias.some(alias => perfilEspanol(claveActivacion(alias)) === perfil));
+    return hallados.length === 1 ? hallados[0] : null;
+}
+globalThis.esConfirmacionVoz = esConfirmacionVoz; globalThis.corregirOrden = corregirOrden; globalThis.sitioTolerante = sitioTolerante;
+globalThis.validarNombreActivacion = validarNombreActivacion; globalThis.palabraActivacion = palabraActivacion;
+globalThis.buscarActivacion = buscarActivacion;
+globalThis.validarAliasActivacion = validarAliasActivacion;
 })();

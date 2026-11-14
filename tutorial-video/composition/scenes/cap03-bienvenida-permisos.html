@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>cap03 · Bienvenida y permisos</title>
+  </head>
+  <body>
+    <!--
+      cap03 · Bienvenida y permisos. Capturas reales recortadas (marco de
+      990×594 en x=96,y=170, escala 0,9 sobre la imagen de 2880×1800):
+      bienvenida Base, interruptores uno a uno, Lite, interruptor que se
+      enciende, permiso de micrófono con aviso de Chrome, permiso de cámara
+      y mensaje de privacidad, y check final.
+    -->
+    <template>
+      <style>
+        #cap03-raiz {
+          position: absolute;
+          inset: 0;
+        }
+        .cap03-marco {
+          position: absolute;
+          overflow: hidden;
+          border-radius: var(--r-m);
+          background: #eceff2;
+          box-shadow: var(--sombra-2);
+        }
+        .cap03-marco img {
+          position: absolute;
+          display: block;
+          max-width: none;
+        }
+        .cap03-etq {
+          position: absolute;
+          left: 1180px;
+          width: 640px;
+          font-family: var(--ap-fuente-titulo);
+          font-weight: 700;
+          font-size: 64px;
+          line-height: 1.1;
+        }
+        .cap03-card {
+          position: absolute;
+          box-sizing: border-box;
+          border-radius: 24px;
+          background: #ffffff;
+          color: var(--ap-claro-texto);
+          box-shadow: var(--sombra-2);
+          border: 2px solid var(--ap-claro-borde);
+          font-family: var(--ap-fuente-texto);
+        }
+        .cap03-a {
+          position: absolute;
+          display: flex;
+          align-items: center;
+          white-space: nowrap;
+        }
+        .cap03-boton {
+          justify-content: center;
+          box-sizing: border-box;
+          border-radius: 999px;
+          font-size: 40px;
+          font-weight: 700;
+        }
+        .cap03-pestana {
+          position: absolute;
+          height: 120px;
+          width: 440px;
+          box-sizing: border-box;
+          padding: 0 28px;
+          display: flex;
+          align-items: center;
+          gap: 18px;
+          border-radius: 20px 20px 0 0;
+          background: var(--ap-cromo);
+          color: var(--ap-cromo-texto);
+          font-size: 40px;
+          font-weight: 700;
+          box-shadow: var(--sombra-1);
+        }
+        .cap03-pestana img {
+          width: 56px;
+          height: 56px;
+          border-radius: 50%;
+        }
+        .cap03-pestana svg {
+          width: 48px;
+          height: 48px;
+          margin-left: auto;
+          color: #176b56;
+        }
+      </style>
+
+      <div data-hf-id="hf-dfxi" id="cap03-raiz" class="ap-escena" data-composition-id="cap03" data-width="1920" data-height="1080"></div>
+
+      <script>
+        (function () {
+          const ID = "cap03";
+          const cap = AP.capitulo(ID);
+          const raiz = document.getElementById(ID + "-raiz");
+          const tl = gsap.timeline({ paused: true });
+          const f1 = AP.t(ID, "f1", 0.6);
+          const f2 = AP.t(ID, "f2", 3.9);
+          const f2fin = AP.tFin(ID, "f2", 12.3);
+          const f3 = AP.t(ID, "f3", 12.7);
+          const f4 = AP.t(ID, "f4", 16.4);
+          const f5 = AP.t(ID, "f5", 25.4);
+          const f6 = AP.t(ID, "f6", 32.1);
+          const I = AP.iconos;
+          const S = 0.9;
+          const FX = 96;
+          const FY = 130;
+
+          function el(padre, clase, html, css) {
+            const e = document.createElement("div");
+            if (clase) e.className = clase;
+            if (html != null) e.innerHTML = html;
+            if (css) e.style.cssText = css;
+            padre.appendChild(e);
+            return e;
+          }
+          function ventana(e, t, t2) {
+            tl.fromTo(e, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, t);
+            if (t2 != null) tl.to(e, { opacity: 0, duration: 0.35, ease: "power1.in" }, t2);
+          }
+          // Marco con recorte de una captura. (cx,cy,cw,ch) en px de la imagen; devuelve el mapeo a lienzo.
+          function recorte(id, src, iw, cx, cy, cw, ch, s, x, y) {
+            const m = el(raiz, "cap03-marco", null, "left:" + x + "px;top:" + y + "px;width:" + Math.round(cw * s) + "px;height:" + Math.round(ch * s) + "px");
+            m.id = id;
+            const img = document.createElement("img");
+            img.src = src;
+            img.alt = "";
+            img.setAttribute("data-layout-allow-overflow", "");
+            img.style.cssText = "left:" + -cx * s + "px;top:" + -cy * s + "px;width:" + iw * s + "px";
+            m.appendChild(img);
+            return { el: m, x: (ox) => x + (ox - cx) * s, y: (oy) => y + (oy - cy) * s, k: s };
+          }
+          // Rectángulo de la imagen → rectángulo de lienzo para AP.foco.
+          function rect(r, ox, oy, ow, oh) {
+            return { x: r.x(ox), y: r.y(oy), ancho: ow * r.k, alto: oh * r.k };
+          }
+          // Etiqueta grande + chip a la derecha del marco; aparece en t y se va en t2.
+          function etiqueta(id, texto, tipo, chipTexto, t, t2) {
+            const g = el(raiz, null, null, "position:absolute;inset:0");
+            g.id = id;
+            const e = el(g, "cap03-etq", texto, "top:330px");
+            AP.chip(tl, g, { id: id + "-chip", tipo, texto: chipTexto, x: 1180, y: 450, entrada: null });
+            ventana(g, t, t2);
+            return g;
+          }
+
+          AP.ambiente(tl, raiz, { duracion: cap.duracion, semilla: 4 });
+
+          // f1 · la página de bienvenida entra completa
+          const comp = recorte(ID + "-m-completa", "assets/capturas/base-bienvenida.png", 2880, 880, 60, 1120, 1090, 0.64, 600, 120);
+          AP.entrar(tl, comp.el, f1, "subir", 0.8);
+          tl.to(comp.el, { opacity: 0, duration: 0.4, ease: "power1.in" }, f2 + 0.1);
+
+          // f2 · interruptores uno a uno y Lite
+          const base = recorte(ID + "-m-base", "assets/capturas/base-bienvenida.png", 2880, 900, 800, 1100, 640, S, FX, FY);
+          tl.fromTo(base.el, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, f2 + 0.1);
+          const d = f2fin - f2;
+          const filas = [
+            [830, "Control por voz", "ambos", "Base y Lite", 0.3],
+            [1068, "Cursor con cámara", "base", "Sólo Base", 0.5],
+            [1306, "Lectura en voz alta", "base", "Sólo Base", 0.68],
+          ];
+          filas.forEach((f, i) => {
+            const t = f2 + f[4] * d;
+            const tf = i < 2 ? f2 + filas[i + 1][4] * d - 0.2 : f2 + 0.84 * d - 0.2;
+            const r = rect(base, 920, f[0], 1040, 110);
+            AP.foco(tl, raiz, { id: ID + "-foco-" + (i + 1), x: r.x, y: r.y, ancho: r.ancho, alto: r.alto, radio: 20, entrada: t, salida: tf });
+            etiqueta(ID + "-etq" + (i + 1), f[1], f[2], f[3], t + 0.1, tf);
+          });
+          const lite = recorte(ID + "-m-lite", "assets/capturas/lite-bienvenida.png", 2880, 900, 740, 1100, 640, S, FX, FY);
+          const tl2 = f2 + 0.84 * d;
+          ventana(lite.el, tl2, f3 - 0.2);
+          const rl = rect(lite, 920, 785, 1040, 110);
+          AP.foco(tl, raiz, { id: ID + "-foco-lite", x: rl.x, y: rl.y, ancho: rl.ancho, alto: rl.alto, radio: 20, entrada: tl2 + 0.3, salida: f3 - 0.2 });
+          etiqueta(ID + "-etq-lite", "En Lite, sólo la voz", "lite", "Sólo Lite", tl2 + 0.3, f3 - 0.2);
+
+          // f3 · todo apagado; uno se enciende
+          AP.rotulo(tl, raiz, { id: ID + "-rot1", texto: "Todo empieza apagado", entrada: f3 + 0.1, salida: f3 + 1.9 });
+          const px0 = base.x(1839);
+          const py0 = base.y(858);
+          const pista = el(raiz, null, null, "position:absolute;left:" + px0 + "px;top:" + py0 + "px;width:" + 105 * S + "px;height:" + 55 * S + "px;border-radius:999px;background:#176b56;opacity:0");
+          const perilla = el(pista, null, null, "position:absolute;left:4px;top:4px;width:" + (55 * S - 8) + "px;height:" + (55 * S - 8) + "px;border-radius:50%;background:#ffffff");
+          tl.to(pista, { opacity: 1, duration: 0.3 }, f3 + 2.0);
+          tl.to(perilla, { x: 105 * S - 55 * S, duration: 0.35, ease: "power2.out" }, f3 + 2.0);
+          const rv = rect(base, 920, 830, 1040, 110);
+          AP.foco(tl, raiz, { id: ID + "-foco-enciende", x: rv.x, y: rv.y, ancho: rv.ancho, alto: rv.alto, radio: 20, entrada: f3 + 1.9, salida: f4 - 0.2, latidos: 1 });
+          AP.rotulo(tl, raiz, { id: ID + "-rot2", texto: "Tú decides qué encender", entrada: f3 + 2.0, salida: f4 - 0.2 });
+          tl.to(base.el, { opacity: 0, duration: 0.4 }, f4 - 0.2);
+          tl.to(pista, { opacity: 0, duration: 0.4 }, f4 - 0.2);
+
+          // f4 · permiso de micrófono + aviso de Chrome
+          const mic = recorte(ID + "-m-mic", "assets/capturas/base-permisos-voz.png", 2880, 880, 230, 1120, 640, S, FX, FY);
+          tl.fromTo(mic.el, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, f4 - 0.2);
+          tl.to(mic.el, { opacity: 0, duration: 0.4 }, f5 - 0.2);
+          const rb = rect(mic, 936, 655, 313, 89);
+          AP.foco(tl, raiz, { id: ID + "-foco-mic", x: rb.x, y: rb.y, ancho: rb.ancho, alto: rb.alto, radio: 14, entrada: f4 + 3.2, salida: f4 + 5.3 });
+          const aviso = el(raiz, "cap03-card", null, "left:1180px;top:230px;width:640px;height:380px");
+          aviso.id = ID + "-aviso";
+          el(aviso, "cap03-a", I.candado + "<span style='margin-left:16px;color:#52645d;font-size:36px;font-weight:700'>Aviso de Chrome</span>", "left:36px;top:24px;height:56px").firstChild.style.cssText = "width:40px;height:40px;color:#52645d";
+          el(aviso, "cap03-a", "Usar tu micrófono", "left:36px;top:110px;font-family:var(--ap-fuente-titulo);font-weight:700;font-size:52px");
+          el(aviso, "cap03-a cap03-boton", "Permitir", "left:36px;top:240px;width:290px;height:96px;background:#1a73e8;color:#ffffff");
+          el(aviso, "cap03-a cap03-boton", "No permitir", "left:350px;top:240px;width:254px;height:96px;background:#e8eaed;color:#1f2937;font-size:36px");
+          AP.entrar(tl, aviso, f4 + 5.4, "izquierda", 0.6);
+          AP.rotulo(tl, raiz, { id: ID + "-rot-mic", texto: "Pulsa «Permitir micrófono»", entrada: f4 + 3.3, salida: f4 + 5.3 });
+          AP.foco(tl, raiz, { id: ID + "-foco-aviso", x: 1216, y: 470, ancho: 290, alto: 96, radio: 48, entrada: f4 + 6.6, salida: f5 - 0.2 });
+          tl.to(aviso, { opacity: 0, duration: 0.4 }, f5 - 0.2);
+
+          // f5 · permiso de cámara y privacidad
+          const cam = recorte(ID + "-m-cam", "assets/capturas/base-permisos-camara.png", 2880, 880, 230, 1120, 640, S, FX, FY);
+          tl.fromTo(cam.el, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.out" }, f5 - 0.2);
+          tl.to(cam.el, { opacity: 0, duration: 0.4 }, f6 - 0.2);
+          const rc = rect(cam, 936, 655, 276, 89);
+          AP.foco(tl, raiz, { id: ID + "-foco-cam", x: rc.x, y: rc.y, ancho: rc.ancho, alto: rc.alto, radio: 14, entrada: f5 + 0.3, salida: f5 + 1.9 });
+          const priv = el(raiz, null, null, "position:absolute;left:1180px;top:250px;width:640px;height:420px");
+          priv.id = ID + "-priv";
+          el(priv, null, I.candado, "position:absolute;left:0;top:0;width:190px;height:190px;border-radius:50%;background:var(--ap-verde-suave);color:var(--ap-verde);display:grid;place-items:center").firstChild.style.cssText = "width:104px;height:104px";
+          const p1 = el(priv, "cap03-etq", "Se procesa en tu equipo", "left:0;top:220px");
+          const p2 = el(priv, "cap03-etq", "Nunca sale de tu computadora", "left:0;top:220px");
+          tl.fromTo(p1, { opacity: 0 }, { opacity: 1, duration: 0.4 }, f5 + 2.0);
+          tl.to(p1, { opacity: 0, duration: 0.3 }, f5 + 4.0);
+          tl.fromTo(p2, { opacity: 0 }, { opacity: 1, duration: 0.4 }, f5 + 4.2);
+          AP.entrar(tl, priv, f5 + 1.9, "derecha", 0.6);
+          tl.to(priv, { opacity: 0, duration: 0.4 }, f6 - 0.2);
+
+          // f6 · una sola vez, vale para todas las páginas
+          const fin = el(raiz, null, null, "position:absolute;inset:0");
+          fin.id = ID + "-fin";
+          tl.fromTo(fin, { opacity: 0 }, { opacity: 1, duration: 0.4 }, f6 - 0.1);
+          const chk = el(fin, null, I.check, "position:absolute;left:870px;top:130px;width:180px;height:180px;border-radius:50%;background:var(--ap-verde);color:var(--ap-tinta);display:grid;place-items:center");
+          chk.firstChild.style.cssText = "width:104px;height:104px;stroke-width:3";
+          AP.entrar(tl, chk, f6, "rebote", 0.6);
+          el(fin, "ap-subtitulo", "Se pide una sola vez", "position:absolute;left:0;right:0;top:340px;text-align:center").id = ID + "-una-vez";
+          [["Wikipedia", 120], ["YouTube", 740], ["Gmail", 1360]].forEach((p, i) => {
+            const t = el(fin, "cap03-pestana", '<img src="assets/marca/adapta-icon.webp" alt=""><span>' + p[0] + "</span>" + I.check, "left:" + p[1] + "px;top:520px");
+            t.id = ID + "-tab" + (i + 1);
+            AP.entrar(tl, t, f6 + 0.6 + i * 0.3, "subir", 0.5);
+          });
+
+          window.__timelines[ID] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

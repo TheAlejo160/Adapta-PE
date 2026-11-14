@@ -11,7 +11,11 @@ const conexiones = new Map();
 let transicionPaginas = Promise.resolve(), revisionPaginas = 0, conectarTodas = false;
 let pestanaConControl = null;
 let retornoCamara = null;
+let camaraSinPermiso = false; // El HUD de la página explica que falta autorizar la cámara hasta que llegue una imagen.
 let detenerMascotaLectura = null;
+let pruebaNombre = null;
+let confirmacionVoz = null;
+let secuenciaTTS = 0;
 // 'auto' (o valor desconocido) sigue el primer idioma del sistema que el parser admite.
 function idiomaVoz(valor) {
     if (CodigosVoz.includes(valor)) return valor;
@@ -38,19 +42,23 @@ function vozTTS(idioma) {
     return idioma.startsWith('es') || !CodigosVoz.includes(idioma) ? IdiomasVoz[idioma.slice(0, 2).toLowerCase()].tts : idioma;
 }
 function textoEstadoVoz() { return estadoVoz ?? TextosAdapta.t('voz.desactivada'); }
-// Nueva pestaña propia (si el manifest la declara): la pestaña informa chrome://newtab/ y Chrome no
-// permite inyectar en páginas de extensión; la página carga el controlador por sí misma.
+// Páginas propias con controlador: la Nueva pestaña (si el manifest la declara; la pestaña informa
+// chrome://newtab/) y el tutorial (bienvenida.html, con o sin #hash). Chrome no permite inyectar en
+// páginas de extensión; cada página carga el controlador por sí misma. Devuelve su URL base o null.
 const nuevaPestana = chrome.runtime.getManifest().chrome_url_overrides?.newtab;
-function esNuevaPestana(pestana) {
-    return Boolean(nuevaPestana) && ['chrome://newtab/', chrome.runtime.getURL(nuevaPestana)].includes(pestana?.url);
+const urlTutorial = () => chrome.runtime.getURL('bienvenida.html');
+function paginaPropia(pestana) {
+    if (nuevaPestana && ['chrome://newtab/', chrome.runtime.getURL(nuevaPestana)].includes(pestana?.url)) return chrome.runtime.getURL(nuevaPestana);
+    return pestana?.url?.split('#')[0] === urlTutorial() ? urlTutorial() : null;
 }
-function paginaPermitida(pestana) { return /^(https?|file):/.test(pestana?.url || '') || esNuevaPestana(pestana); }
+function paginaPermitida(pestana) { return /^(https?|file):/.test(pestana?.url || '') || Boolean(paginaPropia(pestana)); }
 
 function asegurarControlador(pestana) {
     if (!paginaPermitida(pestana)) return Promise.resolve(null);
     // Otra extensión o la página de Chrome también usan chrome://newtab/: exigir nuestro documento.
-    if (esNuevaPestana(pestana)) return chrome.runtime.getContexts({ contextTypes: ['TAB'], tabIds: [pestana.id] }).then(contextos => {
-        const propio = contextos.find(contexto => contexto.frameId === 0 && contexto.documentUrl?.startsWith(chrome.runtime.getURL(nuevaPestana)));
+    const propia = paginaPropia(pestana);
+    if (propia) return chrome.runtime.getContexts({ contextTypes: ['TAB'], tabIds: [pestana.id] }).then(contextos => {
+        const propio = contextos.find(contexto => contexto.frameId === 0 && contexto.documentUrl?.startsWith(propia));
         return propio ? { id: pestana.id, documentId: propio.documentId } : null;
     }).catch(() => null);
     if (conexiones.has(pestana.id)) return conexiones.get(pestana.id);
@@ -89,7 +97,7 @@ function sincronizarPaginas(todas = false) {
         }
         if (revision !== revisionPaginas) return;
         if (destino) {
-            const respuesta = await chrome.tabs.sendMessage(destino.id, { accion: 'control_prioridad', activa: true },
+            const respuesta = await chrome.tabs.sendMessage(destino.id, { accion: 'control_prioridad', activa: true, camaraSinPermiso },
                 { documentId: destino.documentId }).catch(() => null);
             if (respuesta?.ok && revision === revisionPaginas) pestanaConControl = destino;
         }
@@ -109,8 +117,9 @@ async function pestanaActual() {
 }
 function sincronizarVoz(reintentar = false) {
     transicionVoz = transicionVoz.catch(() => {}).then(async () => {
-        const preferencias = await chrome.storage.local.get(['voz', 'ojos', 'ajustesCineticos', 'idiomaVoz']);
+        const preferencias = await chrome.storage.local.get(['voz', 'ojos', 'ajustesCineticos', 'idiomaVoz', 'nombreActivacion', 'aliasActivacion', 'tambienComputadora', 'modoConversacion']);
         const camara = admiteCinetico && Boolean(preferencias.ojos);
+        if (!camara) camaraSinPermiso = false;
         const idioma = await idiomaResuelto(preferencias.idiomaVoz);
         const existentes = await chrome.runtime.getContexts({ contextTypes: ['OFFSCREEN_DOCUMENT'],
             documentUrls: [chrome.runtime.getURL('voz/escucha.html')] });
@@ -122,7 +131,9 @@ function sincronizarVoz(reintentar = false) {
         }
         if (!existentes.length) await chrome.offscreen.createDocument({ url: 'voz/escucha.html',
             reasons: ['USER_MEDIA'], justification: 'Mantener una sola cámara y un solo micrófono de accesibilidad al navegar y cambiar de ventana.' });
-        await chrome.runtime.sendMessage({ destino: 'voz_central', accion: 'voz_configurar', activa: Boolean(preferencias.voz), idioma });
+        await chrome.runtime.sendMessage({ destino: 'voz_central', accion: 'voz_configurar', activa: Boolean(preferencias.voz), idioma,
+            nombreActivacion: preferencias.nombreActivacion, aliasActivacion: preferencias.aliasActivacion,
+            tambienComputadora: preferencias.tambienComputadora, modoConversacion: preferencias.modoConversacion });
         if (!preferencias.voz) { estadoVoz = null; tipoVoz = undefined; }
         if (admiteCinetico) await chrome.runtime.sendMessage({ destino: 'voz_central', accion: 'camara_configurar', activa: camara,
             procesar: Boolean(pestanaConControl), modo: preferencias.ajustesCineticos?.modo || 'cabeza', reintentar });
@@ -138,6 +149,21 @@ async function publicarEstadoVoz(activa) {
 }
 async function gestionarVoz(peticion, emisor) {
     const central = emisor.url === chrome.runtime.getURL('voz/escucha.html');
+    if (peticion.accion === 'voz_probar_nombre') {
+        if (!(await chrome.storage.local.get('voz')).voz) return { ok: false };
+        pruebaNombre = { texto: null, vence: Date.now() + 15000 };
+        const respuesta = await chrome.runtime.sendMessage({ destino: 'voz_central', accion: 'voz_probar_nombre' });
+        if (!respuesta?.ok) pruebaNombre = null;
+        return { ok: respuesta?.ok === true };
+    }
+    if (peticion.accion === 'voz_prueba_estado') {
+        const vigente = pruebaNombre?.vence > Date.now();
+        return { ok: true, texto: vigente ? pruebaNombre.texto : null, caducada: Boolean(pruebaNombre) && !vigente && pruebaNombre.texto === null };
+    }
+    if (peticion.accion === 'voz_prueba_muestra' && central) {
+        if (pruebaNombre?.vence > Date.now() && pruebaNombre.texto === null && typeof peticion.texto === 'string') pruebaNombre.texto = peticion.texto.slice(0, 4000);
+        return { ok: true };
+    }
     if (peticion.accion === 'voz_estado') {
         await idiomaVigente();
         return { ok: true, texto: textoEstadoVoz(), tipo: tipoVoz, activa: Boolean((await chrome.storage.local.get('voz')).voz) };
@@ -157,8 +183,9 @@ async function gestionarVoz(peticion, emisor) {
     if (peticion.accion === 'voz_publicar_estado') return fijarEstado();
     if (peticion.accion === 'voz_necesita_permiso') {
         const url = chrome.runtime.getURL('voz/permisos.html');
-        const existentes = await chrome.tabs.query({ url });
+        const existentes = (await chrome.tabs.query({})).filter(pestana => pestana.url === url);
         if (!existentes.length) await chrome.tabs.create({ url });
+        else { await chrome.tabs.update(existentes[0].id, { active: true }); await chrome.windows.update(existentes[0].windowId, { focused: true }); }
         return { ok: true };
     }
     if (peticion.accion === 'voz_comando') {
@@ -169,19 +196,23 @@ async function gestionarVoz(peticion, emisor) {
         // Fijar el destino al recibir la frase; no reenviar el mismo comando a una ventana nueva.
         ultimaVentanaVoz = pestana;
         const comando = normalizarVoz(peticion.texto);
+        if (!esConfirmacionVoz(comando)) confirmacionVoz = null;
         if (admiteCinetico && /^(activar|desactivar) (?:mouse cinetico|cursor)$/.test(comando)) {
-            await chrome.storage.local.set({ ojos: comando.startsWith('activar') }); return { ok: true };
+            const activar = comando.startsWith('activar');
+            // Con el cursor ya activo, «activar cursor» reintenta la cámara (storage no cambia y no volvería a sincronizar).
+            if (activar && (await chrome.storage.local.get('ojos')).ojos) await sincronizarVoz(true);
+            else await chrome.storage.local.set({ ojos: activar });
+            return { ok: true };
         }
         if (paginaPermitida(pestana)) {
             try {
                 const destino = await asegurarControlador(pestana);
                 if (!destino) throw new Error('Página protegida');
-                const respuesta = await chrome.tabs.sendMessage(pestana.id, { accion: 'voz_ejecutar', texto: peticion.texto }, { documentId: destino.documentId });
-                if (respuesta?.ok) return { ok: true };
+                const respuesta = await chrome.tabs.sendMessage(pestana.id, { accion: 'voz_ejecutar', texto: peticion.texto }, { documentId: destino.documentId }).catch(() => null);
+                if (respuesta) return respuesta;
             } catch (_) {}
         }
-        await chrome.runtime.sendMessage({ destino: 'voz_central', accion: 'voz_fallback', texto: peticion.texto });
-        return { ok: true };
+        return chrome.runtime.sendMessage({ destino: 'voz_central', accion: 'voz_fallback', texto: peticion.texto });
     }
     throw new Error('Acción de voz inválida');
 }
@@ -209,21 +240,26 @@ chrome.runtime.onMessage.addListener((peticion, emisor, responder) => {
                 .then(() => responder({ ok: true }), () => responder({ ok: false }));
             return true;
         }
+        if (peticion.accion === 'camara_fotograma') camaraSinPermiso = false;
         if (destino) chrome.tabs.sendMessage(destino.id, peticion, { documentId: destino.documentId }).catch(() => {});
         return;
     }
     if (peticion.accion === 'camara_necesita_permiso' && admiteCinetico && emisor.url === chrome.runtime.getURL('voz/escucha.html')) {
         const url = chrome.runtime.getURL('voz/permisos.html') + '?dispositivo=camara';
         (async () => {
-            const existentes = await chrome.tabs.query({ url });
+            camaraSinPermiso = true;
+            // El HUD avisa antes de que la pestaña de permisos tome el foco.
+            if (pestanaConControl) chrome.tabs.sendMessage(pestanaConControl.id, { accion: 'camara_permiso' }, { documentId: pestanaConControl.documentId }).catch(() => {});
+            const existentes = (await chrome.tabs.query({})).filter(pestana => pestana.url === url);
             if (!existentes.length) { retornoCamara = await pestanaActual(); await chrome.tabs.create({ url }); }
+            else { await chrome.tabs.update(existentes[0].id, { active: true }); await chrome.windows.update(existentes[0].windowId, { focused: true }); }
             responder({ ok: true });
         })().catch(() => responder({ ok: false })); return true;
     }
     if (peticion.accion === 'camara_permiso_listo' && admiteCinetico && emisor.tab && emisor.url === chrome.runtime.getURL('voz/permisos.html') + '?dispositivo=camara') {
         (async () => {
             const actual = await pestanaActual();
-            const retorno = retornoCamara; retornoCamara = null;
+            const retorno = retornoCamara; retornoCamara = null; camaraSinPermiso = false;
             if (actual?.id === emisor.tab.id && retorno?.id != null) await chrome.tabs.update(retorno.id, { active: true }).catch(() => {});
             await chrome.tabs.remove(emisor.tab.id);
             responder({ ok: true });
@@ -235,18 +271,18 @@ chrome.runtime.onMessage.addListener((peticion, emisor, responder) => {
     }
     const acciones = ['mascota', 'hablar', 'callar', 'abrir_url', 'buscar_inteligente', 'cerrar_pestana', 'cerrar_ventana', 'crear_pestana',
         'crear_ventana', 'recargar', 'atras', 'adelante', 'cambiar_pestana', 'zoom', 'ayuda', 'duplicar_pestana', 'silenciar', 'ir_pestana',
-        'cerrar_otras', 'pantalla_completa'];
+        'cerrar_otras', 'pantalla_completa', 'confirmar_voz', 'cancelar_voz', 'tutorial'];
     if (!acciones.includes(peticion.accion)) return;
     (async () => {
         const pestana = emisor.tab || (emisor.url === chrome.runtime.getURL('voz/escucha.html') ? ultimaVentanaVoz || await pestanaActual() : null);
         // El documento offscreen no es una pestaña: sus reacciones van al marco principal de la pestaña.
         const resultado = await ejecutarAccion(peticion, pestana, emisor.tab ? emisor.documentId : undefined);
-        responder({ ok: true, texto: peticion.accion === 'ayuda' ? resultado.texto : undefined });
-    })().catch(() => responder({ ok: false, error: 'No se pudo realizar la acción en esta página.' }));
+        responder({ ok: true, resultado: resultado?.resultado || 'ok', texto: peticion.accion === 'ayuda' ? resultado.texto : undefined });
+    })().catch(() => responder({ ok: false, resultado: 'fallo', error: 'No se pudo realizar la acción en esta página.' }));
     return true;
 });
 chrome.storage.onChanged.addListener((cambios, area) => {
-    if (area === 'local' && (cambios.voz || cambios.ojos || cambios.idiomaVoz)) sincronizarVoz().catch(() => {});
+    if (area === 'local' && ['voz', 'ojos', 'idiomaVoz', 'nombreActivacion', 'aliasActivacion', 'tambienComputadora', 'modoConversacion'].some(clave => cambios[clave])) sincronizarVoz().catch(() => {});
     if (area === 'local' && ['voz', 'ojos', 'talkback', 'daltonismo', 'ajustesCineticos', 'mascota'].some(clave => cambios[clave])) sincronizarPaginas(true).catch(() => {});
 });
 let popupsAbiertos = 0;
@@ -272,8 +308,43 @@ chrome.windows.onRemoved.addListener(() => sincronizarPaginas().catch(() => {}))
 // Recuperar también al reiniciarse el worker o recargar la extensión sin cambiar versión.
 sincronizarPaginas(true).catch(() => {});
 
+// Compara la confirmación sin tildes, puntuación final ni diferencias ß/ss («schließen» = «schliessen»).
+const claveConfirmacion = texto => normalizarVoz(texto).replace(/ß/g, 'ss').replace(/[.!?]+$/, '');
+const frasesIguales = (a, b) => claveConfirmacion(a) === claveConfirmacion(b);
+// Pestañas afectadas por un cierre: todas (ventana), la actual o las otras no fijadas (como Chrome).
+const pestanasCierre = (accion, pestanas, tabId) => pestanas.filter(otra => accion === 'cerrar_ventana' ||
+    (accion === 'cerrar_pestana' ? otra.id === tabId : otra.id !== tabId && !otra.pinned)).map(otra => otra.id).sort((a, b) => a - b);
 async function ejecutarAccion(peticion, pestana, documentId) {
     const accion = peticion.accion;
+    if (accion === 'cancelar_voz') { confirmacionVoz = null; return; }
+    if (accion === 'confirmar_voz') {
+        const pendiente = confirmacionVoz;
+        confirmacionVoz = null; // Una sola oportunidad; nunca repetir una confirmación vieja.
+        if (!pendiente || Date.now() > pendiente.vence || !frasesIguales(peticion.texto, pendiente.frase)) throw new Error('Confirmación inválida');
+        const actual = await pestanaActual();
+        if (pestana?.windowId !== pendiente.windowId || actual?.id !== pendiente.tabId || actual?.windowId !== pendiente.windowId) throw new Error('Cambió el destino');
+        const pestanas = await chrome.tabs.query({ windowId: pendiente.windowId });
+        const ids = pestanasCierre(pendiente.accion, pestanas, pendiente.tabId);
+        if (JSON.stringify(ids) !== JSON.stringify(pendiente.tabIds)) throw new Error('Cambió el destino');
+        if (pendiente.accion === 'cerrar_ventana') return chrome.windows.remove(pendiente.windowId);
+        if (ids.length) return chrome.tabs.remove(ids);
+        return;
+    }
+    if (ParidadVoz.comportamiento.destructivas.includes(accion)) {
+        if (pestana?.id == null || pestana.windowId == null) throw new Error('Destino no disponible');
+        const pestanas = await chrome.tabs.query({ windowId: pestana.windowId });
+        const tabIds = pestanasCierre(accion, pestanas, pestana.id);
+        const datos = ParidadVoz.confirmaciones[(await idiomaVigente()).slice(0, 2)] || ParidadVoz.confirmaciones.es;
+        // Frase corta y exacta; el destino (ventana, pestaña activa y pestañas afectadas) se comprueba al confirmar.
+        const frase = `${datos.verbo} ${datos[accion]}`;
+        // Los 8 s para responder empiezan al terminar la pregunta; hasta entonces rige el límite de 60 s del TTS.
+        const pendiente = confirmacionVoz = { accion, windowId: pestana.windowId, tabId: pestana.id, tabIds, frase, vence: Date.now() + 60000 };
+        await ejecutarAccion({ accion: 'hablar', texto: datos.pregunta.replace('{frase}', frase), alTerminar: evento => {
+            if (confirmacionVoz !== pendiente) return;
+            if (evento === 'fin') pendiente.vence = Date.now() + ParidadVoz.comportamiento.confirmacionMs; else confirmacionVoz = null;
+        } }, pestana, documentId);
+        return { resultado: 'confirmando' };
+    }
     const notificarMascota = (estado, hablando) => {
         if (pestana?.id != null) chrome.tabs.sendMessage(pestana.id, { accion: 'mascota_estado', estado, hablando },
             documentId ? { documentId } : { frameId: 0 }).catch(() => {});
@@ -285,30 +356,45 @@ async function ejecutarAccion(peticion, pestana, documentId) {
     }
     if (accion === 'ayuda') {
         const idioma = await idiomaResuelto();
-        const { ayuda } = IdiomasVoz[idioma.slice(0, 2).toLowerCase()];
+        const { ayuda: guia, palabra } = IdiomasVoz[idioma.slice(0, 2).toLowerCase()];
+        const ayuda = guia.replace(palabra, palabraActivacion((await chrome.storage.local.get('nombreActivacion')).nombreActivacion, idioma));
         await ejecutarAccion({ accion: 'hablar', texto: ayuda, lang: vozTTS(idioma) }, pestana, documentId);
         return { texto: ayuda };
     }
+    if (accion === 'tutorial') {
+        // Una sola pestaña de tutorial: se enfoca si ya existe. tabs.query no admite chrome-extension:// como patrón.
+        const abierto = (await chrome.tabs.query({})).find(pestana => pestana.url?.split('#')[0] === urlTutorial());
+        const url = urlTutorial() + '#tutorial';
+        if (!abierto) return chrome.tabs.create({ url });
+        await chrome.tabs.update(abierto.id, { active: true, url });
+        return chrome.windows.update(abierto.windowId, { focused: true });
+    }
     if (accion === 'hablar') {
-        if (!chrome.tts || typeof peticion.texto !== 'string') return;
+        if (!chrome.tts || typeof peticion.texto !== 'string') { peticion.alTerminar?.('fin'); return; }
         // Los avisos hablados usan el idioma de la interfaz.
         const lang = typeof peticion.lang === 'string' ? peticion.lang : vozTTS(await idiomaVigente());
-        detenerMascotaLectura?.();
+        detenerMascotaLectura?.('error');
         chrome.tts.stop();
-        const finalizar = () => {
+        const id = Date.now() + '-' + (++secuenciaTTS);
+        const notificarTTS = evento => chrome.runtime.sendMessage({ destino: 'voz_central', accion: 'voz_tts', id, evento }).catch(() => {});
+        const finalizar = (evento = 'fin') => {
             if (detenerMascotaLectura !== finalizar) return;
             detenerMascotaLectura = null; notificarMascota('idle', false);
+            notificarTTS(evento); peticion.alTerminar?.(evento);
         };
         detenerMascotaLectura = finalizar;
         notificarMascota(peticion.origen === 'lectura' ? 'read' : 'talk', true);
+        // Offscreen recibe el inicio antes que el resultado de la orden: así la conversación espera al fin del TTS.
+        await notificarTTS('inicio');
+        if (detenerMascotaLectura !== finalizar) return;
         try {
             chrome.tts.speak(peticion.texto, { lang, rate: 1.05,
-                onEvent: evento => { if (['end', 'interrupted', 'cancelled', 'error'].includes(evento.type)) finalizar(); }
-            }, () => { if (chrome.runtime.lastError) finalizar(); });
-        } catch (error) { finalizar(); throw error; }
+                onEvent: evento => { if (['end', 'interrupted', 'cancelled', 'error'].includes(evento.type)) finalizar(evento.type === 'end' ? 'fin' : 'error'); }
+            }, () => { if (chrome.runtime.lastError) finalizar('error'); });
+        } catch (error) { finalizar('error'); throw error; }
         return;
     }
-    if (accion === 'callar') { detenerMascotaLectura?.(); chrome.tts?.stop(); return; }
+    if (accion === 'callar') { confirmacionVoz = null; detenerMascotaLectura?.('error'); chrome.tts?.stop(); return; }
     if (accion === 'crear_pestana') return chrome.tabs.create({});
     if (accion === 'crear_ventana') return chrome.windows.create({});
     if (accion === 'abrir_url') return gestionarAperturaURL(peticion.url, peticion.destino, pestana);
@@ -329,8 +415,6 @@ async function ejecutarAccion(peticion, pestana, documentId) {
         return gestionarAperturaURL(url, peticion.destino, pestana);
     }
     if (pestana?.id == null) throw new Error('Pestaña no disponible');
-    if (accion === 'cerrar_pestana') return chrome.tabs.remove(pestana.id);
-    if (accion === 'cerrar_ventana') return chrome.windows.remove(pestana.windowId);
     if (accion === 'recargar') return chrome.tabs.reload(pestana.id);
     if (accion === 'atras') return chrome.tabs.goBack(pestana.id);
     if (accion === 'adelante') return chrome.tabs.goForward(pestana.id);
@@ -345,11 +429,9 @@ async function ejecutarAccion(peticion, pestana, documentId) {
         if (!peticion.activa) await chrome.storage.session.remove(clave);
         return chrome.windows.update(ventana.id, { state: estado });
     }
-    if (['cambiar_pestana', 'ir_pestana', 'cerrar_otras'].includes(accion)) {
+    if (['cambiar_pestana', 'ir_pestana'].includes(accion)) {
         const pestanas = (await chrome.tabs.query({ windowId: pestana.windowId })).sort((a, b) => a.index - b.index);
         if (!pestanas.length) return;
-        // Como Chrome, «cerrar otras» conserva las pestañas fijadas.
-        if (accion === 'cerrar_otras') return chrome.tabs.remove(pestanas.filter(otra => otra.id !== pestana.id && !otra.pinned).map(otra => otra.id));
         if (accion === 'ir_pestana') {
             const destino = pestanas[peticion.indice === -1 ? pestanas.length - 1 : peticion.indice - 1];
             if (!Number.isInteger(peticion.indice) || !destino) throw new Error('Pestaña inexistente');

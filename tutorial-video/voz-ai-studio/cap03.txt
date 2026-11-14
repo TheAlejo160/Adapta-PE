@@ -1,0 +1,11 @@
+Al instalarla se abre una página de bienvenida.
+
+Ahí verás interruptores grandes. En base: control por voz, cursor con cámara y lectura en voz alta. En Lite, solo la voz.
+
+Todo empieza apagado. Tú decides qué encender.
+
+Al activar la voz, se abre una página para dar permiso al micrófono. Pulsa «Permitir micrófono», y en el aviso de Chrome, «Permitir».
+
+Con la cámara pasa lo mismo, y la imagen se procesa solo en tu equipo. Nunca sale de tu computadora.
+
+Solo lo haces una vez y sirve para todas las páginas.

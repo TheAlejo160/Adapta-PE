@@ -115,14 +115,16 @@ Después pulsa el botón de recarga de AdaptaPE en `chrome://extensions` una vez
 
 Al instalar se abre **«Ya puedes usar AdaptaPE»** (`bienvenida.html`) con tres interruptores: **Control por voz**, **Cursor con cámara** y **Lectura en voz alta**. Cada uno guarda la preferencia sólo cuando lo pulsas. Si Chrome pide permiso para el micrófono o la cámara, elige **Permitir**.
 
+Debajo de los interruptores está el **Tutorial práctico** (`bienvenida.html#tutorial`): ocho pasos cortos que se comprueban en la propia página (activar voz y micrófono, decir tu nombre con **Probar nombre**, los ejercicios «baja», «selecciona Siguiente» y «dale clic», elegir un filtro con muestras, practicar el cursor sobre tres botones grandes y dónde volver). Para repetirlo pulsa **Tutorial** en el panel o di «Computadora, tutorial». AdaptaPE **no** usa el parpadeo para hacer clic: los gestos son pinza, boca y puño.
+
 Después todo se ajusta desde el panel **Ayudas de AdaptaPE** (el icono de la barra). El panel muestra cada módulo con su estado **Activado / Desactivado**:
 
 | Sección del panel | Qué controla |
 | --- | --- |
 | **Lectura en voz alta** | TalkBack: escucha el elemento que señalas. |
 | **Control por voz** | Escucha global de órdenes. Incluye **Idioma**, **Órdenes y micrófono** y el botón **Configurar micrófono**. |
-| **Filtros de color** | Siete filtros, **Sin filtro** y **Quitar filtro**. |
-| **Cursor con cámara** | Activa la cámara y la pregunta **«¿Qué quieres usar para moverlo?»** con los tres modos. Incluye la ayuda **Cómo mover y hacer clic**. |
+| **Filtros de color** | Grupo de opciones con muestra de color (rojo/verde, azul/amarillo, grises), **Sólo un filtro a la vez**, **Sin filtro** y **Quitar filtro**. Flechas para moverte entre ellas. |
+| **Cursor con cámara** | Activa la cámara y la pregunta **«¿Qué quieres usar para moverlo?»** con los tres modos. Incluye el **tiempo para pulsar quedándote quieto** (0,5 a 1,5 s, 1 s por defecto), el interruptor **Atracción a controles** (activado por defecto) y la ayuda **Cómo mover y hacer clic**. |
 | **Tu mascota** | **Sin mascota**, **Tinku · gallito de las rocas**, **Cuchu · cuy** o **Yati · llama**. |
 
 Los ajustes se guardan automáticamente en el navegador; el panel avisa si no pudo guardarlos.
@@ -146,6 +148,12 @@ El permiso pertenece a la extensión, no a cada sitio: lo concedes una vez y sir
 3. Repite «Computadora» antes de cada orden nueva.
 
 En las webs aparece un indicador con el estado de la escucha. Di **«Computadora, ayuda»** para escuchar un resumen de órdenes. No hace falta un imperativo exacto: «Computadora, por favor ábreme YouTube pe» también funciona (ver [Formas de decir la misma orden](#formas-de-decir-la-misma-orden)).
+
+**Nombre de activación propio.** En el panel, sección Control por voz, escribe un nombre en **Nombre de activación** (por ejemplo «Jarvis» o «Lucía») y pulsa **Guardar nombre**. Ese nombre sustituye a «Computadora» y a la palabra del idioma en los seis idiomas, y las pistas del panel, la bienvenida, el indicador de las webs, la Nueva pestaña y la ayuda hablada lo muestran. Debe tener de 3 a 24 caracteres, hasta 3 palabras y al menos 3 letras (letras, espacios, guion o apóstrofo); se rechazan órdenes de voz («abre», «busca», «detente»…), muletillas («oye», «por favor») y nombres de mascotas. La detección tolera acentos, que el reconocedor parta el nombre en sílabas («Jar vis») y una «s» final; no acepta nombres parecidos (con «Benito», «bonito» no activa), para evitar falsos disparos. Un valor guardado que no sea texto vuelve a «Computadora». **Usar «Computadora»** vuelve al predeterminado. Se guardan sólo en `chrome.storage.local` (`nombreActivacion`, `aliasActivacion`, `tambienComputadora`, `modoConversacion`).
+
+**Alias, «Probar nombre» y modos opcionales.** Si el reconocedor oye tu nombre de otra forma, pulsa **Probar nombre**, di sólo el nombre y, si el panel muestra lo que oyó, pulsa **Añadir como alias** (hasta 3 alias, también editables separados por punto y coma). La prueba nunca ejecuta órdenes. Algunos nombres extranjeros traen pronunciaciones fijas: con «Jarvis», «yarbis» también activa. El nombre sólo activa al inicio de la frase o tras «oye»/«hola» («busca Jarvis en Wikipedia» no activa); «Hey Google» se admite como nombre compuesto. **También responder a Computadora** (apagado por defecto) mantiene «Computadora» junto a tu nombre. **Modo conversación** (apagado por defecto) vuelve a escuchar 8 segundos sin nombre tras cada orden que salió bien, cuando termina la voz sintética; «gracias», «listo» o «silencio» lo cierran sin apagar el micrófono. Mientras AdaptaPE habla sólo se aceptan «calla» o «silencio».
+
+**Órdenes con errores de transcripción.** Si una orden no se entiende, AdaptaPE corrige como mucho una letra del primer verbo hacia una orden inofensiva (buscar, recargar, seleccionar…) y dice qué va a hacer («Entendí: buscar Perú en YouTube»). Si hay dos posibilidades, no hace nada. Nunca corrige órdenes que cierran, borran, envían, compran, pulsan o apagan: si se parecen a una de ellas, te pide repetir. «abre yutub» abre YouTube (lista cerrada y pronunciación española, sin ediciones).
 
 ### 3. Abrir y buscar sitios
 
@@ -193,7 +201,7 @@ Una burbuja informativa muestra la vista de la cámara; no tiene botones. Una l�
 
 | Método | Modo | Cómo |
 | --- | --- | --- |
-| **Permanencia (dwell)** | Todos | Sal de la zona de atracción al menos 180 ms, vuelve a la zona segura y quédate **1 segundo** sobre el mismo objetivo. Para otro clic repite la salida y el regreso. |
+| **Permanencia (dwell)** | Todos | Sal de la zona de atracción al menos 180 ms, vuelve a la zona segura y quédate **1 segundo** (ajustable de 0,5 a 1,5 s en el panel) sobre el mismo objetivo. Para otro clic repite la salida y el regreso. |
 | **Pinza** | Brazos, manos o puños | Junta pulgar e índice y suéltalos antes de 0,7 s: clic. Mantén la pinza 0,7 s: clic derecho. La muñeca debe verse dentro del cuadro. |
 | **Boca** | Cabeza / torso | Abre bien la boca unos 0,3 s y ciérrala: clic al cerrar. Más de 1,5 s abierta (bostezo) no hace clic. |
 | **Puño + permanencia** | Brazos, manos o puños | Muestra la mano abierta, luego cierra el puño y mantenlo. El cursor se detiene en el centro seguro y hace clic tras 1 segundo sobre el mismo objetivo. Abre la mano para cancelar. |
@@ -207,11 +215,11 @@ Mientras la pinza o la boca están activas el cursor se queda quieto. Cada gesto
 2. Pasa el ratón o el cursor de cámara sobre un elemento.
 3. Tras **300 ms** se lee su nombre accesible, texto alternativo o contenido, y se marca con un contorno.
 
-Di «Computadora, cállate» para detener la lectura. Es una lectura por puntero, no un lector de pantalla completo: no ofrece navegación por teclado ni describe imágenes sin texto alternativo.
+Di «Computadora, cállate» para detener la lectura. También lee el control al recibir el foco con el teclado, con la misma espera de 300 ms. No es un lector de pantalla completo ni describe imágenes sin texto alternativo.
 
 ### 9. Filtros de color
 
-Elige uno en **Filtros de color**: Protanomalía, Protanopía, Deuteranomalía, Deuteranopía, Tritanomalía, Tritanopía o Acromatopsia (escala de grises). El panel muestra **Activo:** con el nombre del filtro. **Quitar filtro** o **Sin filtro** lo retira.
+Elige uno en **Filtros de color** (un solo filtro a la vez, con una muestra de color por opción): Protanomalía, Protanopía, Deuteranomalía, Deuteranopía, Tritanomalía, Tritanopía o Acromatopsia (escala de grises). El panel muestra **Activo:** con el nombre del filtro. **Quitar filtro** o **Sin filtro** lo retira.
 
 El filtro se aplica también en pestañas de fondo, en marcos incrustados y en pantalla completa de juegos y reproductores (Canvas, WebGL y vídeo), sin aplicarse dos veces. Puedes cambiarlo sin recargar ni salir de pantalla completa. Son transformaciones visuales fijas: no diagnostican ni corrigen médicamente el daltonismo.
 
@@ -257,8 +265,8 @@ Di cada orden después de **«Computadora»** o dentro de su ventana de 8 segund
 | `abre YouTube en una nueva pestaña`, `busca Perú en otra ventana` | El modificador final elige el destino. Sin modificador se usa la pestaña actual. |
 | `busca en YouTube` (sin consulta) | Pregunta qué quieres buscar. |
 | `nueva pestaña`, `otra pestaña`, `abre una nueva ventana` | Crea una pestaña o ventana nueva. |
-| `cierra esta pestaña`, `cerrar ventana` | Cierra la pestaña o la ventana. |
-| `cierra las otras pestañas`, `deja solo esta pestaña` | Cierra las demás pestañas de la ventana y conserva las fijadas. |
+| `cierra esta pestaña`, `cerrar ventana` | Cierra la pestaña o la ventana. Ambas piden confirmar: di exactamente «confirmo cerrar esta pestaña» o «confirmo cerrar ventana» en los 8 segundos siguientes a la pregunta; «cancelar» la anula sin repetir el nombre. |
+| `cierra las otras pestañas`, `deja solo esta pestaña` | Cierra las demás pestañas de la ventana y conserva las fijadas. Pide confirmar: «confirmo cerrar otras pestañas» en 8 segundos; si cambian la ventana o sus pestañas, no cierra nada. |
 | `duplica la pestaña` | Duplica la pestaña actual. |
 | `pestaña 3`, `ve a la pestaña dos`, `la tercera pestaña`, `última pestaña` | Activa esa pestaña contando desde la izquierda (del 1 al 10 con palabras). |
 | `siguiente pestaña`, `pestaña de la derecha`; `pestaña anterior`, `pestaña de la izquierda` | Recorre las pestañas de la ventana, volviendo al extremo opuesto al final. |
@@ -289,6 +297,7 @@ Cuando una apertura o búsqueda pide otra ventana, se intenta situarla en un mon
 | `reproduce el video`, `continuar video`, `pausa el audio` | Reproduce o pausa el primer vídeo o audio. La web puede exigir una interacción física. |
 | `cancela`, `cancelar`, `olvídalo` | Cancela la orden pendiente y retira la selección. |
 | `ayuda`, `qué puedo decir`, `qué comandos hay`, `qué puedes hacer` | Lee y muestra un resumen de órdenes. |
+| `tutorial`, `abre el tutorial` | Abre (o enfoca) el tutorial práctico. Seis idiomas: «tutorial», «open the tutorial», «abre o tutorial», «öffne das Tutorial», «ouvre le tutoriel», «apri il tutorial». |
 | `cállate`, `silencio`, `basta`, `deja de leer`, `para de hablar` | Detiene la lectura en voz alta. |
 
 El dictado conserva acentos, mayúsculas y signos. No inserta ni borra texto en campos de contraseña, incluidos los revelados o los editores con `autocomplete="current-password"` o `"new-password"`; esta protección actúa después del reconocimiento y no evita que el servicio de voz procese lo pronunciado. Las palabras de navegación dentro de un dictado o una búsqueda no se ejecutan como órdenes.
@@ -403,7 +412,8 @@ Chrome no permite content scripts en `chrome://`, la Chrome Web Store y otras p�
 | --- | --- |
 | `manifest.json` | Versión, permisos, service worker, orden de inyección y Chromium 119 mínimo. |
 | `popup.html` / `popup.js` / `voz/popup.js` | Panel, preferencias en `chrome.storage.local`, estado de escucha y **Configurar micrófono**. |
-| `bienvenida.html` / `bienvenida.js` | Página que el worker abre al instalar. |
+| `bienvenida.html` / `bienvenida.js` | Página que el worker abre al instalar y tutorial práctico (`#tutorial`); carga el controlador de la variante para los ejercicios. |
+| `filtros_ui.js` | Grupo de radios de filtros con muestras, compartido por el panel y el tutorial. |
 | `voz/permisos.html` / `voz/permisos.js` | Autorización visible de micrófono o cámara. |
 | `voz/escucha.html` / `voz/escucha.js` / `voz/camara.js` | Documento offscreen: reconocedor único y captura de cámara. |
 | `vision/trabajador.js` | Worker MediaPipe privado, con modelos y WASM locales. |
@@ -412,7 +422,7 @@ Chrome no permite content scripts en `chrome://`, la Chrome Web Store y otras p�
 | `textos.js` / `textos_paginas.js` / `_locales/` | Textos de la interfaz en seis idiomas, sin servicio de traducción externo. |
 | `classes/VoiceAssistant.js` | Reconocimiento (sólo offscreen) y parser de órdenes de página, selección y dictado. |
 | `classes/KineticEngine.js` | Cursor de cámara: calibración, joystick, física, permanencia, pinza, boca, puño y menú contextual. |
-| `classes/TalkBack.js` | Lectura por puntero con debounce de 300 ms. |
+| `classes/TalkBack.js` | Lectura por puntero y foco con debounce de 300 ms. |
 | `classes/FiltrosDaltonismo.js` / `filtros_frames.js` | Filtros SVG en la página, marcos y pantalla completa. |
 | `mascotas/` | Adaptador de mascota, motor del SDK Mascota-Modular-Adapta-PE y sprites WebP. |
 | `nueva_pestana*.{html,js,css}` | Nueva pestaña propia y sus temas. |

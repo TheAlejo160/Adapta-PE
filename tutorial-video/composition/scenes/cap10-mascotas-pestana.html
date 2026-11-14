@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mascotas y Nueva pestaña</title>
+  </head>
+  <body>
+    <template>
+      <style>
+        #cap10-raiz { position: absolute; inset: 0; font-family: var(--ap-fuente-texto); color: var(--ap-texto); }
+        .cap10-grupo { position: absolute; inset: 0; }
+        #cap10-pregunta { position: absolute; left: 0; right: 0; top: 400px; text-align: center; font: 700 110px/1.1 var(--ap-fuente-titulo); }
+        .cap10-nombre { position: absolute; top: 650px; width: 460px; text-align: center; }
+        .cap10-nombre b { display: block; font: 700 68px/1.1 var(--ap-fuente-titulo); color: var(--ap-verde); }
+        .cap10-nombre span { display: block; margin-top: 6px; font: 600 42px/1.2 var(--ap-fuente-texto); color: var(--ap-texto); }
+        .cap10-tarjeta { position: absolute; left: 96px; display: flex; align-items: center; gap: 24px; padding: 20px 32px; border-radius: 24px; background: var(--ap-superficie); border: 2px solid var(--ap-borde); font: 700 52px/1.1 var(--ap-fuente-titulo); }
+        .cap10-tarjeta svg { width: 60px; height: 60px; color: var(--ap-verde); flex: none; }
+        #cap10-panel { position: absolute; left: 268px; top: 130px; width: 1383px; height: 678px; border-radius: 24px; overflow: hidden; box-shadow: var(--sombra-2); background: #151b20; }
+        #cap10-panel img { position: absolute; width: 3648px; height: 2810px; left: -1132px; top: -1583px; max-width: none; }
+        #cap10-nueva { position: absolute; left: 0; top: 0; width: 1240px; height: auto; display: block; }
+      </style>
+      <div data-hf-id="hf-2lqa" id="cap10-raiz" class="ap-escena" data-composition-id="cap10" data-width="1920" data-height="1080"></div>
+
+      <script>
+        (function () {
+          const ID = "cap10";
+          const cap = AP.capitulo(ID);
+          const raiz = document.getElementById(ID + "-raiz");
+          const tl = gsap.timeline({ paused: true });
+          const f1 = AP.t(ID, "f1", 0.6);
+          const f2 = AP.t(ID, "f2", 8.6);
+          const f3 = AP.t(ID, "f3", 14.4);
+          const f4 = AP.t(ID, "f4", 21.2);
+          const el = (tag, id, cls, html, padre) => {
+            const e = document.createElement(tag);
+            if (id) e.id = id;
+            if (cls) e.className = cls;
+            if (html != null) e.innerHTML = html;
+            (padre || raiz).appendChild(e);
+            return e;
+          };
+          AP.ambiente(tl, raiz, { duracion: cap.duracion, semilla: 11 });
+
+          // ───── f1: las tres mascotas, una a una ─────
+          const g1 = el("div", "cap10-g1", "cap10-grupo");
+          const preg = el("div", "cap10-pregunta", null, "¿Quieres compañía?", g1);
+          AP.entrar(tl, preg, f1, "subir", 0.6);
+          tl.to(preg, { opacity: 0, duration: 0.4 }, f1 + 2.2);
+          const MASC = [
+            ["tinku", "Tinku", "gallito de las rocas", 330, 2.7],
+            ["cuchu", "Cuchu", "cuy", 797, 5.1],
+            ["yati", "Yati", "llama", 1264, 6.3],
+          ];
+          const mascotas = {};
+          MASC.forEach((m) => {
+            const t0 = f1 + m[4];
+            const salida = m[0] === "cuchu" ? null : f2 - 0.2;
+            mascotas[m[0]] = AP.mascota(tl, g1, {
+              id: "cap10-" + m[0], nombre: m[0], x: m[3], y: 250, alto: 380, entrada: t0, salida: salida,
+              animaciones: m[0] === "cuchu"
+                ? [{ anim: "wave", desde: t0, hasta: t0 + 1.6 }, { anim: "idle", desde: t0 + 1.6, hasta: f2 + 0.4 }, { anim: "look", desde: f2 + 0.4, hasta: f2 + 2.5 }, { anim: "wave", desde: f2 + 3.0, hasta: f2 + 4.0 }, { anim: "idle", desde: f2 + 4.0, hasta: f2 + 4.3 }, { anim: "sleep", desde: f2 + 4.3, hasta: f3 + 0.4 }]
+                : [{ anim: "wave", desde: t0, hasta: t0 + 1.6 }, { anim: "idle", desde: t0 + 1.6, hasta: f2 }],
+            });
+            const rot = el("div", "cap10-nombre-" + m[0], "cap10-nombre", "<b>" + m[1] + "</b><span>" + m[2] + "</span>", g1);
+            rot.style.left = m[3] + 163 - 230 + "px";
+            AP.entrar(tl, rot, t0 + 0.4, "subir", 0.5);
+            tl.to(rot, { opacity: 0, duration: 0.3 }, f2 - 0.1);
+          });
+
+          // ───── f2: mira, saluda, duerme ─────
+          const cur = AP.cursor(tl, g1, { id: "cap10-cursor", x: 1500, y: 300, entrada: f2 + 0.2 });
+          cur.mover(f2 + 0.5, 1560, 620, 1.0).mover(f2 + 1.6, 1300, 380, 0.9).mover(f2 + 2.6, 1500, 520, 0.8);
+          cur.ocultar(f2 + 3.0);
+          AP.comandoVoz(tl, g1, { id: "cap10-voz1", texto: "Computadora, saluda mascota", x: 1100, y: 250, entrada: f2 + 2.8, pitido: f2 + 2.9, duracion: 1.2, salida: f2 + 4.0 });
+          AP.comandoVoz(tl, g1, { id: "cap10-voz2", texto: "Computadora, duerme mascota", x: 1100, y: 420, entrada: f2 + 4.15, pitido: f2 + 4.25, duracion: 1.2, salida: f3 - 0.2 });
+          AP.rotulo(tl, g1, { id: "cap10-rot2", texto: "Te mira y reacciona", entrada: f2 + 0.4, salida: f2 + 2.7 });
+          tl.to(mascotas.cuchu, { opacity: 0, duration: 0.4 }, f3 + 0.4);
+          tl.to(g1, { opacity: 0, duration: 0.01 }, f3 + 0.8);
+
+          // ───── f3: Nueva pestaña ─────
+          const g3 = el("div", "cap10-g3", "cap10-grupo");
+          const NX = 600, NY = 100, S = 0.62;
+          const nav = AP.navegador(tl, g3, { id: "cap10-nav", x: NX, y: NY, ancho: 1240, alto: 700, pestana: "Nueva pestaña", url: "", extension: "base", entrada: f3 });
+          const img = el("img", "cap10-nueva", null, null, nav.cuerpo);
+          img.setAttribute("data-layout-allow-overflow", ""); img.src = "assets/capturas/base-nueva-pestana.png"; img.alt = "Nueva pestaña de AdaptaPE";
+          const tarj = (id, icono, texto, y, t) => {
+            const c = el("div", id, "cap10-tarjeta", icono + "<span>" + texto + "</span>", g3);
+            c.style.top = y + "px";
+            AP.entrar(tl, c, t, "izquierda", 0.5);
+            tl.to(c, { opacity: 0, duration: 0.3 }, f4 - 0.15);
+          };
+          tarj("cap10-t-voz", AP.iconos.mic, "La voz funciona", 300, f3 + 3.3);
+          tarj("cap10-t-cur", AP.iconos.cursor, "El cursor también", 430, f3 + 4.3);
+
+          // ───── f4: buscar, favoritos, temas ─────
+          const px = (dx) => NX + dx * S, py = (dy) => NY + 142 + dy * S;
+          AP.foco(tl, g3, { id: "cap10-foco-busca", x: px(600), y: py(215), ancho: 800 * S, alto: 95 * S, radio: 30, oscurecer: true, latidos: 2, entrada: f4, salida: f4 + 1.0 });
+          AP.foco(tl, g3, { id: "cap10-foco-fav", x: px(600), y: py(440), ancho: 400 * S, alto: 175 * S, radio: 24, oscurecer: true, latidos: 2, entrada: f4 + 1.1, salida: f4 + 2.4 });
+          tl.to(nav.el, { opacity: 0, duration: 0.4 }, f4 + 2.5);
+          const panel = el("div", "cap10-panel", null, '<img data-layout-allow-overflow src="assets/capturas/base-nueva-pestana-temas.png" alt="Panel Personalizar con los temas">', g3);
+          AP.entrar(tl, panel, f4 + 2.6, "subir", 0.6);
+          AP.foco(tl, g3, { id: "cap10-foco-alto", x: 302, y: 546, ancho: 438, alto: 121, radio: 20, oscurecer: false, latidos: 3, entrada: f4 + 4.8 });
+
+          window.__timelines[ID] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

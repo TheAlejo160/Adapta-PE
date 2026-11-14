@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>cap04 · El panel de AdaptaPE</title>
+  </head>
+  <body>
+    <!--
+      cap04 · El panel de AdaptaPE. Navegador con el icono fijado; clic y el
+      panel real (base-popup.png, 720 px de ancho, escala 0,9) que se
+      desplaza por sus secciones. Al final, Base y Lite lado a lado.
+      Mapeo de y: lienzo = VY + (y_imagen - desplazamiento) * escala.
+    -->
+    <template>
+      <style>
+        #cap04-raiz {
+          position: absolute;
+          inset: 0;
+        }
+        .cap04-visor {
+          position: absolute;
+          overflow: hidden;
+          border-radius: var(--r-m);
+          background: #eceff2;
+          box-shadow: var(--sombra-2);
+          border: 3px solid #cfd6dc;
+          box-sizing: border-box;
+        }
+        .cap04-visor img {
+          position: absolute;
+          left: 0;
+          top: 0;
+          display: block;
+          max-width: none;
+        }
+        .cap04-fondo {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: top center;
+        }
+        .cap04-idiomas {
+          position: absolute;
+          left: 150px;
+          top: 340px;
+          width: 840px;
+          height: 330px;
+          box-sizing: border-box;
+          padding: 28px;
+          border-radius: var(--r-l);
+          background: var(--ap-superficie);
+          border: var(--borde-grueso) solid var(--ap-borde);
+          box-shadow: var(--sombra-2);
+          display: flex;
+          flex-wrap: wrap;
+          gap: 24px;
+          align-content: center;
+        }
+        .cap04-idioma {
+          width: 240px;
+          height: 100px;
+          border-radius: 999px;
+          background: var(--ap-superficie-2);
+          border: 3px solid var(--ap-verde);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 40px;
+          font-weight: 700;
+        }
+        .cap04-selector {
+          position: absolute;
+          box-sizing: border-box;
+          border-radius: 14px;
+          background: #ffffff;
+          border: 2px solid #5f6b78;
+          color: #1f2937;
+          display: flex;
+          align-items: center;
+          padding: 0 24px;
+          font-family: var(--ap-fuente-texto);
+          font-size: 34px;
+          opacity: 0;
+        }
+      </style>
+
+      <div data-hf-id="hf-pbwm" id="cap04-raiz" class="ap-escena" data-composition-id="cap04" data-width="1920" data-height="1080"></div>
+
+      <script>
+        (function () {
+          const ID = "cap04";
+          const cap = AP.capitulo(ID);
+          const raiz = document.getElementById(ID + "-raiz");
+          const tl = gsap.timeline({ paused: true });
+          const f1 = AP.t(ID, "f1", 0.6);
+          const f2 = AP.t(ID, "f2", 5);
+          const f3 = AP.t(ID, "f3", 14.2);
+          const f4 = AP.t(ID, "f4", 19.2);
+          const f5 = AP.t(ID, "f5", 24.7);
+
+          function el(padre, clase, html, css) {
+            const e = document.createElement("div");
+            if (clase) e.className = clase;
+            if (html != null) e.innerHTML = html;
+            if (css) e.style.cssText = css;
+            padre.appendChild(e);
+            return e;
+          }
+          function fase(id, tin, tout) {
+            const e = el(raiz, null, null, "position:absolute;inset:0");
+            e.id = id;
+            if (tin != null) tl.fromTo(e, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, tin);
+            if (tout != null) tl.to(e, { opacity: 0, duration: 0.4, ease: "power1.in" }, tout);
+            return e;
+          }
+          // Visor con imagen desplazable. Devuelve la imagen y el mapeo de un rectángulo de la imagen al lienzo.
+          function visor(padre, id, src, iw, x, y, w, h, s) {
+            const v = el(padre, "cap04-visor", null, "left:" + x + "px;top:" + y + "px;width:" + w + "px;height:" + h + "px");
+            v.id = id;
+            const img = document.createElement("img");
+            img.src = src;
+            img.alt = "";
+            img.setAttribute("data-layout-allow-overflow", "");
+            img.style.width = iw * s + "px";
+            v.appendChild(img);
+            return {
+              v,
+              img,
+              mover(t, hasta, dur) {
+                tl.to(img, { y: -hasta * s, duration: dur, ease: "power2.inOut" }, t);
+              },
+              r(sc, ox, oy, ow, oh) {
+                return { x: x + ox * s, y: y + (oy - sc) * s, ancho: ow * s, alto: oh * s };
+              },
+            };
+          }
+          const S = 0.9;
+
+          AP.ambiente(tl, raiz, { duracion: cap.duracion, semilla: 6 });
+
+          // ───────── Fase A: el panel sobre la página ─────────
+          const A = fase(ID + "-A", null, f5 - 0.3);
+          const nav = AP.navegador(tl, A, { id: ID + "-nav", x: 96, y: 120, ancho: 1728, alto: 710, pestana: "AdaptaPE", url: "adaptape.cc", extension: "base", entrada: null });
+          const fondo1 = document.createElement("img");
+          fondo1.className = "cap04-fondo";
+          fondo1.src = "assets/capturas/base-nueva-pestana.png";
+          fondo1.alt = "";
+          nav.cuerpo.appendChild(fondo1);
+          const fondo2 = document.createElement("img");
+          fondo2.className = "cap04-fondo";
+          fondo2.src = "assets/capturas/base-wikipedia-filtro-acromatopsia.png";
+          fondo2.alt = "";
+          nav.cuerpo.appendChild(fondo2);
+          tl.set(fondo2, { opacity: 0 }, 0);
+
+          // f1 · clic en el icono fijado y se abre el panel
+          const cur = AP.cursor(tl, A, { id: ID + "-cursor", x: 1000, y: 620, tipo: "flecha", entrada: f1 });
+          cur.mover(f1 + 0.4, 1713, 224, 1.0, "power2.inOut").clic(f1 + 1.6).ocultar(f1 + 2.3);
+          const VX = 1090;
+          const VY = 262;
+          const pop = visor(A, ID + "-popup", "assets/capturas/base-popup.png", 800, VX, VY, 720, 570, S);
+          AP.entrar(tl, pop.v, f1 + 1.7, "bajar", 0.6);
+          AP.rotulo(tl, A, { id: ID + "-rot1", texto: "Aquí está todo", entrada: f1 + 2.8, salida: f2 - 0.4 });
+
+          // f2 · lectura, voz e idioma
+          const r1 = pop.r(0, 60, 300, 660, 175);
+          AP.foco(tl, A, { id: ID + "-foco-lectura", x: r1.x, y: r1.y, ancho: r1.ancho, alto: r1.alto, radio: 18, oscurecer: false, entrada: f2 + 0.3, salida: f2 + 2.3 });
+          pop.mover(f2 + 2.2, 330, 0.7);
+          const r2 = pop.r(330, 60, 520, 660, 150);
+          AP.foco(tl, A, { id: ID + "-foco-voz", x: r2.x, y: r2.y, ancho: r2.ancho, alto: r2.alto, radio: 18, oscurecer: false, entrada: f2 + 2.9, salida: f2 + 4.3 });
+          const r3 = pop.r(330, 130, 760, 590, 130);
+          AP.foco(tl, A, { id: ID + "-foco-idioma", x: r3.x, y: r3.y, ancho: r3.ancho, alto: r3.alto, radio: 18, oscurecer: false, entrada: f2 + 4.5, salida: f3 - 0.3 });
+          const idi = el(A, "cap04-idiomas");
+          idi.id = ID + "-idiomas";
+          ["Español", "Inglés", "Portugués", "Alemán", "Francés", "Italiano"].forEach((n, i) => {
+            const c = el(idi, "cap04-idioma", n);
+            AP.entrar(tl, c, f2 + 5.5 + i * 0.5, "rebote", 0.4);
+          });
+          tl.fromTo(idi, { opacity: 0 }, { opacity: 1, duration: 0.3 }, f2 + 5.4);
+          tl.to(idi, { opacity: 0, duration: 0.35 }, f3 - 0.3);
+
+          // f3 · filtros, cursor con cámara y mascota
+          pop.mover(f3, 1150, 0.9);
+          const r4 = pop.r(1150, 60, 1185, 660, 260);
+          AP.foco(tl, A, { id: ID + "-foco-filtros", x: r4.x, y: r4.y, ancho: r4.ancho, alto: r4.alto, radio: 18, oscurecer: false, entrada: f3 + 1.0, salida: f3 + 2.0 });
+          const r5 = pop.r(1150, 60, 1470, 660, 190);
+          AP.foco(tl, A, { id: ID + "-foco-cursor", x: r5.x, y: r5.y, ancho: r5.ancho, alto: r5.alto, radio: 18, oscurecer: false, entrada: f3 + 2.0, salida: f3 + 2.9 });
+          pop.mover(f3 + 2.8, 1450, 0.8);
+          const r6 = pop.r(1450, 60, 1690, 660, 290);
+          AP.foco(tl, A, { id: ID + "-foco-mascota", x: r6.x, y: r6.y, ancho: r6.ancho, alto: r6.alto, radio: 18, oscurecer: false, entrada: f3 + 3.7, salida: f4 - 0.1 });
+
+          // f4 · se guarda solo y se aplica al instante
+          pop.mover(f4, 1150, 1.0);
+          AP.rotulo(tl, A, { id: ID + "-rot2", texto: "Se guarda automáticamente", entrada: f4 + 0.4, salida: f4 + 2.9 });
+          const rs = pop.r(1150, 72, 1301, 636, 88);
+          const sel = el(A, "cap04-selector", "<span>Acromatopsia</span>", "left:" + rs.x + "px;top:" + rs.y + "px;width:" + rs.ancho + "px;height:" + rs.alto + "px");
+          sel.id = ID + "-selector";
+          tl.to(sel, { opacity: 1, duration: 0.3 }, f4 + 3.2);
+          tl.to(fondo2, { opacity: 1, duration: 1.0, ease: "power1.inOut" }, f4 + 3.2);
+          AP.foco(tl, A, { id: ID + "-foco-selector", x: rs.x, y: rs.y, ancho: rs.ancho, alto: rs.alto, radio: 14, oscurecer: false, entrada: f4 + 2.7, salida: f5 - 0.3 });
+          AP.rotulo(tl, A, { id: ID + "-rot3", texto: "Al instante, sin recargar", entrada: f4 + 3.3, salida: f5 - 0.4 });
+
+          // ───────── Fase B: Base y Lite lado a lado ─────────
+          const B = fase(ID + "-B", f5 - 0.3, null);
+          const BS = 0.8;
+          AP.chip(tl, B, { id: ID + "-chip-base-t", tipo: "base", texto: "AdaptaPE Base", x: 120, y: 104, entrada: f5 + 0.1 });
+          AP.chip(tl, B, { id: ID + "-chip-lite-t", tipo: "lite", texto: "AdaptaPE Lite", x: 1160, y: 104, entrada: f5 + 0.3 });
+          const vb = visor(B, ID + "-vbase", "assets/capturas/base-popup.png", 800, 120, 190, 640, 650, BS);
+          const vl = visor(B, ID + "-vlite", "assets/capturas/lite-popup.png", 800, 1160, 190, 640, 650, BS);
+          AP.entrar(tl, vb.v, f5 + 0.2, "subir", 0.6);
+          AP.entrar(tl, vl.v, f5 + 0.4, "subir", 0.6);
+          const rb1 = vb.r(0, 60, 295, 660, 150);
+          AP.foco(tl, B, { id: ID + "-foco-b1", x: rb1.x, y: rb1.y, ancho: rb1.ancho, alto: rb1.alto, radio: 16, oscurecer: false, entrada: f5 + 0.7, salida: f5 + 1.8 });
+          AP.chip(tl, B, { id: ID + "-chip-lectura", tipo: "base", x: 800, y: rb1.y + 24, entrada: f5 + 0.9, salida: f5 + 1.8 });
+          vb.mover(f5 + 1.9, 900, 1.0);
+          vl.mover(f5 + 1.9, 900, 1.0);
+          const rb2 = vb.r(900, 60, 1450, 660, 200);
+          AP.foco(tl, B, { id: ID + "-foco-b2", x: rb2.x, y: rb2.y, ancho: rb2.ancho, alto: rb2.alto, radio: 16, oscurecer: false, entrada: f5 + 3.1 });
+          AP.chip(tl, B, { id: ID + "-chip-cursor", tipo: "base", x: 800, y: rb2.y + 44, entrada: f5 + 3.3 });
+
+          window.__timelines[ID] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

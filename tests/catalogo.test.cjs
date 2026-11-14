@@ -8,6 +8,8 @@ const { execFileSync } = require('node:child_process');
 const raiz = path.resolve(__dirname, '..');
 const { catalogo, serializar } = require('../tools/exportar-catalogo.cjs');
 const idiomas = ['es', 'en', 'pt', 'de', 'fr', 'it'];
+const soloBase = process.argv.includes('--solo-base');
+if (soloBase) console.log('Sólo Base: identidad con Lite pendiente del orquestador.');
 
 function cargar(carpeta) {
     const clases = fs.existsSync(path.join(carpeta, 'classes/VoiceAssistant.js')) ? 'classes' : 'clases';
@@ -27,7 +29,7 @@ assert.deepEqual(Object.keys(exportado.idiomas), idiomas);
 assert.equal(exportado.origen.licencia, 'CC-BY-NC-SA-4.0');
 assert.equal(exportado.sitios.youtube.inicio, 'https://www.youtube.com/');
 
-for (const carpeta of [raiz, path.resolve(raiz, '../extensiónLite')]) {
+for (const carpeta of soloBase ? [raiz] : [raiz, path.resolve(raiz, '../lite')]) {
     execFileSync(process.execPath, [path.join(carpeta, 'tools/exportar-catalogo.cjs'), '--check']);
     assert.equal(serializar(catalogo(carpeta)), serializado, 'Base y Lite deben exportar los mismos datos comunes');
     const contexto = cargar(carpeta);
@@ -51,6 +53,7 @@ for (const carpeta of [raiz, path.resolve(raiz, '../extensiónLite')]) {
             assert.equal(new RegExp(patron.patron, patron.flags).source, original.frases[indice][0].source);
             assert.equal(reemplazo, original.frases[indice][1]);
         });
+        assert.deepEqual(exportado.idiomas[idioma].reglas, reglas.map(([patron, reemplazo]) => ({ ...patron, reemplazo })));
     }
 }
 
@@ -64,9 +67,28 @@ for (const [modulo, textos] of Object.entries(exportado.textos)) {
         }
     }
 }
+// Tutorial: la misma secuencia en el catálogo, en los textos de seis idiomas y en el HTML de cada variante;
+// las órdenes que enseña cada texto llegan a la orden canónica del parser.
+assert.deepEqual(exportado.tutorial.pasos.map(paso => paso.id), ['voz', 'nombre', 'baja', 'selecciona', 'clic', 'filtro', 'cursor', 'reabrir']);
+assert.deepEqual(exportado.tutorial.pasos.filter(paso => paso.soloBase).map(paso => paso.id), ['cursor']);
+const codigos = { es: 'es-PE', en: 'en-US', pt: 'pt-BR', de: 'de-DE', fr: 'fr-FR', it: 'it-IT' };
+const parser = cargar(raiz).VoiceAssistant.prepararComando;
+for (const paso of exportado.tutorial.pasos) for (const idioma of idiomas) {
+    for (const parte of ['titulo', 'texto']) assert.ok(exportado.textos.paginas[idioma][`tutorial.${paso.id}.${parte}`], `${idioma}/tutorial.${paso.id}.${parte}`);
+    if (!paso.orden) continue;
+    const citada = /[«“„]\s*\{palabra\},\s*(.+?)\s*[»”“]/.exec(exportado.textos.paginas[idioma][`tutorial.${paso.id}.texto`]);
+    assert.ok(citada, `${idioma}/${paso.id}: la orden entre comillas`);
+    const esperada = paso.id === 'selecciona' ? `selecciona ${exportado.textos.paginas[idioma]['tutorial.objetivo']}` : paso.orden;
+    assert.equal(parser(citada[1], codigos[idioma]), esperada, `${idioma}/${paso.id}: «${citada[1]}»`);
+}
+for (const [carpeta, esBase] of soloBase ? [[raiz, true]] : [[raiz, true], [path.resolve(raiz, '../lite'), false]]) {
+    const html = fs.readFileSync(path.join(carpeta, 'bienvenida.html'), 'utf8');
+    assert.deepEqual([...html.matchAll(/data-paso="(\w+)"/g)].map(coincidencia => coincidencia[1]),
+        exportado.tutorial.pasos.filter(paso => esBase || !paso.soloBase).map(paso => paso.id), 'Pasos del tutorial en ' + path.basename(carpeta));
+}
 const temporal = fs.mkdtempSync(path.join(os.tmpdir(), 'adaptape-catalogo-'));
 try {
-    for (const archivo of ['tools/exportar-catalogo.cjs', 'sitios.js', 'classes/VoiceAssistant.js', 'textos_paginas.js', 'mascotas/Mascota.js', 'tests/fixtures/voz-paridad.json']) {
+    for (const archivo of ['tools/exportar-catalogo.cjs', 'sitios.js', 'classes/VoiceAssistant.js', 'textos_paginas.js', 'mascotas/Mascota.js', 'tests/fixtures/voz-paridad.json', 'tests/fixtures/activacion-paridad.json']) {
         const destino = path.join(temporal, archivo);
         fs.mkdirSync(path.dirname(destino), { recursive: true });
         fs.copyFileSync(path.join(raiz, archivo), destino);

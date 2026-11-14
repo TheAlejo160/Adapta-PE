@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>cap13 · Cierre</title>
+  </head>
+  <body>
+    <!--
+      cap13 · Consejos y despedida (~27 s). Una idea en pantalla a la vez:
+      f1 título · f2 voz sólo en una edición · f3 micrófono + Chrome ·
+      f4 «Computadora, recalibrar» · f5 resumen de 4 ideas + mascotas ·
+      f6 logo + adaptape.cc. Es la última escena: puede fundirse al final.
+    -->
+    <template>
+      <style>
+        #cap13-raiz {
+          position: absolute;
+          inset: 0;
+        }
+        /* Consejo 2: micrófono con permiso concedido. */
+        #cap13-mic {
+          position: absolute;
+          left: 560px;
+          top: 360px;
+          width: 300px;
+          height: 300px;
+          border-radius: 50%;
+          background: var(--ap-superficie);
+          border: 6px solid var(--ap-verde);
+          color: var(--ap-verde);
+          display: grid;
+          place-items: center;
+          box-shadow: var(--sombra-2);
+        }
+        #cap13-mic svg {
+          width: 150px;
+          height: 150px;
+          display: block;
+        }
+        #cap13-mic-ok {
+          position: absolute;
+          right: -10px;
+          bottom: 6px;
+          width: 104px;
+          height: 104px;
+          border-radius: 50%;
+          background: var(--ap-verde);
+          color: var(--ap-tinta);
+          display: grid;
+          place-items: center;
+          border: 6px solid var(--ap-fondo);
+        }
+        #cap13-mic-ok svg {
+          width: 60px;
+          height: 60px;
+        }
+        #cap13-mas {
+          position: absolute;
+          left: 920px;
+          top: 470px;
+          font-family: var(--ap-fuente-titulo);
+          font-size: var(--t-titulo);
+          font-weight: 700;
+          color: var(--ap-texto-2);
+          line-height: 1;
+        }
+        /* Consejo 3: anillo de calibración. */
+        #cap13-diana {
+          position: absolute;
+          left: 1340px;
+          top: 300px;
+          width: 420px;
+          height: 420px;
+          display: block;
+        }
+        /* Resumen: cuatro ideas. */
+        #cap13-ideas {
+          position: absolute;
+          left: var(--margen-lateral);
+          right: var(--margen-lateral);
+          top: 130px;
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 40px;
+        }
+        .cap13-idea {
+          height: 360px;
+          border-radius: var(--r-l);
+          background: var(--ap-superficie);
+          border: var(--borde-grueso) solid var(--ap-borde);
+          box-shadow: var(--sombra-1);
+          padding: 40px 32px;
+          display: flex;
+          flex-direction: column;
+          gap: 28px;
+        }
+        .cap13-idea-icono {
+          width: 112px;
+          height: 112px;
+          border-radius: 50%;
+          background: var(--ap-verde-suave);
+          color: var(--ap-verde);
+          display: grid;
+          place-items: center;
+        }
+        .cap13-idea-icono svg {
+          width: 64px;
+          height: 64px;
+          display: block;
+        }
+        .cap13-idea-texto {
+          font-family: var(--ap-fuente-titulo);
+          font-weight: 700;
+          font-size: 46px;
+          line-height: 1.12;
+        }
+        /* Despedida. */
+        #cap13-despedida {
+          position: absolute;
+          left: var(--margen-lateral);
+          right: var(--margen-lateral);
+          top: 104px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+          text-align: center;
+        }
+        #cap13-logo {
+          width: 180px;
+          height: 180px;
+          display: block;
+        }
+        #cap13-url {
+          font-family: var(--ap-fuente-titulo);
+          font-weight: 700;
+          font-size: var(--t-display);
+          line-height: 1.05;
+          color: var(--ap-verde);
+          margin: 0;
+        }
+        #cap13-adios {
+          font-size: 56px;
+          font-weight: 600;
+          color: var(--ap-texto);
+          margin: 0;
+        }
+        #cap13-telon {
+          position: absolute;
+          inset: 0;
+          background: var(--ap-fondo-hondo);
+          opacity: 0;
+        }
+      </style>
+
+      <div data-hf-id="hf-3mxu" id="cap13-raiz" class="ap-escena" data-composition-id="cap13" data-width="1920" data-height="1080">
+        <div data-hf-id="hf-nu15" id="cap13-mic">
+          <svg data-hf-id="hf-26zx" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Micrófono"><rect data-hf-id="hf-yfem" x="9" y="2" width="6" height="12" rx="3" /><path data-hf-id="hf-6jsj" d="M5 10a7 7 0 0 0 14 0" /><path data-hf-id="hf-wew8" d="M12 17v4" /><path data-hf-id="hf-85wg" d="M8 21h8" /></svg>
+          <span data-hf-id="hf-crw7" id="cap13-mic-ok"><svg data-hf-id="hf-085v" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-gg77" d="M5 12l5 5 9-11" /></svg></span>
+        </div>
+        <div data-hf-id="hf-45vi" id="cap13-mas">+</div>
+
+        <svg data-hf-id="hf-1p29" id="cap13-diana" viewBox="0 0 420 420" aria-label="Anillo de calibración">
+          <circle data-hf-id="hf-g314" cx="210" cy="210" r="180" fill="none" stroke="#475569" stroke-width="6" stroke-dasharray="14 18" />
+          <circle data-hf-id="hf-liot" cx="210" cy="210" r="120" fill="none" stroke="#475569" stroke-width="6" />
+          <circle data-hf-id="hf-mhjd" id="cap13-diana-progreso" cx="210" cy="210" r="150" fill="none" stroke="#86efac" stroke-width="14" stroke-linecap="round" transform="rotate(-90 210 210)" stroke-dasharray="942.48" stroke-dashoffset="942.48" />
+          <path data-hf-id="hf-w4zm" d="M210 40v60M210 320v60M40 210h60M320 210h60" stroke="#b9c5d5" stroke-width="6" stroke-linecap="round" />
+          <circle data-hf-id="hf-xnv4" id="cap13-diana-centro" cx="210" cy="210" r="26" fill="#86efac" />
+        </svg>
+
+        <div data-hf-id="hf-syns" id="cap13-ideas">
+          <div data-hf-id="hf-xoac" class="cap13-idea" id="cap13-idea-1">
+            <div data-hf-id="hf-egmt" class="cap13-idea-icono"><svg data-hf-id="hf-h0hq" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect data-hf-id="hf-mlpe" x="9" y="2" width="6" height="12" rx="3" /><path data-hf-id="hf-wwsz" d="M5 10a7 7 0 0 0 14 0" /><path data-hf-id="hf-neqo" d="M12 17v4" /><path data-hf-id="hf-qajc" d="M8 21h8" /></svg></div>
+            <div data-hf-id="hf-eq9g" class="cap13-idea-texto">Di «Computadora» y pide</div>
+          </div>
+          <div data-hf-id="hf-6c67" class="cap13-idea" id="cap13-idea-2">
+            <div data-hf-id="hf-ymzt" class="cap13-idea-icono"><svg data-hf-id="hf-pmle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-i085" d="M5 3l14 7-6 2-2 6z" /></svg></div>
+            <div data-hf-id="hf-b1uc" class="cap13-idea-texto">Mueve el cursor sin manos</div>
+          </div>
+          <div data-hf-id="hf-2e26" class="cap13-idea" id="cap13-idea-3">
+            <div data-hf-id="hf-ztww" class="cap13-idea-icono"><svg data-hf-id="hf-q0wf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path data-hf-id="hf-fe0e" d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" /><circle data-hf-id="hf-2731" cx="12" cy="12" r="3" /></svg></div>
+            <div data-hf-id="hf-mnsu" class="cap13-idea-texto">Escucha y mira mejor</div>
+          </div>
+          <div data-hf-id="hf-b1y1" class="cap13-idea" id="cap13-idea-4">
+            <div data-hf-id="hf-zflv" class="cap13-idea-icono"><svg data-hf-id="hf-qf7g" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect data-hf-id="hf-lbj0" x="3" y="4" width="18" height="12" rx="2" /><path data-hf-id="hf-n6hi" d="M8 20h8M12 16v4" /></svg></div>
+            <div data-hf-id="hf-9467" class="cap13-idea-texto">Navegador, Windows y macOS</div>
+          </div>
+        </div>
+
+        <div data-hf-id="hf-4t1x" id="cap13-despedida">
+          <img data-hf-id="hf-qrk3" id="cap13-logo" src="../assets/marca/adapta-pe.webp" alt="Logo de AdaptaPE" />
+          <p data-hf-id="hf-yeng" id="cap13-url">adaptape.cc</p>
+          <p data-hf-id="hf-tbqy" id="cap13-adios">¡Hasta pronto!</p>
+        </div>
+
+        <div data-hf-id="hf-23ut" id="cap13-telon" data-layout-ignore data-layout-allow-occlusion></div>
+      </div>
+
+      <script>
+        (function () {
+          const ID = "cap13";
+          const cap = AP.capitulo(ID);
+          const raiz = document.getElementById(ID + "-raiz");
+          const D = cap.duracion;
+          const f = (n, r) => AP.t(ID, "f" + n, r);
+          const fin = (n, r) => AP.tFin(ID, "f" + n, r);
+          const t1 = f(1, 0.6), t2 = f(2, 3.7), t3 = f(3, 7.8), t4 = f(4, 12.7), t5 = f(5, 16.8), t6 = f(6, 22.7);
+
+          const tl = gsap.timeline({ paused: true });
+          AP.ambiente(tl, raiz, { duracion: D, semilla: 13 });
+
+          // ── f1: título ──
+          AP.tituloCapitulo(tl, raiz, { id: ID + "-titulo", etiqueta: "Para terminar", titulo: "Consejos rápidos", entrada: t1, salida: t2 - 0.45 });
+
+          // ── f2: Base y Lite a la vez → voz sólo en una ──
+          AP.paso(tl, raiz, { id: ID + "-c1", n: 1, total: 3, etiqueta: "Consejo 1 de 3", texto: "Voz encendida en una sola", x: 96, y: 120, entrada: t2, salida: t3 - 0.4 });
+          const pb = AP.popup(tl, raiz, {
+            id: ID + "-popup-base",
+            edicion: "base",
+            x: 340,
+            y: 400,
+            interruptores: [{ texto: "Voz", activo: false, cambiaEn: t2 + 1.4 }],
+            entrada: t2 + 0.4,
+          });
+          const pl = AP.popup(tl, raiz, {
+            id: ID + "-popup-lite",
+            edicion: "lite",
+            x: 1020,
+            y: 400,
+            interruptores: [{ texto: "Voz", activo: false }],
+            entrada: t2 + 0.6,
+          });
+          AP.salir(tl, pb.el, t3 - 0.4);
+          AP.salir(tl, pl.el, t3 - 0.4);
+
+          // ── f3: permiso del micrófono + Google Chrome ──
+          AP.paso(tl, raiz, { id: ID + "-c2", n: 2, total: 3, etiqueta: "Consejo 2 de 3", texto: "Micrófono permitido y Chrome", x: 96, y: 120, entrada: t3, salida: t4 - 0.4 });
+          tl.fromTo("#cap13-mic", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.6)" }, t3 + 0.4);
+          tl.fromTo("#cap13-mic-ok", { scale: 0 }, { scale: 1, duration: 0.45, ease: "back.out(2.4)" }, t3 + 1.6);
+          tl.fromTo("#cap13-mas", { opacity: 0 }, { opacity: 1, duration: 0.3 }, t3 + 2.4);
+          const chrome = AP.chip(tl, raiz, { id: ID + "-chrome", tipo: "extension", texto: "Google Chrome", x: 1060, y: 476, entrada: t3 + 2.7 });
+          AP.salir(tl, ["#cap13-mic", "#cap13-mas", chrome], t4 - 0.4);
+
+          // ── f4: «Computadora, recalibrar» ──
+          AP.paso(tl, raiz, { id: ID + "-c3", n: 3, total: 3, etiqueta: "Consejo 3 de 3", texto: "¿Cursor torcido? Recalibra", x: 96, y: 120, entrada: t4, salida: t5 - 0.4 });
+          const voz = AP.comandoVoz(tl, raiz, { id: ID + "-voz", texto: "Computadora, recalibrar", x: 96, y: 440, entrada: t4 + 0.9, duracion: 1.6, salida: t5 - 0.4 });
+          tl.fromTo("#cap13-diana", { opacity: 0, scale: 0.8, rotation: -20 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.6, ease: "power3.out" }, t4 + 1.0);
+          tl.fromTo("#cap13-diana-progreso", { attr: { "stroke-dashoffset": 942.48 } }, { attr: { "stroke-dashoffset": 0 }, duration: 1.4, ease: "power1.inOut" }, t4 + 2.3);
+          tl.fromTo("#cap13-diana-centro", { scale: 1, transformOrigin: "50% 50%" }, { scale: 1.5, duration: 0.25, ease: "power2.out", yoyo: true, repeat: 1, transformOrigin: "50% 50%" }, t4 + 3.7);
+          AP.salir(tl, "#cap13-diana", t5 - 0.4);
+
+          // ── f5: resumen de 4 ideas + mascotas que se despiden ──
+          const durF5 = fin(5, t5 + 5.5) - t5;
+          [1, 2, 3, 4].forEach((n, i) => {
+            const tt = t5 + 0.2 + i * Math.min(1.0, (durF5 - 1) / 4);
+            tl.fromTo("#cap13-idea-" + n, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" }, tt);
+            tl.fromTo("#cap13-idea-" + n + " .cap13-idea-icono", { scale: 0.5 }, { scale: 1, duration: 0.6, ease: "back.out(2)" }, tt + 0.1);
+          });
+          tl.to("#cap13-ideas", { opacity: 0, y: -30, duration: 0.45, ease: "power2.in" }, t6 - 0.5);
+
+          const tM = t5 + 3.6;
+          const mascotas = [
+            { nombre: "cuchu", x: 310 },
+            { nombre: "yati", x: 829 },
+            { nombre: "tinku", x: 1348 },
+          ];
+          mascotas.forEach((m, i) => {
+            const desde = tM + i * 0.25;
+            AP.mascota(tl, raiz, {
+              id: ID + "-" + m.nombre,
+              nombre: m.nombre,
+              x: m.x,
+              y: 524,
+              alto: 306,
+              entrada: desde,
+              animaciones: [
+                { anim: "happy", desde: 0, hasta: desde + 0.9 },
+                { anim: "wave", desde: desde + 0.9, hasta: D },
+              ],
+            });
+          });
+
+          // ── f6: logo + adaptape.cc ──
+          tl.fromTo("#cap13-logo", { opacity: 0, scale: 0.6, rotation: -10 }, { opacity: 1, scale: 1, rotation: 0, duration: 0.7, ease: "back.out(1.7)" }, t6);
+          tl.fromTo("#cap13-url", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.8, ease: "expo.out" }, t6 + 0.3);
+          tl.fromTo("#cap13-adios", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }, fin(6, t6 + 3.9) - 1.3);
+
+          // Última escena: fundido final (el telón, por encima de todo).
+          raiz.appendChild(document.getElementById("cap13-telon"));
+          tl.fromTo("#cap13-telon", { opacity: 0 }, { opacity: 1, duration: 0.7, ease: "power1.in" }, D - 0.75);
+
+          window.__timelines[ID] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

@@ -20,21 +20,21 @@
     const mascota = new globalThis.Mascota();
     const idIndicador = 'adapta-pe-voz-indicador-' + runtimeOriginal.id;
     const textos = {
-        es: { 'pagina.vozActiva': 'Voz activa · di Computadora', 'pagina.reanudado': 'Cursor reanudado. Centro fijo, sin calibración.',
+        es: { 'pagina.vozActiva': 'Voz activa · di {palabra}', 'pagina.reanudado': 'Cursor reanudado. Centro fijo, sin calibración.',
             'pagina.centroFijo': 'Centro fijo para gestos. Sólo cabeza y torso calibran postura.' },
-        en: { 'pagina.vozActiva': 'Voice on · say Computer', 'pagina.reanudado': 'Cursor resumed. Fixed center, no calibration.',
+        en: { 'pagina.vozActiva': 'Voice on · say {palabra}', 'pagina.reanudado': 'Cursor resumed. Fixed center, no calibration.',
             'pagina.centroFijo': 'Fixed center for gestures. Only head and torso calibrate posture.' },
-        pt: { 'pagina.vozActiva': 'Voz ativa · diga Computador', 'pagina.reanudado': 'Cursor retomado. Centro fixo, sem calibração.',
+        pt: { 'pagina.vozActiva': 'Voz ativa · diga {palabra}', 'pagina.reanudado': 'Cursor retomado. Centro fixo, sem calibração.',
             'pagina.centroFijo': 'Centro fixo para gestos. Só cabeça e tronco calibram a postura.' },
-        de: { 'pagina.vozActiva': 'Sprache aktiv · sage Computer', 'pagina.reanudado': 'Cursor fortgesetzt. Feste Mitte, keine Kalibrierung.',
+        de: { 'pagina.vozActiva': 'Sprache aktiv · sage {palabra}', 'pagina.reanudado': 'Cursor fortgesetzt. Feste Mitte, keine Kalibrierung.',
             'pagina.centroFijo': 'Feste Mitte für Gesten. Nur Kopf und Oberkörper kalibrieren die Haltung.' },
-        fr: { 'pagina.vozActiva': 'Voix active · dites Ordinateur', 'pagina.reanudado': 'Curseur repris. Centre fixe, sans calibrage.',
+        fr: { 'pagina.vozActiva': 'Voix active · dites {palabra}', 'pagina.reanudado': 'Curseur repris. Centre fixe, sans calibrage.',
             'pagina.centroFijo': 'Centre fixe pour les gestes. Seuls la tête et le torse calibrent la posture.' },
-        it: { 'pagina.vozActiva': 'Voce attiva · di’ Computer', 'pagina.reanudado': 'Cursore ripreso. Centro fisso, senza calibrazione.',
+        it: { 'pagina.vozActiva': 'Voce attiva · di’ {palabra}', 'pagina.reanudado': 'Cursore ripreso. Centro fisso, senza calibrazione.',
             'pagina.centroFijo': 'Centro fisso per i gesti. Solo testa e busto calibrano la postura.' },
     };
     globalThis.TextosAdapta?.definir(textos);
-    const t = clave => globalThis.TextosAdapta?.t(clave) ?? textos.es[clave];
+    const t = (clave, variables) => globalThis.TextosAdapta?.t(clave, variables) ?? textos.es[clave];
     let textoVoz = null; // null: texto predeterminado en el idioma actual.
     let langTTS; // undefined: el worker usa es-ES.
     let indicador;
@@ -46,7 +46,7 @@
             indicador.style.cssText = 'position:fixed;bottom:20px;left:20px;max-width:80vw;padding:10px 20px;background:#8b1420;color:white;border-radius:20px;font:14px sans-serif;z-index:999999;pointer-events:none';
         }
         if (!indicador.isConnected) document.body?.append(indicador);
-        const texto = textoVoz ?? t('pagina.vozActiva');
+        const texto = textoVoz ?? t('pagina.vozActiva', { palabra: globalThis.palabraActivacion?.(voiceAssistantNuevo.nombreActivacion, globalThis.TextosAdapta?.idioma) });
         if (indicador.textContent !== texto) indicador.textContent = texto;
     }
     function vigente() { try { return !destruido && Boolean(runtimeOriginal.id && runtimeOriginal.getManifest()); } catch (_) { return false; } }
@@ -63,7 +63,7 @@
     }
     const observarInterfaz = new MutationObserver(recuperarInterfaz);
     voiceAssistantNuevo.alEstado = (texto, tipo) => { mascota.estadoVoz(texto, tipo); chrome.runtime.sendMessage({ accion: 'voz_resultado', texto, tipo }).catch(() => {}); };
-    const clavesPreferencias = ['voz', 'daltonismo', 'ojos', 'talkback', 'ajustesCineticos', 'mascota', 'posicionMascota', 'idiomaVoz'];
+    const clavesPreferencias = ['voz', 'daltonismo', 'ojos', 'talkback', 'ajustesCineticos', 'mascota', 'posicionMascota', 'idiomaVoz', 'nombreActivacion'];
     // Un solo ajuste (`idiomaVoz`, «auto» por defecto) fija voz e interfaz; los módulos se retraducen sin recargar.
     function aplicarIdioma(valor) {
         const codigo = globalThis.CodigosVoz?.includes(valor) ? valor : globalThis.detectarIdiomaVoz?.([...navigator.languages, navigator.language, chrome.i18n?.getUILanguage?.()]) ?? 'es-PE';
@@ -81,6 +81,7 @@
         if (destruido || revision !== revisionPreferencias) return;
         aplicarIdioma(res.idiomaVoz);
         voiceAssistantNuevo.permitidoPorUsuario = Boolean(res.voz);
+        voiceAssistantNuevo.setNombreActivacion(res.nombreActivacion);
         filtros.aplicar(res.daltonismo || 'ninguno');
         mascota.configurar(res.mascota, res.posicionMascota);
         mascota.actualizarVisibilidad(!document.hidden);
@@ -107,6 +108,7 @@
         if (peticion.accion === 'mascota_estado') { mascota.reaccionar(peticion.estado, peticion.hablando); return; }
         if (peticion.accion === 'control_prioridad') {
             prioridad = Boolean(peticion.activa);
+            if (prioridad) motorCinetico.faltaPermiso = peticion.camaraSinPermiso === true;
             actualizarVisibilidad();
             if (!prioridad) { responder({ ok: true }); return; }
             revisarPreferencias().then(() => responder({ ok: true })).catch(() => responder({ ok: false }));
@@ -118,6 +120,7 @@
             if (typeof datos?.grises === 'string') datos.grises = Array.from(atob(datos.grises), letra => letra.charCodeAt(0));
             motorCinetico.recibirFotograma(datos); return;
         }
+        if (peticion.accion === 'camara_permiso') { motorCinetico.faltaPermiso = true; return; }
         if (peticion.accion === 'camara_vista' && prioridad && !document.hidden) { motorCinetico.recibirVista(peticion.vista); return; }
         if (peticion.accion === 'camara_error' && prioridad) {
             const clave = /^cinetico\.error\.\w+$/.test(peticion.clave) ? peticion.clave : undefined;
@@ -140,7 +143,7 @@
             if (/^control (zona (izquierda|derecha)|mano parcial)$/.test(comando)) texto = 'control muñón';
             if (/^control (brazos|extremidades|punos)$/.test(comando)) texto = 'control manos';
             if (/^(da|dale|hazle) (clic|click)$/.test(comando)) texto = voiceAssistantNuevo.elementoSeleccionado ? 'dale clic' : 'clic';
-            voiceAssistantNuevo.ejecutarComando(texto); responder({ ok: true }); return;
+            voiceAssistantNuevo.ejecutarConResultado(texto).then(responder).catch(() => responder({ ok: false, resultado: 'fallo' })); return true;
         }
         if (peticion.accion === 'voz_indicador') {
             if (peticion.activa) mascota.estadoVoz(String(peticion.texto || ''), peticion.tipo);

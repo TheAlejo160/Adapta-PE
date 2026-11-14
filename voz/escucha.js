@@ -1,14 +1,14 @@
 // Un reconocedor por extensión, independiente de pestañas, ventanas y barra de Chrome.
-const vozCentral = new VoiceAssistant(null, texto => {
-    chrome.runtime.sendMessage({ accion: 'voz_comando', texto }).catch(() => {});
-});
+const vozCentral = new VoiceAssistant(null, texto => chrome.runtime.sendMessage({ accion: 'voz_comando', texto })
+    .catch(() => ({ ok: false, resultado: 'fallo' })));
 vozCentral.actualizarVisibilidad(true);
 vozCentral.alEstado = (texto, tipo) => chrome.runtime.sendMessage({ accion: 'voz_publicar_estado', texto, tipo }).catch(() => {});
 let solicitud = 0;
-async function configurarVoz(activa, idioma) {
+async function configurarVoz(activa, idioma, preferencias) {
     const actual = ++solicitud;
     TextosAdapta.fijarIdioma(idioma);
     vozCentral.setIdioma(idioma);
+    vozCentral.configurarActivacion(preferencias);
     if (!activa) { vozCentral.setEstado(false); return; }
     const permiso = await navigator.permissions.query({ name: 'microphone' });
     if (actual !== solicitud) return;
@@ -23,9 +23,17 @@ async function configurarVoz(activa, idioma) {
 }
 chrome.runtime.onMessage.addListener((peticion, emisor, responder) => {
     if (emisor.id !== chrome.runtime.id || peticion.destino !== 'voz_central') return;
+    if (peticion.accion === 'voz_tts') {
+        vozCentral.eventoTTS(peticion.id, peticion.evento); responder({ ok: true }); return;
+    }
     if (peticion.accion === 'voz_configurar') {
-        configurarVoz(Boolean(peticion.activa), peticion.idioma).then(() => responder({ ok: true })).catch(() => responder({ ok: false }));
+        configurarVoz(Boolean(peticion.activa), peticion.idioma, peticion).then(() => responder({ ok: true })).catch(() => responder({ ok: false }));
         return true;
+    }
+    if (peticion.accion === 'voz_probar_nombre') {
+        if (!vozCentral.microfonoIniciado || !vozCentral.permitidoPorUsuario) { responder({ ok: false }); return; }
+        vozCentral.probarNombre(texto => chrome.runtime.sendMessage({ accion: 'voz_prueba_muestra', texto }).catch(() => {}));
+        responder({ ok: true }); return;
     }
     if (peticion.accion === 'voz_fallback' && typeof peticion.texto === 'string') {
         const comando = normalizarVoz(peticion.texto);
@@ -33,8 +41,8 @@ chrome.runtime.onMessage.addListener((peticion, emisor, responder) => {
             vozCentral.mostrarEstado(TextosAdapta.t('voz.soloPaginas'), 'error');
             responder({ ok: false }); return;
         }
-        vozCentral.ejecutarComando(peticion.texto);
-        responder({ ok: true });
+        vozCentral.ejecutarConResultado(peticion.texto).then(responder).catch(() => responder({ ok: false, resultado: 'fallo' }));
+        return true;
     }
 });
 window.addEventListener('pagehide', () => vozCentral.detener());

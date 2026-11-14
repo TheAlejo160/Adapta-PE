@@ -1,0 +1,9 @@
+Adapta Pe es una ayuda de accesibilidad gratuita, hecha en Perú.
+
+Está pensada para personas con poca movilidad en las manos, con baja visión o daltonismo, y sus familias.
+
+Hay dos versiones. Lite es la ligera: voz, filtros de color y mascota. Ideal para computadoras sencillas o sin cámara.
+
+base lo tiene todo: además suma el cursor con cámara y la lectura en voz alta.
+
+Y puedes usarlas como extensión del navegador, o como aplicación en Windows y en mac O S.

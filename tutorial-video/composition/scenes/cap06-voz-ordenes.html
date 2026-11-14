@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="UTF-8"><title>Órdenes que puedes usar</title></head>
+<body><template>
+<style>
+#cap06-raiz { position:absolute; inset:0; }
+.cap06-etapa { position:absolute; inset:0; opacity:0; }
+.cap06-categoria { position:absolute; left:96px; top:155px; width:550px; }
+.cap06-categoria h2 { font-size:80px; line-height:1.08; margin:0 0 36px; color:var(--ap-verde); font-family:var(--ap-fuente-titulo); }
+.cap06-orden { font-size:44px; line-height:1.23; padding:20px 22px; margin:12px 0; border-left:5px solid var(--ap-verde); background:var(--ap-superficie); border-radius:0 14px 14px 0; }
+.cap06-pagina { position:absolute; inset:0; padding:30px 38px; font-size:40px; color:#182332; background:white; }
+.cap06-pagina h3 { font-size:54px; margin:0 0 22px; }
+.cap06-campo { height:76px; border:3px solid #657284; padding:12px 20px; border-radius:12px; background:#fff; font-size:40px; }
+.cap06-resultado { display:flex; gap:24px; align-items:center; margin-top:22px; padding:18px; border-radius:14px; background:#ecf0f5; }
+.cap06-miniatura { width:150px; height:92px; border-radius:10px; background:#d7e4db; display:grid; place-items:center; font-size:48px; }
+.cap06-articulo { position:absolute; left:38px; right:38px; top:30px; }
+.cap06-bloque { height:170px; border-bottom:3px solid #ccd5df; padding:24px 0; }
+.cap06-bloque p { font-size:40px; margin:12px 0 0; }
+.cap06-boton { display:inline-block; font-size:44px; color:white; background:#1c4f7d; padding:24px 42px; border:0; border-radius:12px; }
+#cap06-contacto { position:absolute; left:340px; top:165px; }
+#cap06-ripple { position:absolute; left:350px; top:136px; width:240px; height:150px; border:6px solid #1b6e41; border-radius:50%; opacity:0; }
+.cap06-formulario label { display:block; margin:0 0 10px; font-size:40px; font-weight:700; }
+.cap06-formulario .cap06-campo { margin-bottom:20px; }
+#cap06-bloqueo { display:flex; align-items:center; gap:18px; background:#edf1f6; border:3px solid #657284; border-radius:12px; padding:14px 20px; }
+#cap06-bloqueo svg { width:44px; height:44px; }
+#cap06-sin-dictado { margin-top:18px; color:#6b2330; font-weight:700; font-size:40px; }
+#cap06-lectura { padding:22px; border-radius:16px; background:#eaf4ee; color:#185b36; font-size:44px; margin-top:32px; display:flex; align-items:center; gap:20px; }
+#cap06-lectura svg { width:52px; height:52px; }
+.cap06-tab { height:50px; padding:7px 22px; border-radius:12px 12px 0 0; font-size:36px; background:#e3e8ee; color:#182332; white-space:nowrap; }
+</style>
+<div data-hf-id="hf-ef2y" id="cap06-raiz" class="ap-escena" data-composition-id="cap06" data-width="1920" data-height="1080"></div>
+<script>
+(function () {
+  const ID='cap06', cap=AP.capitulo(ID), raiz=document.getElementById(ID+'-raiz'), tl=gsap.timeline({paused:true});
+  const tiempos=[AP.t(ID,'f1',0.6),AP.t(ID,'f2',5.688),AP.t(ID,'f3',10.175),AP.t(ID,'f4',15.741),AP.t(ID,'f5',22.504),AP.t(ID,'f6',30.787)];
+  AP.ambiente(tl,raiz,{duracion:cap.duracion,semilla:6});
+  function etapa(n,titulo,ordenes,html,pestana,url) {
+    const el=document.createElement('div'); el.id=ID+'-etapa-'+n; el.className='cap06-etapa';
+    el.innerHTML='<div class="cap06-categoria"><h2>'+titulo+'</h2>'+ordenes.map((o,i)=>'<div id="cap06-orden-'+n+'-'+i+'" class="cap06-orden">«'+o+'»</div>').join('')+'</div>';
+    raiz.appendChild(el);
+    const nav=AP.navegador(tl,el,{id:ID+'-nav-'+n,x:700,y:150,ancho:1124,alto:670,pestana:pestana||'Mi página',url:url||'Mi página',extension:'base'});
+    nav.cuerpo.innerHTML='<div id="cap06-pagina-'+n+'" class="cap06-pagina">'+html+'</div>';
+    tl.fromTo(el,{opacity:0},{opacity:1,duration:0.35},tiempos[n-1]);
+    if(n<6) tl.set(el,{opacity:0},tiempos[n]);
+    return {el,nav,pagina:nav.cuerpo.firstElementChild};
+  }
+  function texto(selector,contenido,t) {
+    const el=document.querySelector(selector);
+    if (!el.dataset.cap06Capas) {
+      const inicial=document.createElement('span'); inicial.textContent=el.textContent;
+      el.replaceChildren(inicial); el.style.display='grid'; inicial.style.gridArea='1 / 1'; el.dataset.cap06Capas='si';
+    }
+    const anterior=el.lastElementChild, siguiente=document.createElement('span');
+    siguiente.textContent=contenido; siguiente.style.gridArea='1 / 1'; siguiente.style.opacity='0'; el.appendChild(siguiente);
+    tl.set(anterior,{opacity:0},t); tl.set(siguiente,{opacity:1},t);
+  }
+  function resaltar(n,i,t) { tl.to('#cap06-orden-'+n+'-'+i,{backgroundColor:'#244533',duration:0.2},t); }
+  const busca=etapa(1,'Buscar',['busca recetas en YouTube'],'<h3>YouTube</h3><div id="cap06-busqueda" class="cap06-campo">Buscar</div><div id="cap06-resultados"><div class="cap06-resultado"><div class="cap06-miniatura">▶</div><span>Recetas fáciles</span></div><div class="cap06-resultado"><div class="cap06-miniatura">▶</div><span>Cocina paso a paso</span></div></div>','YouTube','youtube.com');
+  AP.escribir(tl,document.getElementById('cap06-busqueda'),tiempos[0]+1.5,'recetas',0.7);
+  AP.entrar(tl,'#cap06-resultados',tiempos[0]+2.3,'subir',0.45);
+  resaltar(1,0,tiempos[0]+1.5);
+  const mover=etapa(2,'Moverte',['baja','sube un poco','ve al final'],'<div id="cap06-articulo" class="cap06-articulo"><div class="cap06-bloque"><h3>Recetas para cada día</h3><p>Elige tus ingredientes</p></div><div class="cap06-bloque"><h3>Prepara la cocina</h3><p>Todo listo para empezar</p></div><div class="cap06-bloque"><h3>Sigue los pasos</h3><p>Cocina a tu ritmo</p></div><div class="cap06-bloque"><h3>Final de la página</h3><p>¡A disfrutar!</p></div></div>');
+  const bloques=mover.pagina.querySelectorAll('.cap06-bloque');
+  // El recorte del navegador oculta las secciones que salen de la página visible.
+  bloques[2].style.opacity='0'; bloques[3].style.opacity='0';
+  tl.set(bloques[0],{opacity:0},tiempos[1]+0.75);
+  tl.set(bloques[2],{opacity:1},tiempos[1]+1.4);
+  tl.set(bloques[1],{opacity:0},tiempos[1]+3);
+  tl.set(bloques[3],{opacity:1},tiempos[1]+3.6);
+  tl.to('#cap06-articulo',{y:-230,duration:0.6,ease:'power2.inOut'},tiempos[1]+0.8); resaltar(2,0,tiempos[1]+0.8);
+  tl.to('#cap06-articulo',{y:-150,duration:0.45,ease:'power2.inOut'},tiempos[1]+2); resaltar(2,1,tiempos[1]+2);
+  tl.to('#cap06-articulo',{y:-350,duration:0.6,ease:'power2.inOut'},tiempos[1]+3); resaltar(2,2,tiempos[1]+3);
+  const tabs=etapa(3,'Pestañas',['nueva pestaña','siguiente pestaña','cierra esta pestaña'],'<h3 id="cap06-destino-tab">Recetas</h3><div class="cap06-campo">Cada página, en su pestaña</div>','Recetas');
+  const barra=tabs.nav.el.querySelector('.ap-nav-pestanas');
+  const tabNueva=document.createElement('div'); tabNueva.className='cap06-tab'; tabNueva.textContent='Nueva pestaña'; barra.appendChild(tabNueva);
+  const tabAyuda=document.createElement('div'); tabAyuda.className='cap06-tab'; tabAyuda.textContent='Ayuda'; barra.appendChild(tabAyuda);
+  tabs.nav.el.querySelector('.ap-nav-pestana').style.minWidth='240px';
+  AP.entrar(tl,tabNueva,tiempos[2]+0.8,'bajar',0.3); AP.entrar(tl,tabAyuda,tiempos[2]+0.8,'bajar',0.3);
+  texto('#cap06-destino-tab','Nueva pestaña',tiempos[2]+0.8);
+  tl.to(tabNueva,{backgroundColor:'#ffffff',duration:0.2},tiempos[2]+0.8); resaltar(3,0,tiempos[2]+0.8);
+  texto('#cap06-destino-tab','Ayuda',tiempos[2]+2.4);
+  tl.to(tabNueva,{backgroundColor:'#e3e8ee',duration:0.2},tiempos[2]+2.4);
+  tl.to(tabAyuda,{backgroundColor:'#ffffff',duration:0.2},tiempos[2]+2.4); resaltar(3,1,tiempos[2]+2.4);
+  AP.salir(tl,tabAyuda,tiempos[2]+3.8,0.25);
+  texto('#cap06-destino-tab','Nueva pestaña',tiempos[2]+3.8);
+  tl.to(tabNueva,{backgroundColor:'#ffffff',duration:0.2},tiempos[2]+3.8); resaltar(3,2,tiempos[2]+3.8);
+  const seleccion=etapa(4,'Seleccionar',['selecciona Contacto','dale clic'],'<h3>¿Hablamos?</h3><button id="cap06-contacto" class="cap06-boton" type="button">Contacto</button><div id="cap06-ripple"></div>');
+  tl.set('#cap06-contacto',{outline:'4px solid #ffdc00',outlineOffset:'5px',boxShadow:'0 0 0 7px #111827'},tiempos[3]+1.5); resaltar(4,0,tiempos[3]+1.5);
+  AP.pulso(tl,'#cap06-ripple',tiempos[3]+4.7,{opacity:1,scale:0.7},{opacity:0,scale:1.5,duration:0.7});
+  tl.to('#cap06-contacto',{backgroundColor:'#18613d',duration:0.25},tiempos[3]+4.7); resaltar(4,1,tiempos[3]+4.7);
+  const escribir=etapa(5,'Escribir',['enfoca correo','escribe hola, cómo estás'],'<div class="cap06-formulario"><label>Correo</label><div id="cap06-correo" class="cap06-campo"></div><label>Contraseña</label><div id="cap06-bloqueo">'+AP.iconos.candado+'<span>Campo protegido</span></div><div id="cap06-sin-dictado">Sin dictado en contraseñas</div></div>');
+  tl.set('#cap06-correo',{outline:'4px solid #125da5',outlineOffset:'3px'},tiempos[4]+0.9); resaltar(5,0,tiempos[4]+0.9);
+  AP.escribir(tl,document.getElementById('cap06-correo'),tiempos[4]+2.6,'hola, cómo estás',1.4); resaltar(5,1,tiempos[4]+2.6);
+  AP.entrar(tl,'#cap06-sin-dictado',tiempos[4]+5.2,'subir',0.3);
+  const mas=etapa(6,'Más',['aumenta zoom','pantalla completa','silencio'],'<div id="cap06-zoom"><h3>Lectura a tu medida</h3><div class="cap06-campo">Un texto más grande</div></div><div id="cap06-lectura">'+AP.iconos.altavoz+'<span id="cap06-estado-lectura">Leyendo…</span></div>');
+  tl.to('#cap06-zoom',{scale:1.1,transformOrigin:'0% 0%',duration:0.5},tiempos[5]+0.7); resaltar(6,0,tiempos[5]+0.7);
+  tl.to(mas.nav.el,{y:-20,height:690,duration:0.5},tiempos[5]+2);
+  tl.to(mas.nav.el.querySelector('.ap-nav-pestanas'),{height:0,opacity:0,duration:0.5},tiempos[5]+2);
+  tl.to(mas.nav.el.querySelector('.ap-nav-barra'),{height:0,opacity:0,duration:0.5},tiempos[5]+2); resaltar(6,1,tiempos[5]+2);
+  texto('#cap06-estado-lectura','Lectura detenida',tiempos[5]+3.7);
+  tl.to('#cap06-lectura',{backgroundColor:'#e7edf5',color:'#263d56',duration:0.25},tiempos[5]+3.7); resaltar(6,2,tiempos[5]+3.7);
+  window.__timelines[ID]=tl;
+})();
+</script>
+</template></body></html>

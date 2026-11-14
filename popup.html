@@ -13,6 +13,7 @@
       <div><h1>AdaptaPE</h1><p>Base v13.0</p></div>
     </header>
     <p class="introduccion" data-i18n="popup.introduccion">Elige las ayudas que quieres usar.</p>
+    <button type="button" id="abrirTutorial" data-i18n="popup.tutorial">Tutorial</button>
     <p id="estadoPanel" class="estado-panel" role="status" data-i18n="popup.cargando">Cargando tus ajustes…</p>
 
     <section class="opcion" aria-labelledby="tituloLectura">
@@ -55,32 +56,33 @@
           <option value="it-IT" lang="it-IT">Italiano</option>
         </select>
         <p id="ayudaIdiomaVoz" data-i18n="popup.ayudaIdioma">Idioma de AdaptaPE y de tus órdenes de voz. «Automático» usa el idioma de tu computadora.</p>
+        <form id="formNombreActivacion" novalidate>
+          <label for="nombreActivacion" data-i18n="popup.nombre">Nombre de activación</label>
+          <input type="text" id="nombreActivacion" autocomplete="off" spellcheck="false" aria-describedby="ayudaNombreActivacion estadoNombreActivacion">
+          <p id="ayudaNombreActivacion" data-i18n="popup.ayudaNombre">Dilo antes de cada orden. Sustituye a «Computadora». De 3 a 24 letras, hasta 3 palabras.</p>
+          <label for="aliasActivacion" data-i18n="popup.alias">Alias (hasta 3, separados por punto y coma)</label>
+          <input type="text" id="aliasActivacion" autocomplete="off" spellcheck="false" aria-describedby="estadoNombreActivacion">
+          <button type="submit" data-i18n="popup.guardarNombre">Guardar nombre</button>
+          <button type="button" id="restaurarNombreActivacion" data-i18n="popup.restaurarNombre">Usar «Computadora»</button>
+          <p id="estadoNombreActivacion" role="status" aria-live="polite"></p>
+        </form>
+        <div class="fila"><label for="tambienComputadora" data-i18n="popup.tambienComputadora">También responder a Computadora</label><label class="switch"><input type="checkbox" id="tambienComputadora"><span class="slider" aria-hidden="true"></span></label></div>
+        <div class="fila"><label for="modoConversacion" data-i18n="popup.modoConversacion">Modo conversación (8 segundos tras cada éxito)</label><label class="switch"><input type="checkbox" id="modoConversacion"><span class="slider" aria-hidden="true"></span></label></div>
+        <button type="button" id="probarNombreActivacion" data-i18n="popup.probarNombre">Probar nombre</button>
+        <p id="muestraNombreActivacion" role="status" aria-live="polite"></p>
+        <button type="button" id="anadirAliasActivacion" disabled data-i18n="popup.anadirAlias">Añadir como alias</button>
         <details><summary data-i18n="popup.ordenes">Órdenes y micrófono</summary><p data-i18n="popup.ejemplosVoz">Después del sonido, di «Abre YouTube», «Busca gatos», «Bajar» o «Cerrar pestaña». Di «Ayuda» para escuchar más órdenes.</p></details>
       </div>
     </section>
 
     <section class="select-box" aria-labelledby="tituloFiltros">
-      <label class="opcion-info" for="selectDaltonismo">
+      <div class="opcion-info">
         <svg class="icono" aria-hidden="true"><use href="iconos.svg#color"/></svg>
         <strong id="tituloFiltros" data-i18n="popup.filtros">Filtros de color</strong>
-      </label>
+      </div>
       <p id="ayudaFiltro" class="descripcion" data-i18n="popup.ayudaFiltro">Elige tu filtro de daltonismo.</p>
-      <select id="selectDaltonismo" aria-describedby="ayudaFiltro estadoDaltonismo">
-        <option value="ninguno" data-i18n="popup.sinFiltro">Sin filtro</option>
-        <optgroup label="Rojo y verde" data-i18n-label="popup.grupoRojoVerde">
-          <option value="deuteranomalia" data-i18n="popup.deuteranomalia">Deuteranomalía</option>
-          <option value="protanomalia" data-i18n="popup.protanomalia">Protanomalía</option>
-          <option value="deuteranopia" data-i18n="popup.deuteranopia">Deuteranopía</option>
-          <option value="protanopia" data-i18n="popup.protanopia">Protanopía</option>
-        </optgroup>
-        <optgroup label="Azul y amarillo" data-i18n-label="popup.grupoAzulAmarillo">
-          <option value="tritanomalia" data-i18n="popup.tritanomalia">Tritanomalía</option>
-          <option value="tritanopia" data-i18n="popup.tritanopia">Tritanopía</option>
-        </optgroup>
-        <optgroup label="Escala de grises" data-i18n-label="popup.grupoGrises">
-          <option value="acromatopsia" data-i18n="popup.acromatopsia">Acromatopsia</option>
-        </optgroup>
-      </select>
+      <p id="unFiltro" class="descripcion filtro-unico" data-i18n="popup.unFiltro">Sólo un filtro a la vez</p>
+      <div role="radiogroup" id="grupoDaltonismo" class="filtro-grupo" aria-labelledby="tituloFiltros" aria-describedby="ayudaFiltro unFiltro estadoDaltonismo"></div>
       <div class="filtro-feedback">
         <p id="estadoDaltonismo" role="status" data-i18n="popup.sinFiltroActivo">Sin filtro activo</p>
         <button id="quitarDaltonismo" type="button" hidden data-i18n="popup.quitarFiltro">Quitar filtro</button>
@@ -104,6 +106,11 @@
           <option value="zona" data-i18n="popup.modoZona">Muñón / mano parcial</option>
         </select>
         <p id="ayudaModo" data-i18n="popup.ayudaModo">Sólo cabeza / torso necesita calibrar tu postura.</p>
+        <label for="adapta-pe-dwell" data-i18n="popup.dwell">Tiempo para pulsar quedándote quieto</label>
+        <input type="range" id="adapta-pe-dwell" min="500" max="1500" step="100" value="1000" aria-describedby="ayudaDwell">
+        <p id="ayudaDwell"></p>
+        <div class="fila"><label for="adapta-pe-atraccion" data-i18n="popup.atraccion">Atracción a controles</label><label class="switch"><input type="checkbox" id="adapta-pe-atraccion" checked aria-describedby="ayudaAtraccion"><span class="slider" aria-hidden="true"></span></label></div>
+        <p id="ayudaAtraccion" data-i18n="popup.ayudaAtraccion">El cursor se acerca suavemente a los botones y enlaces cercanos.</p>
         <details><summary data-i18n="popup.comoMover">Cómo mover y hacer clic</summary>
           <p data-i18n="popup.gesto1">Sin calibración: la primera posición detectada de tu extremidad es el reposo del joystick. El centro de la vista permanece fijo.</p>
           <p data-i18n="popup.gesto2">Desplaza un poco la extremidad en cualquier dirección y mantenla ahí para mover el cursor. Vuelve al reposo para detenerlo.</p>
@@ -144,6 +151,7 @@
   <script src="textos.js"></script>
   <script src="sitios.js"></script>
   <script src="textos_paginas.js"></script>
+  <script src="filtros_ui.js"></script>
   <script src="popup.js"></script>
   <script src="voz/popup.js"></script>
   <script src="mascotas/popup.js"></script>

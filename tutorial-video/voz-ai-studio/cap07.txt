@@ -1,0 +1,13 @@
+Ahora, el cursor con cámara. Esto es solo de la versión base.
+
+Enciende «Cursor con cámara» en el panel y elige qué usarás para moverlo. Hay tres modos.
+
+Cabeza y torso: siéntate cómodo y quédate quieto un segundo. Adapta Pe aprende tu postura.
+
+Luego, inclina un poco la cabeza y el cursor se mueve. Vuelve al centro y se detiene.
+
+Brazos, manos o puños: funciona como un joystick invisible. Mueve la mano un poco, sostenla, y el cursor avanza.
+
+Muñón o mano parcial: sigue una zona con textura, como la piel, una venda o la manga. No necesita dedos.
+
+Consejo: busca buena luz de frente, y evita tener una ventana brillante detrás de ti.
