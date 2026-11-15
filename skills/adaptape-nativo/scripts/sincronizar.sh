@@ -33,17 +33,17 @@ copiar_skill() {
 copiar_skill "$BASE"
 echo "skill copiada: $BASE"
 
-# Destinos del Mac del titular; una carpeta ausente se informa y se omite.
+# Destinos relativos a la extensión Base en la suite.
 DESTINOS="
-$HOME/PycharmProjects/WelcomeScreen/extensiónLite
-$HOME/Desktop/Adapta-PE-Win
-$HOME/Desktop/Adapta-PE-Lite-Win
-$HOME/Desktop/TheAlejoCloud/Adapta-PE
-$HOME/Desktop/TheAlejoCloud/Adapta-PE-Lite
-$HOME/Desktop/Adapta-PE-Pro
-$HOME/Desktop/AdaptaPE Browser
-$HOME/Desktop/Mascota-Modular-Adapta-PE
-$HOME/WebstormProjects/adapta-pe
+$BASE/../lite
+$BASE/../../windows/base
+$BASE/../../windows/lite
+$BASE/../../macos/base
+$BASE/../../macos/lite
+$BASE/../../repos/Adapta-PE-Pro
+$BASE/../../navegador/base
+$BASE/../../compartido/mascota-sdk
+$BASE/../../web/landing
 "
 
 echo "$DESTINOS" | while IFS= read -r dir; do

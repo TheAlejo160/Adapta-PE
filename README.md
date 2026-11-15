@@ -6,7 +6,7 @@
 
 AdaptaPE Base es la **edición completa** de la extensión AdaptaPE para Google Chrome y otros navegadores Chromium de escritorio. Permite navegar por la web sin usar ratón ni teclado: das órdenes con la voz, mueves un cursor con la cabeza, un brazo, una mano o un muñón delante de la cámara, escuchas el elemento que señalas y cambias los colores de las páginas.
 
-- **Versión del código:** 13.0 (Manifest V3).
+- **Versión del código:** 14.0 (Manifest V3).
 - **Navegador mínimo:** Chromium 119 (`minimum_chrome_version` del manifest).
 - **Instalar:** [AdaptaPE en Chrome Web Store](https://chromewebstore.google.com/detail/haglphebolbegbchdkgejkoblocehogp?utm_source=item-share-cb) o desde este repositorio ([instrucciones](#instalación)).
 - **Sitio oficial:** [adaptape.cc](https://www.adaptape.cc) (también [adaptape.thealejo-dev.cc](https://adaptape.thealejo-dev.cc), que es el enlace del manifest y de la Nueva pestaña).
@@ -427,7 +427,6 @@ Chrome no permite content scripts en `chrome://`, la Chrome Web Store y otras p�
 | `mascotas/` | Adaptador de mascota, motor del SDK Mascota-Modular-Adapta-PE y sprites WebP. |
 | `nueva_pestana*.{html,js,css}` | Nueva pestaña propia y sus temas. |
 | `content_script.js` | Controlador de página: instancia módulos, aplica preferencias y se retira si la extensión se desactiva. |
-| `app.py` | Prototipo Flask opcional y simulado; no lo usa la extensión. |
 
 Los detalles del cursor (umbrales, joystick, señal con dedos, carga adaptativa) están en [KINETICMOUSE.md](KINETICMOUSE.md). Las reglas internas para quien desarrolla están en [CLAUDE.md](CLAUDE.md).
 
@@ -521,26 +520,6 @@ El 18 de octubre de 2026 pasaron con Node 24: motores (75 grupos), voz (15), cin
 Lite vive en su propio repositorio ([Adapta-PE-Lite](https://github.com/TheAlejo160/Adapta-PE-Lite)) y usa `clases/` en lugar de `classes/`. Estos archivos deben ser **idénticos byte a byte** en ambas ediciones: `sitios.js`, `textos.js`, `textos_paginas.js`, `VoiceAssistant.js`, `voz/escucha.js`, `background.js`, `bienvenida.js`, `filtros_frames.js` y `nueva_pestana*`. Edita uno y copia al otro. `tests/voz.test.cjs` comprueba `sitios.js`, `textos.js`, `textos_paginas.js`, `VoiceAssistant.js`, `background.js`, `voz/escucha.js` y `nueva_pestana.js`; `bienvenida.js`, `filtros_frames.js` y el resto de `nueva_pestana*` se comparan a mano con `cmp`. **No copies TalkBack, KineticEngine, `voz/camara.js` ni `vision/` a Lite.**
 
 Antes de publicar, prueba a mano la autorización visible, el dictado en un formulario, desactivar Control por voz, los filtros y, en Base, calibración, pérdida de seguimiento, pausa, permanencia, pinza, boca y la liberación de la cámara.
-
-## Backend Python opcional (simulado)
-
-`app.py` es un **prototipo** del «Ojo Biónico». La extensión no lo usa: ni el panel ni TalkBack ni el cursor se conectan a él, y no contiene ningún modelo de IA. No necesitas Python.
-
-Para probarlo, con Python 3.8 o posterior:
-
-```sh
-python -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-python -m pip install flask flask-cors
-python app.py
-```
-
-| Ruta | Comportamiento actual |
-| --- | --- |
-| `GET /estado` | JSON con un mensaje de disponibilidad. |
-| `POST /analizar_imagen` | Recibe JSON con `src`, espera un segundo y devuelve siempre la misma descripción simulada. |
-
-Escucha en `http://127.0.0.1:5000`, en modo depuración y con CORS abierto. No está preparado para producción.
 
 ## Trabajo futuro
 

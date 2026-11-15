@@ -120,15 +120,19 @@ document.addEventListener('DOMContentLoaded', () => {
     grupoFiltros.addEventListener("change", () => guardarCambios({ daltonismo: FiltrosUI.valor(grupoFiltros) }));
     checkOjos.addEventListener("change", () => guardarCambios({ ojos: checkOjos.checked }));
     // Los ajustes del cursor comparten una clave: se guarda sólo el campo que cambió.
-    async function guardarAjusteCinetico(cambio, errorClave) {
+    let colaAjustesCineticos = Promise.resolve();
+    function guardarAjusteCinetico(cambio, errorClave) {
         mostrarEstadoPanel("popup.guardando");
-        try {
-            const res = await chrome.storage.local.get("ajustesCineticos");
-            await chrome.storage.local.set({ ajustesCineticos: { ...res.ajustesCineticos, ...cambio } });
-            mostrarEstadoPanel("popup.guardados");
-        } catch (_) {
-            mostrarEstadoPanel(errorClave, true);
-        }
+        colaAjustesCineticos = colaAjustesCineticos.then(async () => {
+            try {
+                const res = await chrome.storage.local.get("ajustesCineticos");
+                await chrome.storage.local.set({ ajustesCineticos: { ...res.ajustesCineticos, ...cambio } });
+                mostrarEstadoPanel("popup.guardados");
+            } catch (_) {
+                mostrarEstadoPanel(errorClave, true);
+            }
+        });
+        return colaAjustesCineticos;
     }
     modoControl.addEventListener("change", () => guardarAjusteCinetico({ modo: modoControl.value }, "popup.noGuardoModo"));
     rangoDwell.addEventListener("input", mostrarDwell);

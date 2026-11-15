@@ -1,6 +1,6 @@
 ---
 name: adaptape-nativo
-description: Traslada y optimiza las mejoras de las extensiones AdaptaPE Base 13.0 y Lite 3.0 (voz en seis idiomas, prepararComando, mouse cinético con pinza/boca/puño/mano falsa/carga adaptativa, y mascotas) a las aplicaciones de escritorio de Windows (C#/WPF), macOS (Swift/SwiftUI) y, más adelante, Linux, de forma fluida, rápida y con mejor detección en la gran mayoría de laptops, PC, MacBook y Mac. Úsala cuando la petición mencione portar, sincronizar, igualar o mejorar voz, cursor por cámara, gestos, dwell o mascotas en Adapta-PE-Win, Adapta-PE-Lite-Win, Adapta-PE (macOS), Adapta-PE-Lite (macOS) o un futuro Adapta-PE Linux, o cuando se pida un análisis de paridad, optimizar rendimiento o latencia, o mejorar la detección.
+description: Traslada y optimiza las mejoras de las extensiones AdaptaPE Base 14.0 y Lite 4.0 (voz en seis idiomas, prepararComando, mouse cinético con pinza/boca/puño/mano falsa/carga adaptativa, y mascotas) a las aplicaciones de escritorio de Windows (C#/WPF), macOS (Swift/SwiftUI) y, más adelante, Linux, de forma fluida, rápida y con mejor detección en la gran mayoría de laptops, PC, MacBook y Mac. Úsala cuando la petición mencione portar, sincronizar, igualar o mejorar voz, cursor por cámara, gestos, dwell o mascotas en Adapta-PE-Win, Adapta-PE-Lite-Win, Adapta-PE (macOS), Adapta-PE-Lite (macOS) o un futuro Adapta-PE Linux, o cuando se pida un análisis de paridad, optimizar rendimiento o latencia, o mejorar la detección.
 ---
 
 # AdaptaPE nativo: portar mejoras de la extensión a escritorio
@@ -87,7 +87,7 @@ Al terminar informa en pocas líneas: qué mecánica se portó y a qué variante
 ## AdaptaPE: guía unificada de mejoras, plataformas, rendimiento y verificación
 
 **Actualizado:** 17 de octubre de 2026.
-**Referencia de comportamiento:** extensión Base 13.0 y Lite 3.0.
+**Referencia de comportamiento:** extensión Base 14.0 y Lite 4.0.
 **Destinos:** Windows (C#/WPF), macOS (Swift/SwiftUI) y, más adelante, Linux.
 **Skill:** `adaptape-nativo` (Codex y Claude Code). Su `SKILL.md` incluye este documento completo.
 
@@ -137,7 +137,7 @@ Detalle exacto de umbrales y reglas: `CLAUDE.md` (o `AGENTS.md`) y `KINETICMOUSE
 | Seguridad del clic | Pérdida, pausa, cambio de fuente, calibración y saltos >200 ms desarman; 250 ms iniciales sin clic. |
 | Privacidad | Imágenes, postura y plantillas sólo en memoria; `ajustesCineticos` guarda sólo modo/temblor/velocidad/amplitud. |
 
-#### 1.3 Mascotas (Base 13.0 y Lite 3.0)
+#### 1.3 Mascotas (Base 14.0 y Lite 4.0)
 
 | Mejora | Comportamiento clave |
 | --- | --- |
@@ -162,8 +162,8 @@ Rutas del Mac del titular. En otro equipo, pide las rutas equivalentes.
 
 | Proyecto | Ruta | Stack | Pruebas |
 | --- | --- | --- | --- |
-| Extensión Base 13.0 (referencia) | `/Users/thealejo/PycharmProjects/WelcomeScreen/extensión/` | Manifest V3, Vanilla JS, MediaPipe local | `node tests/<archivo>.test.cjs` |
-| Extensión Lite 3.0 (referencia) | `/Users/thealejo/PycharmProjects/WelcomeScreen/extensiónLite/` (usa `clases/`) | Igual sin cámara, cinético ni TalkBack | Cubierta por las pruebas de Base |
+| Extensión Base 14.0 (referencia) | `/Users/thealejo/PycharmProjects/WelcomeScreen/extensión/` | Manifest V3, Vanilla JS, MediaPipe local | `node tests/<archivo>.test.cjs` |
+| Extensión Lite 4.0 (referencia) | `/Users/thealejo/PycharmProjects/WelcomeScreen/extensiónLite/` (usa `clases/`) | Igual sin cámara, cinético ni TalkBack | Cubierta por las pruebas de Base |
 | macOS Base | `/Users/thealejo/Desktop/TheAlejoCloud/Adapta-PE/` | Swift/SwiftUI, Speech, Vision, AX, ScreenCaptureKit + Core Image, `AVSpeechSynthesizer`. Paridad en `docs/PARIDAD.md` | `Adapta-PETests` (Xcode) |
 | macOS Lite | `/Users/thealejo/Desktop/TheAlejoCloud/Adapta-PE-Lite/` | Igual sin cámara, cinético ni TalkBack; proyecto independiente | `Adapta-PE-LiteTests` |
 | Windows Base | `/Users/thealejo/Desktop/Adapta-PE-Win/` | C#/WPF, `net10.0-windows` + `net48` + `net461`, OpenCvSharp DNN con ONNX, SAPI + Vosk. Validación en `docs/VALIDACION-WINDOWS.md` | `tests/AdaptaPE.Checks`, `scripts/checks.ps1` |
@@ -175,7 +175,7 @@ Rutas del Mac del titular. En otro equipo, pide las rutas equivalentes.
 
 ---
 
-### 3. Brechas respecto a Base 13.0 / Lite 3.0
+### 3. Brechas respecto a Base 14.0 / Lite 4.0
 
 Revisión por búsqueda de símbolos y contrastada por Codex el 17/10/2026; confirmar en el código antes de actuar. Los nombres nativos están en inglés.
 

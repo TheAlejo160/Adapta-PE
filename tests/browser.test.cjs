@@ -158,7 +158,7 @@ async function conectar(url) {
                 assert.equal((await evaluar('document.querySelector("h1").textContent')).result.value, id === completa.id ? 'AdaptaPE' : 'AdaptaPE Lite');
                 assert.equal((await evaluar('chrome.runtime.getManifest().name')).result.value, id === completa.id ? 'AdaptaPE' : 'AdaptaPE Lite');
                 assert.equal((await evaluar('getComputedStyle(document.getElementById("hintVoz")).display!=="none"')).result.value, true, 'Micrófono configurable con voz apagada');
-                assert.equal((await evaluar('chrome.runtime.getManifest().version')).result.value, id === completa.id ? '13.0' : '3.0');
+                assert.equal((await evaluar('chrome.runtime.getManifest().version')).result.value, id === completa.id ? '14.0' : '4.0');
                 await esperar(async () => (await evaluar('!document.getElementById("selectMascota").disabled')).result?.value, 'Selector de mascotas preparado');
                 for (const nombre of ['tinku', 'cuchu', 'yati', 'ninguna']) {
                     await evaluar(`document.getElementById('selectMascota').value='${nombre}';document.getElementById('selectMascota').dispatchEvent(new Event('change'))`);
@@ -181,8 +181,8 @@ async function conectar(url) {
                 }
                 await panel.pedir('Emulation.clearDeviceMetricsOverride');
                 if (id === completa.id) {
-                    assert.equal((await evaluar('chrome.runtime.getManifest().version')).result.value, '13.0');
-                    assert.match((await evaluar('document.querySelector(".header p").textContent')).result.value, /Base v13\.0/);
+                    assert.equal((await evaluar('chrome.runtime.getManifest().version')).result.value, '14.0');
+                    assert.match((await evaluar('document.querySelector(".header p").textContent')).result.value, /Base v14\.0/);
                     assert.equal((await evaluar('document.getElementById("adapta-pe-modo-control").value')).result.value, 'cabeza');
                     await evaluar("chrome.storage.local.set({ajustesCineticos:{modo:'cabeza',temblor:true,velocidad:0.8,amplitud:0.55}})");
                     for (const modo of ['manos', 'zona', 'cabeza']) {
